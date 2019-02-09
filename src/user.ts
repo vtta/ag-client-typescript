@@ -38,6 +38,12 @@ export class User extends UserData implements Refreshable {
         return new UserRoles(response.data);
     }
 
+    static async current_can_create_courses(): Promise<boolean> {
+        let response = await HttpClient.get_instance().get<boolean>(
+            '/users/current/can_create_courses/');
+        return response.data;
+    }
+
     static async get_by_pk(pk: number): Promise<User> {
         let response = await HttpClient.get_instance().get<UserData>(`/users/${pk}/`);
         return new User(response.data);
