@@ -67,17 +67,15 @@ Course.objects.validate_and_create(name='Course', semester=Semester.spring, year
     test('Get course by pk', async () => {
         let create_course = `
 from autograder.core.models import Course, Semester
-Course.objects.validate_and_create(name='EECS 280', semester=Semester.summer, year=2021,
-                                   subtitle='Egg', num_late_days=1)
+course = Course.objects.validate_and_create(name='EECS 280', subtitle='I haz pk')
+print(course.pk)
         `;
-        run_in_django_shell(create_course);
+        let {stdout} = run_in_django_shell(create_course);
+        let pk = parseInt(stdout, 10);
 
-        let course = await Course.get_by_fields('EECS 280', Semester.summer, 2021);
+        let course = await Course.get_by_pk(pk);
         expect(course.name).toEqual('EECS 280');
-        expect(course.semester).toEqual(Semester.summer);
-        expect(course.year).toEqual(2021);
-        expect(course.subtitle).toEqual('Egg');
-        expect(course.num_late_days).toEqual(1);
+        expect(course.subtitle).toEqual('I haz pk');
     });
 
     test('Get course by pk not found', async () => {
