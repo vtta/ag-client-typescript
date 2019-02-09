@@ -2,6 +2,7 @@
     "compilerOptions": {
         "baseUrl": ".",
         "declaration": true,
+        "downlevelIteration": true,
         "moduleResolution": "node",
         "noFallthroughCasesInSwitch": true,
         "noImplicitReturns": true,
