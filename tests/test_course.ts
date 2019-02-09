@@ -303,7 +303,7 @@ course.save()
 
 // ----------------------------------------------------------------------------
 
-describe.only('Course observer tests', () => {
+describe('Course observer tests', () => {
     class TestObserver implements CourseObserver {
         created_count = 0;
         changed_count = 0;
