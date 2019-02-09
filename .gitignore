@@ -63,3 +63,4 @@ typings/
 etc-default-docker.factory
 .DS_Store
 dist
+.idea/

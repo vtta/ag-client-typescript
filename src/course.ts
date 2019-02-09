@@ -10,6 +10,7 @@ export class CourseData {
     year: number | null;
     subtitle: string;
     num_late_days: number;
+    allowed_guest_domain: string;
     last_modified: string;
 
     constructor({pk,
@@ -18,6 +19,7 @@ export class CourseData {
                  year,
                  subtitle,
                  num_late_days,
+                 allowed_guest_domain,
                  last_modified}: CourseData) {
         this.pk = pk;
         this.name = name;
@@ -25,6 +27,7 @@ export class CourseData {
         this.year = year;
         this.subtitle = subtitle;
         this.num_late_days = num_late_days;
+        this.allowed_guest_domain = allowed_guest_domain;
         this.last_modified = last_modified;
     }
 }
@@ -36,10 +39,39 @@ export interface AllCourses {
     courses_is_handgrader_for: Course[];
 }
 
+export interface CourseObserver {
+    update_course_created(course: Course): void;
+    update_course_changed(course: Course): void;
+}
+
 export class Course extends CourseData implements SaveableAPIObject {
+    private static _subscribers = new Set<CourseObserver>();
+
+    static subscribe(observer: CourseObserver) {
+        Course._subscribers.add(observer);
+    }
+
+    static unsubscribe(observer: CourseObserver) {
+        Course._subscribers.delete(observer);
+    }
+
+    static notify_course_created(course: Course) {
+        for (let subscriber of Course._subscribers) {
+            subscriber.update_course_created(course);
+        }
+    }
+
+    static notify_course_changed(course: Course) {
+        for (let subscriber of Course._subscribers) {
+            subscriber.update_course_changed(course);
+        }
+    }
+
     static async create(data: NewCourseData) {
         let response = await HttpClient.get_instance().post<CourseData>(`/courses/`, data);
-        return new Course(response.data);
+        let course = new Course(response.data);
+        Course.notify_course_created(course);
+        return course;
     }
 
     static async get_all() {
@@ -82,6 +114,7 @@ export class Course extends CourseData implements SaveableAPIObject {
             `/courses/${this.pk}/`, filter_keys(this, Course.EDITABLE_FIELDS)
         );
         safe_assign(this, response.data);
+        Course.notify_course_changed(this);
     }
 
     static readonly EDITABLE_FIELDS: (keyof CourseData)[] = [
@@ -90,6 +123,7 @@ export class Course extends CourseData implements SaveableAPIObject {
         'year',
         'subtitle',
         'num_late_days',
+        'allowed_guest_domain'
     ];
 
     async copy(new_name: string, new_semester: Semester, new_year: number) {
@@ -100,12 +134,19 @@ export class Course extends CourseData implements SaveableAPIObject {
                 new_semester: new_semester,
                 new_year: new_year
             });
-        return new Course(response.data);
+        let course = new Course(response.data);
+        Course.notify_course_created(course);
+        return course;
     }
 
     async refresh(): Promise<void> {
+        let last_modified = this.last_modified;
         let response = await HttpClient.get_instance().get<CourseData>(`/courses/${this.pk}/`);
         safe_assign(this, response.data);
+
+        if (last_modified !== this.last_modified) {
+            Course.notify_course_changed(this);
+        }
     }
 
     async get_admins(): Promise<User[]> {

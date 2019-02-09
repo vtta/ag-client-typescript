@@ -1,7 +1,13 @@
-import { Course, Semester, User } from '..';
+import { Course, CourseObserver, Semester, User } from '..';
 
-import { do_editable_fields_test, global_setup, make_superuser,
-         reset_db, run_in_django_shell, sleep } from './utils';
+import {
+    do_editable_fields_test,
+    global_setup,
+    make_superuser,
+    reset_db,
+    run_in_django_shell,
+    sleep
+} from './utils';
 
 beforeAll(() => {
     global_setup();
@@ -17,6 +23,7 @@ describe('Course ctor tests', () => {
             year: 2017,
             subtitle: 'FUN!',
             num_late_days: 2,
+            allowed_guest_domain: '',
             last_modified: now
         });
         expect(course.pk).toEqual(44);
@@ -25,6 +32,7 @@ describe('Course ctor tests', () => {
         expect(course.year).toEqual(2017);
         expect(course.subtitle).toEqual('FUN!');
         expect(course.num_late_days).toEqual(2);
+        expect(course.allowed_guest_domain).toEqual('');
         expect(course.last_modified).toEqual(now);
     });
 });
@@ -290,6 +298,124 @@ course.save()
         expect(new_course.semester).toEqual(Semester.winter);
         expect(new_course.year).toEqual(2021);
         expect((await Course.get_all()).length).toEqual(2);
+    });
+});
+
+// ----------------------------------------------------------------------------
+
+describe('Course observer tests', () => {
+    class TestObserver implements CourseObserver {
+        created_count = 0;
+        changed_count = 0;
+        course: Course | null = null;
+
+        update_course_changed(course: Course) {
+            this.course = course;
+            this.changed_count += 1;
+        }
+
+        update_course_created(course: Course) {
+            this.course = course;
+            this.created_count += 1;
+        }
+    }
+
+    let observer!: TestObserver;
+
+    beforeEach(() => {
+        reset_db();
+        make_superuser();
+        observer = new TestObserver();
+        console.log(observer);
+        Course.subscribe(observer);
+    });
+
+    test('Course.create update_course_created', async () => {
+        let course = await Course.create({
+            name: 'Coursey'
+        });
+
+        expect(observer.course).toEqual(course);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+    });
+
+    test('Course.save update_course_changed', async () => {
+        let course = await Course.create({
+            name: 'Coursey'
+        });
+
+        let old_timestamp = course.last_modified;
+        await course.save();
+
+        expect(observer.course).toEqual(course);
+        expect(observer.course!.last_modified).not.toEqual(old_timestamp);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(1);
+    });
+
+    test('Course.copy update_course_created', async () => {
+        let course = await Course.create({
+            name: 'Coursey'
+        });
+
+        let clone = await course.copy('New Coursey', Semester.fall, 2019);
+
+        expect(observer.course).toEqual(clone);
+        expect(observer.created_count).toEqual(2);
+        expect(observer.changed_count).toEqual(0);
+    });
+
+    test('Course.refresh last_modified different update_course_changed', async () => {
+        let course = await Course.create({
+            name: 'Coursey'
+        });
+
+        let old_timestamp = course.last_modified;
+
+        let rename = `
+from autograder.core.models import Course
+c = Course.objects.get(pk=${course.pk})
+c.validate_and_update(name='Renamed')
+        `;
+
+        run_in_django_shell(rename);
+
+        await course.refresh();
+        expect(observer.course).toEqual(course);
+        expect(observer.course!.last_modified).not.toEqual(old_timestamp);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(1);
+    });
+
+    test('Course.refresh last_modified unchanged', async () => {
+        let course = await Course.create({
+            name: 'Coursey'
+        });
+
+        let old_timestamp = course.last_modified;
+        await course.refresh();
+
+        expect(observer.course).toEqual(course);
+        expect(observer.course!.last_modified).toEqual(old_timestamp);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+    });
+
+    test('Unsubscribe', async () => {
+        let course = await Course.create({
+            name: 'Coursey'
+        });
+
+        expect(observer.course).toEqual(course);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+
+        Course.unsubscribe(observer);
+
+        await course.save();
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
     });
 });
 
