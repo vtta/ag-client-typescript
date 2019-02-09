@@ -141,6 +141,31 @@ c.handgraders.add(user)
         expect(roles.is_student).toBe(true);
         expect(roles.is_handgrader).toBe(true);
     });
+
+    // ------------------------------------------------------------------------
+
+    test('Current non-super user has can create courses permission', async () => {
+        let make_user = `
+from django.contrib.auth.models import User, Permission
+user = User.objects.get_or_create(username='jameslp@umich.edu')[0]
+user.user_permissions.add(Permission.objects.get(codename='create_course'))
+        `;
+        run_in_django_shell(make_user);
+
+        let can_create = await User.current_can_create_courses();
+        expect(can_create).toBe(true);
+    });
+
+    test('Current user does not have create courses permission', async () => {
+        let can_create = await User.current_can_create_courses();
+        expect(can_create).toBe(false);
+    });
+
+    test('Superuser can create courses permission', async () => {
+        make_superuser();
+        let can_create = await User.current_can_create_courses();
+        expect(can_create).toBe(true);
+    });
 });
 
 // ----------------------------------------------------------------------------
