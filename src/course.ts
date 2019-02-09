@@ -54,8 +54,6 @@ export class Course extends CourseData implements SaveableAPIObject {
 
     static notify_course_created(course: Course) {
         for (let subscriber of Course._subscribers) {
-            console.log(subscriber);
-            console.log(subscriber.update_course_created);
             subscriber.update_course_created(course);
         }
     }

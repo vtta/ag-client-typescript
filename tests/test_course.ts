@@ -1,5 +1,4 @@
-import { CourseObserver } from "src/course";
-import { Course, CourseObserverMixin, Semester, User } from '..';
+import { Course, CourseObserver, Semester, User } from '..';
 
 import {
     do_editable_fields_test,
