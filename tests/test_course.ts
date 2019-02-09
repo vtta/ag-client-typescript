@@ -23,6 +23,7 @@ describe('Course ctor tests', () => {
             year: 2017,
             subtitle: 'FUN!',
             num_late_days: 2,
+            allowed_guest_domain: '',
             last_modified: now
         });
         expect(course.pk).toEqual(44);
@@ -31,6 +32,7 @@ describe('Course ctor tests', () => {
         expect(course.year).toEqual(2017);
         expect(course.subtitle).toEqual('FUN!');
         expect(course.num_late_days).toEqual(2);
+        expect(course.allowed_guest_domain).toEqual('');
         expect(course.last_modified).toEqual(now);
     });
 });

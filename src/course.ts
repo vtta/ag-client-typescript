@@ -10,6 +10,7 @@ export class CourseData {
     year: number | null;
     subtitle: string;
     num_late_days: number;
+    allowed_guest_domain: string;
     last_modified: string;
 
     constructor({pk,
@@ -18,6 +19,7 @@ export class CourseData {
                  year,
                  subtitle,
                  num_late_days,
+                 allowed_guest_domain,
                  last_modified}: CourseData) {
         this.pk = pk;
         this.name = name;
@@ -25,6 +27,7 @@ export class CourseData {
         this.year = year;
         this.subtitle = subtitle;
         this.num_late_days = num_late_days;
+        this.allowed_guest_domain = allowed_guest_domain;
         this.last_modified = last_modified;
     }
 }
@@ -120,6 +123,7 @@ export class Course extends CourseData implements SaveableAPIObject {
         'year',
         'subtitle',
         'num_late_days',
+        'allowed_guest_domain'
     ];
 
     async copy(new_name: string, new_semester: Semester, new_year: number) {
