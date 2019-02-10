@@ -139,7 +139,7 @@ Project.objects.all().delete()
         expect(project.name).toEqual('Project1');
     });
 
-    test.skip('Create project all params', async () => {
+    test('Create project all params', async () => {
         let now = (new Date()).toISOString();
         let data = {
             name: 'project',
@@ -192,7 +192,7 @@ Project.objects.all().delete()
         expect(projects.length).toEqual(3);
     });
 
-    test.skip('Create project only required params', async () => {
+    test('Create project only required params', async () => {
         let data = {
             name: 'project',
             course: course.pk
@@ -202,7 +202,7 @@ Project.objects.all().delete()
         expect(project.course).toEqual(course.pk);
         expect(project.visible_to_students).toEqual(false);
         expect(project.soft_closing_time).toEqual(null);
-        // expect(project.closing_time).toEqual(null);
+        expect(project.closing_time).toEqual(null);
 
         let projects = await Project.get_all_from_course(course.pk);
         expect(projects.length).toEqual(3);
