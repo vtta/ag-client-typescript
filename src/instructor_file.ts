@@ -32,6 +32,16 @@ export interface InstructorFileObserver {
 }
 
 export class InstructorFile extends InstructorFileData implements Refreshable {
+    private static _subscribers = new Set<InstructorFileObserver>();
+
+    static subscribe(observer: InstructorFileObserver) {
+        InstructorFile._subscribers.add(observer);
+    }
+
+    static unsubscribe(observer: InstructorFileObserver) {
+        InstructorFile._subscribers.delete(observer);
+    }
+
     static async get_all_from_project(project_pk: number): Promise<InstructorFile[]> {
         let response = await HttpClient.get_instance().get<InstructorFileData[]>(
             `/projects/${project_pk}/instructor_files/`
@@ -57,7 +67,13 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
             form_data
         );
 
-        return new InstructorFile(response.data);
+        let new_file = new InstructorFile(response.data);
+
+        for (let subscriber of InstructorFile._subscribers) {
+            subscriber.update_instructor_file_created(new_file);
+        }
+
+        return new_file;
     }
 
     async get_content(): Promise<string> {
@@ -77,6 +93,10 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
         );
 
         safe_assign(this, response.data);
+
+        for (let subscriber of InstructorFile._subscribers) {
+            subscriber.update_instructor_file_content_changed(this);
+        }
     }
 
     async rename(new_name: string): Promise<void> {
@@ -86,6 +106,10 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
         );
 
         safe_assign(this, response.data);
+
+        for (let subscriber of InstructorFile._subscribers) {
+            subscriber.update_instructor_file_renamed(this);
+        }
     }
 
     async refresh(): Promise<void> {
@@ -96,7 +120,10 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
         safe_assign(this, response.data);
     }
 
-    delete() {
-        return HttpClient.get_instance().delete(`/instructor_files/${this.pk}/`);
+    async delete() {
+        await HttpClient.get_instance().delete(`/instructor_files/${this.pk}/`);
+        for (let subscriber of InstructorFile._subscribers) {
+            subscriber.update_instructor_file_deleted(this);
+        }
     }
 }

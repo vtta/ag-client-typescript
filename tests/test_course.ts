@@ -330,6 +330,10 @@ describe('Course observer tests', () => {
         Course.subscribe(observer);
     });
 
+    afterEach(() => {
+       Course.unsubscribe(observer);
+    });
+
     test('Course.create update_course_created', async () => {
         let course = await Course.create({
             name: 'Coursey'

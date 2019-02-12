@@ -1,4 +1,11 @@
-import { Course, CourseObserver, InstructorFile, Project, Semester } from '..';
+import {
+    Course,
+    CourseObserver,
+    InstructorFile,
+    InstructorFileObserver,
+    Project,
+    Semester
+} from '..';
 
 import {
     do_editable_fields_test,
@@ -16,11 +23,49 @@ beforeAll(() => {
 let course!: Course;
 let project!: Project;
 
+class TestObserver implements InstructorFileObserver {
+    instructor_file: InstructorFile | null = null;
+
+    created_count = 0;
+    renamed_count = 0;
+    content_changed_count = 0;
+    deleted_count = 0;
+
+    update_instructor_file_created(file: InstructorFile) {
+        this.instructor_file = file;
+        this.created_count += 1;
+    }
+
+    update_instructor_file_renamed(file: InstructorFile) {
+        this.instructor_file = file;
+        this.renamed_count += 1;
+    }
+
+    update_instructor_file_content_changed(file: InstructorFile) {
+        this.instructor_file = file;
+        this.content_changed_count += 1;
+    }
+
+    update_instructor_file_deleted(file: InstructorFile) {
+        this.instructor_file = null;
+        this.deleted_count += 1;
+    }
+}
+
+let observer!: TestObserver;
+
 beforeEach(async () => {
     reset_db();
     make_superuser();
     course = await Course.create({name: 'Course'});
     project = await Project.create({name: 'Project', course: course.pk});
+
+    observer = new TestObserver();
+    InstructorFile.subscribe(observer);
+});
+
+afterEach(() => {
+    InstructorFile.unsubscribe(observer);
 });
 
 describe('List/create instructor file tests', () => {
@@ -85,6 +130,9 @@ with file_.open() as f:
 
         let {stdout} = run_in_django_shell(get_content);
         expect(stdout).toEqual(content);
+
+        expect(observer.instructor_file).toEqual(new_file);
+        expect(observer.created_count).toEqual(1);
     });
 });
 
@@ -131,6 +179,9 @@ with file_.open() as f:
 
         let {stdout} = run_in_django_shell(get_content);
         expect(stdout).toEqual(new_content);
+
+        expect(observer.instructor_file).toEqual(instructor_file);
+        expect(observer.content_changed_count).toEqual(1);
     });
 
     test('Rename and refresh instructor file', async () => {
@@ -149,6 +200,9 @@ with file_.open() as f:
         await refresh_me.refresh();
         expect(refresh_me.name).toEqual(new_name);
         expect(refresh_me.last_modified).toEqual(instructor_file.last_modified);
+
+        expect(observer.instructor_file).toEqual(instructor_file);
+        expect(observer.renamed_count).toEqual(1);
     });
 
     test('Delete instructor file', async () => {
@@ -161,123 +215,8 @@ print(InstructorFile.objects.count(), end='')
 
         let {stdout} = run_in_django_shell(get_num_instructor_files)
         expect(parseInt(stdout, 10)).toEqual(0);
+
+        expect(observer.instructor_file).toBeNull();
+        expect(observer.deleted_count).toEqual(1);
     });
 });
-
-// -------------------------------------------------------------------
-
-// describe('Course observer tests', () => {
-//     class TestObserver implements CourseObserver {
-//         created_count = 0;
-//         changed_count = 0;
-//         course: Course | null = null;
-//
-//         update_course_changed(course: Course) {
-//             this.course = course;
-//             this.changed_count += 1;
-//         }
-//
-//         update_course_created(course: Course) {
-//             this.course = course;
-//             this.created_count += 1;
-//         }
-//     }
-//
-//     let observer!: TestObserver;
-//
-//     beforeEach(() => {
-//         reset_db();
-//         make_superuser();
-//         observer = new TestObserver();
-//         console.log(observer);
-//         Course.subscribe(observer);
-//     });
-//
-//     test('Course.create update_course_created', async () => {
-//         let course = await Course.create({
-//             name: 'Coursey'
-//         });
-//
-//         expect(observer.course).toEqual(course);
-//         expect(observer.created_count).toEqual(1);
-//         expect(observer.changed_count).toEqual(0);
-//     });
-//
-//     test('Course.save update_course_changed', async () => {
-//         let course = await Course.create({
-//             name: 'Coursey'
-//         });
-//
-//         let old_timestamp = course.last_modified;
-//         await course.save();
-//
-//         expect(observer.course).toEqual(course);
-//         expect(observer.course!.last_modified).not.toEqual(old_timestamp);
-//         expect(observer.created_count).toEqual(1);
-//         expect(observer.changed_count).toEqual(1);
-//     });
-//
-//     test('Course.copy update_course_created', async () => {
-//         let course = await Course.create({
-//             name: 'Coursey'
-//         });
-//
-//         let clone = await course.copy('New Coursey', Semester.fall, 2019);
-//
-//         expect(observer.course).toEqual(clone);
-//         expect(observer.created_count).toEqual(2);
-//         expect(observer.changed_count).toEqual(0);
-//     });
-//
-//     test('Course.refresh last_modified different update_course_changed', async () => {
-//         let course = await Course.create({
-//             name: 'Coursey'
-//         });
-//
-//         let old_timestamp = course.last_modified;
-//
-//         let rename = `
-// from autograder.core.models import Course
-// c = Course.objects.get(pk=${course.pk})
-// c.validate_and_update(name='Renamed')
-//         `;
-//
-//         run_in_django_shell(rename);
-//
-//         await course.refresh();
-//         expect(observer.course).toEqual(course);
-//         expect(observer.course!.last_modified).not.toEqual(old_timestamp);
-//         expect(observer.created_count).toEqual(1);
-//         expect(observer.changed_count).toEqual(1);
-//     });
-//
-//     test('Course.refresh last_modified unchanged', async () => {
-//         let course = await Course.create({
-//             name: 'Coursey'
-//         });
-//
-//         let old_timestamp = course.last_modified;
-//         await course.refresh();
-//
-//         expect(observer.course).toEqual(course);
-//         expect(observer.course!.last_modified).toEqual(old_timestamp);
-//         expect(observer.created_count).toEqual(1);
-//         expect(observer.changed_count).toEqual(0);
-//     });
-//
-//     test('Unsubscribe', async () => {
-//         let course = await Course.create({
-//             name: 'Coursey'
-//         });
-//
-//         expect(observer.course).toEqual(course);
-//         expect(observer.created_count).toEqual(1);
-//         expect(observer.changed_count).toEqual(0);
-//
-//         Course.unsubscribe(observer);
-//
-//         await course.save();
-//         expect(observer.created_count).toEqual(1);
-//         expect(observer.changed_count).toEqual(0);
-//     });
-// });
