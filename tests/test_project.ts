@@ -170,7 +170,7 @@ Project.objects.all().delete()
         expect(project.course).toEqual(course.pk);
         expect(project.visible_to_students).toEqual(true);
         expect_dates_equal(project.soft_closing_time, now);
-        expect(project.closing_time).toEqual(now);
+        expect_dates_equal(project.closing_time!, now);
 
         expect(project.disallow_student_submissions).toEqual(false);
         expect(project.disallow_group_registration).toEqual(false);
