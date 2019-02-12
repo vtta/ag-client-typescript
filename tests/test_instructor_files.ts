@@ -213,7 +213,7 @@ from autograder.core.models import InstructorFile
 print(InstructorFile.objects.count(), end='')
         `;
 
-        let {stdout} = run_in_django_shell(get_num_instructor_files)
+        let {stdout} = run_in_django_shell(get_num_instructor_files);
         expect(parseInt(stdout, 10)).toEqual(0);
 
         expect(observer.instructor_file).toBeNull();
