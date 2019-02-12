@@ -1,4 +1,4 @@
-import { Course, InstructorFile, Project } from '..';
+import { Course, CourseObserver, InstructorFile, Project, Semester } from '..';
 
 import {
     do_editable_fields_test,
@@ -66,7 +66,7 @@ for i in range(2):
         expect(files[1].project).toEqual(project.pk);
     });
 
-    test.only('Create instructor file', async () => {
+    test('Create instructor file', async () => {
         let content = 'spameggsausagespam';
         let new_file = await InstructorFile.create(
             project.pk, 'fileo', new Blob([content])
@@ -89,23 +89,195 @@ with file_.open() as f:
 });
 
 describe('Get/update/delete instructor file tests', () => {
+    let instructor_file!: InstructorFile;
+    let file_content = 'somefilecontentstheyaresupergreat!';
+    let file_name = 'superfile';
+
+    beforeEach(async () => {
+        instructor_file = await InstructorFile.create(
+            project.pk, file_name, new Blob([file_content]));
+    });
+
     test('Get instructor file', async () => {
-        fail();
+        let loaded = await InstructorFile.get_by_pk(instructor_file.pk);
+        expect(loaded).toEqual(instructor_file);
     });
 
-    test('Get instructor file content', () => {
-        fail();
+    test('Get instructor file content', async () => {
+        let loaded_content = await instructor_file.get_content();
+        expect(loaded_content).toEqual(file_content);
     });
 
-    test('Update instructor file content', async () => {
-        fail();
+    test('Update instructor file content and refresh', async () => {
+        let new_content = 'thisissomenewcontentweeeeeee';
+        // Load another copy of the instructor file that we can refresh.
+        let refresh_me = await InstructorFile.get_by_pk(instructor_file.pk);
+
+        let original_timestamp = instructor_file.last_modified;
+
+        await instructor_file.set_content(new Blob([new_content]));
+        expect(instructor_file.last_modified).not.toEqual(original_timestamp);
+
+        expect(refresh_me.last_modified).toEqual(original_timestamp);
+        await refresh_me.refresh();
+        expect(refresh_me.last_modified).toEqual(instructor_file.last_modified);
+
+        let get_content = `
+from autograder.core.models import InstructorFile
+file_ = InstructorFile.objects.get(pk=${instructor_file.pk})
+with file_.open() as f:
+    print(f.read(), end='')
+        `;
+
+        let {stdout} = run_in_django_shell(get_content);
+        expect(stdout).toEqual(new_content);
     });
 
-    test('Rename instructor file', async () => {
-        fail();
+    test('Rename and refresh instructor file', async () => {
+        let new_name = 'thisisanewfilename';
+        // Load another copy of the instructor file that we can refresh.
+        let refresh_me = await InstructorFile.get_by_pk(instructor_file.pk);
+
+        let original_timestamp = instructor_file.last_modified;
+
+        await instructor_file.rename(new_name);
+        expect(instructor_file.name).toEqual(new_name);
+        expect(instructor_file.last_modified).not.toEqual(original_timestamp);
+
+        expect(refresh_me.name).not.toEqual(new_name);
+        expect(refresh_me.last_modified).toEqual(original_timestamp);
+        await refresh_me.refresh();
+        expect(refresh_me.name).toEqual(new_name);
+        expect(refresh_me.last_modified).toEqual(instructor_file.last_modified);
     });
 
     test('Delete instructor file', async () => {
-        fail();
+        await instructor_file.delete();
+
+        let get_num_instructor_files = `
+from autograder.core.models import InstructorFile
+print(InstructorFile.objects.count(), end='')
+        `;
+
+        let {stdout} = run_in_django_shell(get_num_instructor_files)
+        expect(parseInt(stdout, 10)).toEqual(0);
     });
 });
+
+// -------------------------------------------------------------------
+
+// describe('Course observer tests', () => {
+//     class TestObserver implements CourseObserver {
+//         created_count = 0;
+//         changed_count = 0;
+//         course: Course | null = null;
+//
+//         update_course_changed(course: Course) {
+//             this.course = course;
+//             this.changed_count += 1;
+//         }
+//
+//         update_course_created(course: Course) {
+//             this.course = course;
+//             this.created_count += 1;
+//         }
+//     }
+//
+//     let observer!: TestObserver;
+//
+//     beforeEach(() => {
+//         reset_db();
+//         make_superuser();
+//         observer = new TestObserver();
+//         console.log(observer);
+//         Course.subscribe(observer);
+//     });
+//
+//     test('Course.create update_course_created', async () => {
+//         let course = await Course.create({
+//             name: 'Coursey'
+//         });
+//
+//         expect(observer.course).toEqual(course);
+//         expect(observer.created_count).toEqual(1);
+//         expect(observer.changed_count).toEqual(0);
+//     });
+//
+//     test('Course.save update_course_changed', async () => {
+//         let course = await Course.create({
+//             name: 'Coursey'
+//         });
+//
+//         let old_timestamp = course.last_modified;
+//         await course.save();
+//
+//         expect(observer.course).toEqual(course);
+//         expect(observer.course!.last_modified).not.toEqual(old_timestamp);
+//         expect(observer.created_count).toEqual(1);
+//         expect(observer.changed_count).toEqual(1);
+//     });
+//
+//     test('Course.copy update_course_created', async () => {
+//         let course = await Course.create({
+//             name: 'Coursey'
+//         });
+//
+//         let clone = await course.copy('New Coursey', Semester.fall, 2019);
+//
+//         expect(observer.course).toEqual(clone);
+//         expect(observer.created_count).toEqual(2);
+//         expect(observer.changed_count).toEqual(0);
+//     });
+//
+//     test('Course.refresh last_modified different update_course_changed', async () => {
+//         let course = await Course.create({
+//             name: 'Coursey'
+//         });
+//
+//         let old_timestamp = course.last_modified;
+//
+//         let rename = `
+// from autograder.core.models import Course
+// c = Course.objects.get(pk=${course.pk})
+// c.validate_and_update(name='Renamed')
+//         `;
+//
+//         run_in_django_shell(rename);
+//
+//         await course.refresh();
+//         expect(observer.course).toEqual(course);
+//         expect(observer.course!.last_modified).not.toEqual(old_timestamp);
+//         expect(observer.created_count).toEqual(1);
+//         expect(observer.changed_count).toEqual(1);
+//     });
+//
+//     test('Course.refresh last_modified unchanged', async () => {
+//         let course = await Course.create({
+//             name: 'Coursey'
+//         });
+//
+//         let old_timestamp = course.last_modified;
+//         await course.refresh();
+//
+//         expect(observer.course).toEqual(course);
+//         expect(observer.course!.last_modified).toEqual(old_timestamp);
+//         expect(observer.created_count).toEqual(1);
+//         expect(observer.changed_count).toEqual(0);
+//     });
+//
+//     test('Unsubscribe', async () => {
+//         let course = await Course.create({
+//             name: 'Coursey'
+//         });
+//
+//         expect(observer.course).toEqual(course);
+//         expect(observer.created_count).toEqual(1);
+//         expect(observer.changed_count).toEqual(0);
+//
+//         Course.unsubscribe(observer);
+//
+//         await course.save();
+//         expect(observer.created_count).toEqual(1);
+//         expect(observer.changed_count).toEqual(0);
+//     });
+// });

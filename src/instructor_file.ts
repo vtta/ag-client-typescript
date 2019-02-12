@@ -1,6 +1,6 @@
-import { SaveableAPIObject } from 'src/base';
+import { Refreshable } from 'src/base';
 import { HttpClient } from 'src/http_client';
-import { sort_by_name } from 'src/utils';
+import { safe_assign, sort_by_name } from 'src/utils';
 
 export class InstructorFileData {
     pk: number;
@@ -24,7 +24,14 @@ export class InstructorFileData {
     }
 }
 
-export class InstructorFile extends InstructorFileData implements SaveableAPIObject {
+export interface InstructorFileObserver {
+    update_instructor_file_created(instructor_file: InstructorFile): void;
+    update_instructor_file_renamed(instructor_file: InstructorFile): void;
+    update_instructor_file_content_changed(instructor_file: InstructorFile): void;
+    update_instructor_file_deleted(instructor_file: InstructorFile): void;
+}
+
+export class InstructorFile extends InstructorFileData implements Refreshable {
     static async get_all_from_project(project_pk: number): Promise<InstructorFile[]> {
         let response = await HttpClient.get_instance().get<InstructorFileData[]>(
             `/projects/${project_pk}/instructor_files/`
@@ -32,6 +39,13 @@ export class InstructorFile extends InstructorFileData implements SaveableAPIObj
         let files = response.data.map(file_data => new InstructorFile(file_data));
         sort_by_name(files);
         return files;
+    }
+
+    static async get_by_pk(instructor_file_pk: number): Promise<InstructorFile> {
+        let response = await HttpClient.get_instance().get<InstructorFileData>(
+            `/instructor_files/${instructor_file_pk}/`
+        );
+        return new InstructorFile(response.data);
     }
 
     static async create(project_pk: number, name: string, content: Blob): Promise<InstructorFile> {
@@ -46,11 +60,43 @@ export class InstructorFile extends InstructorFileData implements SaveableAPIObj
         return new InstructorFile(response.data);
     }
 
-    async save(): Promise<void> {
+    async get_content(): Promise<string> {
+        let response = await HttpClient.get_instance().get<string>(
+            `/instructor_files/${this.pk}/content/`
+        );
+        return response.data;
+    }
 
+    async set_content(content: Blob): Promise<void> {
+        let form_data = new FormData();
+        form_data.append('file_obj', content, name);
+
+        let response = await HttpClient.get_instance().put(
+            `/instructor_files/${this.pk}/content/`,
+            form_data
+        );
+
+        safe_assign(this, response.data);
+    }
+
+    async rename(new_name: string): Promise<void> {
+        let response = await HttpClient.get_instance().put(
+            `/instructor_files/${this.pk}/name/`,
+            {name: new_name}
+        );
+
+        safe_assign(this, response.data);
     }
 
     async refresh(): Promise<void> {
+        let response = await HttpClient.get_instance().get<InstructorFileData>(
+            `/instructor_files/${this.pk}/`
+        );
 
+        safe_assign(this, response.data);
+    }
+
+    delete() {
+        return HttpClient.get_instance().delete(`/instructor_files/${this.pk}/`);
     }
 }
