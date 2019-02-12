@@ -12,3 +12,8 @@ export function filter_keys<T, Key extends keyof T>(data: T, include_keys: Key[]
 export function safe_assign<ToType extends FromType, FromType>(to: ToType, from: FromType) {
     Object.assign(to, from);
 }
+
+// Sorts the given array in place by the "name" attribute of its elements.
+export function sort_by_name<T extends {name: string}>(to_sort: T[]) {
+    to_sort.sort((first: T, second: T) => first.name.localeCompare(second.name));
+}

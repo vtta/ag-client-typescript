@@ -14,11 +14,17 @@ export function global_setup() {
         {shell: true});
 }
 
+// Flushes all data from the test database and deletes the
+// test media_root filesystem.
 export function reset_db() {
     // If you add -it to the docker command, be sure to set
     // stdio to ['inherit', ...] for stdin.
     child_process.spawnSync(
         'docker exec typescript-cli-django python3.6 manage.py flush --no-input',
+        {shell: true});
+
+    child_process.spawnSync(
+        'docker exec typescript-cli-django rm -r /usr/src/app/media_root_dev',
         {shell: true});
 }
 

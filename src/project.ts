@@ -1,6 +1,6 @@
 import { SaveableAPIObject } from "./base";
 import { HttpClient } from "./http_client";
-import { filter_keys, safe_assign } from "./utils";
+import { filter_keys, safe_assign, sort_by_name } from "./utils";
 
 export class ProjectData {
     pk: number;
@@ -109,7 +109,7 @@ export class Project extends ProjectData implements SaveableAPIObject {
         let response = await HttpClient.get_instance().get<ProjectData[]>(
             `/courses/${course_pk}/projects/`);
         let projects = response.data.map(project_data => new Project(project_data));
-        projects.sort((first: Project, second: Project) => first.name.localeCompare(second.name));
+        sort_by_name(projects);
         return projects;
     }
 

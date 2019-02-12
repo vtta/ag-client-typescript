@@ -14,7 +14,7 @@ beforeAll(() => {
 });
 
 describe('Course ctor tests', () => {
-    test('Construct course', async () => {
+    test('Construct course', () => {
         let now = (new Date()).toISOString();
         let course = new Course({
             pk: 44,
@@ -67,15 +67,17 @@ Course.objects.validate_and_create(name='Course', semester=Semester.spring, year
     test('Get course by pk', async () => {
         let create_course = `
 from autograder.core.models import Course, Semester
-course = Course.objects.validate_and_create(name='EECS 280', subtitle='I haz pk')
-print(course.pk)
+Course.objects.validate_and_create(name='EECS 280', semester=Semester.summer, year=2021,
+                                   subtitle='Egg', num_late_days=1)
         `;
-        let {stdout} = run_in_django_shell(create_course);
-        let pk = parseInt(stdout, 10);
+        run_in_django_shell(create_course);
 
-        let course = await Course.get_by_pk(pk);
+        let course = await Course.get_by_fields('EECS 280', Semester.summer, 2021);
         expect(course.name).toEqual('EECS 280');
-        expect(course.subtitle).toEqual('I haz pk');
+        expect(course.semester).toEqual(Semester.summer);
+        expect(course.year).toEqual(2021);
+        expect(course.subtitle).toEqual('Egg');
+        expect(course.num_late_days).toEqual(1);
     });
 
     test('Get course by pk not found', async () => {
@@ -326,6 +328,10 @@ describe('Course observer tests', () => {
         observer = new TestObserver();
         console.log(observer);
         Course.subscribe(observer);
+    });
+
+    afterEach(() => {
+       Course.unsubscribe(observer);
     });
 
     test('Course.create update_course_created', async () => {
