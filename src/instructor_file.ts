@@ -1,6 +1,6 @@
-import { Refreshable } from 'src/base';
-import { HttpClient } from 'src/http_client';
-import { safe_assign, sort_by_name } from 'src/utils';
+import { Refreshable } from './base';
+import { HttpClient } from './http_client';
+import { safe_assign, sort_by_name } from './utils';
 
 export class InstructorFileData {
     pk: number;

@@ -1,5 +1,4 @@
-import { Course } from 'src/course';
-import { Project, UltimateSubmissionPolicy } from 'src/project';
+import { Course, Project, UltimateSubmissionPolicy } from '..';
 
 import { do_editable_fields_test, expect_dates_equal, global_setup, make_superuser,
          reset_db, run_in_django_shell, sleep } from './utils';
