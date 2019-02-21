@@ -202,7 +202,7 @@ with file_.open() as f:
         expect(refresh_me.last_modified).toEqual(instructor_file.last_modified);
 
         expect(observer.instructor_file).toEqual(instructor_file);
-        expect(observer.renamed_count).toEqual(1);
+        expect(observer.renamed_count).toEqual(2);
     });
 
     test('Refresh instructor file name changed', async () => {
