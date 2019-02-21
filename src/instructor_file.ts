@@ -69,11 +69,15 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
 
         let new_file = new InstructorFile(response.data);
 
-        for (let subscriber of InstructorFile._subscribers) {
-            subscriber.update_instructor_file_created(new_file);
-        }
+        InstructorFile.notify_instructor_file_created(new_file);
 
         return new_file;
+    }
+
+    static notify_instructor_file_created(instructor_file: InstructorFile) {
+        for (let subscriber of InstructorFile._subscribers) {
+            subscriber.update_instructor_file_created(instructor_file);
+        }
     }
 
     async get_content(): Promise<string> {
@@ -85,7 +89,7 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
 
     async set_content(content: Blob): Promise<void> {
         let form_data = new FormData();
-        form_data.append('file_obj', content, name);
+        form_data.append('file_obj', content, this.name);
 
         let response = await HttpClient.get_instance().put(
             `/instructor_files/${this.pk}/content/`,
@@ -94,8 +98,12 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
 
         safe_assign(this, response.data);
 
+        InstructorFile.notify_instructor_file_content_changed(this);
+    }
+
+    static notify_instructor_file_content_changed(instructor_file: InstructorFile) {
         for (let subscriber of InstructorFile._subscribers) {
-            subscriber.update_instructor_file_content_changed(this);
+            subscriber.update_instructor_file_content_changed(instructor_file);
         }
     }
 
@@ -107,8 +115,12 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
 
         safe_assign(this, response.data);
 
+        InstructorFile.notify_instructor_file_renamed(this);
+    }
+
+    static notify_instructor_file_renamed(instructor_file: InstructorFile) {
         for (let subscriber of InstructorFile._subscribers) {
-            subscriber.update_instructor_file_renamed(this);
+            subscriber.update_instructor_file_renamed(instructor_file);
         }
     }
 
@@ -122,8 +134,12 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
 
     async delete() {
         await HttpClient.get_instance().delete(`/instructor_files/${this.pk}/`);
+        InstructorFile.notify_instructor_file_deleted(this);
+    }
+
+    static notify_instructor_file_deleted(instructor_file: InstructorFile) {
         for (let subscriber of InstructorFile._subscribers) {
-            subscriber.update_instructor_file_deleted(this);
+            subscriber.update_instructor_file_deleted(instructor_file);
         }
     }
 }
