@@ -205,7 +205,7 @@ with file_.open() as f:
         expect(observer.renamed_count).toEqual(1);
     });
 
-    test.only('Refresh instructor file name changed', async () => {
+    test('Refresh instructor file name changed', async () => {
         let new_name = 'a_new_name';
         let rename = `
 from autograder.core.models import InstructorFile
