@@ -205,6 +205,21 @@ with file_.open() as f:
         expect(observer.renamed_count).toEqual(1);
     });
 
+    test.only('Refresh instructor file name changed', async () => {
+        let new_name = 'a_new_name';
+        let rename = `
+from autograder.core.models import InstructorFile
+file_ = InstructorFile.objects.get(pk=${instructor_file.pk})
+file_.rename('${new_name}')
+        `;
+        run_in_django_shell(rename);
+
+        await instructor_file.refresh();
+
+        expect(observer.instructor_file!.name).toEqual(new_name);
+        expect(observer.renamed_count).toEqual(1);
+    });
+
     test('Delete instructor file', async () => {
         await instructor_file.delete();
 

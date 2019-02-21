@@ -125,11 +125,16 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
     }
 
     async refresh(): Promise<void> {
+        let original_name = this.name;
         let response = await HttpClient.get_instance().get<InstructorFileData>(
             `/instructor_files/${this.pk}/`
         );
 
         safe_assign(this, response.data);
+
+        if (this.name !== original_name) {
+            InstructorFile.notify_instructor_file_renamed(this);
+        }
     }
 
     async delete() {
