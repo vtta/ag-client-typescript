@@ -158,6 +158,7 @@ function blob_to_string(blob: Blob): Promise<string> {
             resolve(<string> reader.result);
         };
 
+        /* istanbul ignore next */
         reader.onerror = () => {
             reader.abort();
             reject(new DOMException("Error converting blob to string."));
