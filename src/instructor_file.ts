@@ -27,7 +27,8 @@ export class InstructorFileData {
 export interface InstructorFileObserver {
     update_instructor_file_created(instructor_file: InstructorFile): void;
     update_instructor_file_renamed(instructor_file: InstructorFile): void;
-    update_instructor_file_content_changed(instructor_file: InstructorFile): void;
+    update_instructor_file_content_changed(instructor_file: InstructorFile,
+                                           new_content: string): void;
     update_instructor_file_deleted(instructor_file: InstructorFile): void;
 }
 
@@ -98,12 +99,13 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
 
         safe_assign(this, response.data);
 
-        InstructorFile.notify_instructor_file_content_changed(this);
+        InstructorFile.notify_instructor_file_content_changed(this, await blob_to_string(content));
     }
 
-    static notify_instructor_file_content_changed(instructor_file: InstructorFile) {
+    static notify_instructor_file_content_changed(instructor_file: InstructorFile,
+                                                  new_content: string) {
         for (let subscriber of InstructorFile._subscribers) {
-            subscriber.update_instructor_file_content_changed(instructor_file);
+            subscriber.update_instructor_file_content_changed(instructor_file, new_content);
         }
     }
 
@@ -147,4 +149,21 @@ export class InstructorFile extends InstructorFileData implements Refreshable {
             subscriber.update_instructor_file_deleted(instructor_file);
         }
     }
+}
+
+function blob_to_string(blob: Blob): Promise<string> {
+    let reader = new FileReader();
+    return new Promise((resolve, reject) => {
+        reader.onload = () => {
+            resolve(<string> reader.result);
+        };
+
+        /* istanbul ignore next */
+        reader.onerror = () => {
+            reader.abort();
+            reject(new DOMException("Error converting blob to string."));
+        };
+
+        reader.readAsText(blob);
+    });
 }

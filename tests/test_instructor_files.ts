@@ -26,6 +26,8 @@ let project!: Project;
 class TestObserver implements InstructorFileObserver {
     instructor_file: InstructorFile | null = null;
 
+    content: string = "";
+
     created_count = 0;
     renamed_count = 0;
     content_changed_count = 0;
@@ -41,9 +43,10 @@ class TestObserver implements InstructorFileObserver {
         this.renamed_count += 1;
     }
 
-    update_instructor_file_content_changed(file: InstructorFile) {
+    update_instructor_file_content_changed(file: InstructorFile, new_content: string) {
         this.instructor_file = file;
         this.content_changed_count += 1;
+        this.content = new_content;
     }
 
     update_instructor_file_deleted(file: InstructorFile) {
@@ -182,6 +185,7 @@ with file_.open() as f:
 
         expect(observer.instructor_file).toEqual(instructor_file);
         expect(observer.content_changed_count).toEqual(1);
+        expect(observer.content).toEqual(new_content);
     });
 
     test('Rename and refresh instructor file', async () => {
