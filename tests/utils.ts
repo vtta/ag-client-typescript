@@ -79,3 +79,12 @@ export function expect_dates_equal(first: string | null, second: string | null) 
         expect(new Date(first)).toEqual(new Date(second));
     }
 }
+
+export function expect_dates_not_equal(first: string | null, second: string | null) {
+    if (first === null || second === null) {
+        expect(first).not.toEqual(second);
+    }
+    else {
+        expect(new Date(first)).not.toEqual(new Date(second));
+    }
+}

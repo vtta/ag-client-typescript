@@ -1,19 +1,16 @@
 import {
     Course,
-    CourseObserver,
     InstructorFile,
     InstructorFileObserver,
     Project,
-    Semester
 } from '..';
 
 import {
-    do_editable_fields_test,
+    expect_dates_not_equal,
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell,
-    sleep
+    run_in_django_shell, sleep,
 } from './utils';
 
 beforeAll(() => {
@@ -166,8 +163,9 @@ describe('Get/update/delete instructor file tests', () => {
 
         let original_timestamp = instructor_file.last_modified;
 
+        await sleep(1);
         await instructor_file.set_content(new Blob([new_content]));
-        expect(instructor_file.last_modified).not.toEqual(original_timestamp);
+        expect_dates_not_equal(instructor_file.last_modified, original_timestamp);
 
         expect(refresh_me.last_modified).toEqual(original_timestamp);
         await refresh_me.refresh();
@@ -195,9 +193,10 @@ with file_.open() as f:
 
         let original_timestamp = instructor_file.last_modified;
 
+        await sleep(1);
         await instructor_file.rename(new_name);
         expect(instructor_file.name).toEqual(new_name);
-        expect(instructor_file.last_modified).not.toEqual(original_timestamp);
+        expect_dates_not_equal(instructor_file.last_modified, original_timestamp);
 
         expect(refresh_me.name).not.toEqual(new_name);
         expect(refresh_me.last_modified).toEqual(original_timestamp);
