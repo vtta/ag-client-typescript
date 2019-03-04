@@ -6,6 +6,8 @@ import {
 } from '..';
 
 import {
+    do_editable_fields_test,
+    expect_dates_equal,
     expect_dates_not_equal,
     global_setup,
     make_superuser,
@@ -59,7 +61,7 @@ afterEach(() => {
     ExpectedStudentFile.unsubscribe(observer);
 });
 
-describe.only('List/create expected student file tests', () => {
+describe('List/create expected student file tests', () => {
     test('Expected student file ctor', () => {
         let now = (new Date()).toISOString();
         let expected_student_file = new ExpectedStudentFile({
@@ -139,19 +141,84 @@ ExpectedStudentFile.objects.validate_and_create(project=project, pattern=f'expec
 });
 
 describe('Get/update/delete expected student file tests', () => {
+    let expected_student_file!: ExpectedStudentFile;
+
+    beforeEach(async () => {
+        expected_student_file = await ExpectedStudentFile.create(project.pk, {pattern: 'file.cpp'});
+    });
+
     test('Get expected student file', async () => {
-        fail();
+        let loaded = await ExpectedStudentFile.get_by_pk(expected_student_file.pk);
+        expect(loaded).toEqual(expected_student_file);
     });
 
     test('Update expected student file', async () => {
-        fail();
+        let old_timestamp = expected_student_file.last_modified;
+        expected_student_file.pattern = '*.py';
+        expected_student_file.min_num_matches = 2;
+        expected_student_file.max_num_matches = 4;
+
+        await sleep(1);
+        await expected_student_file.save();
+
+        let loaded = await ExpectedStudentFile.get_by_pk(expected_student_file.pk);
+        expect(loaded.pattern).toEqual('*.py');
+        expect(loaded.min_num_matches).toEqual(2);
+        expect(loaded.max_num_matches).toEqual(4);
+        expect_dates_not_equal(loaded.last_modified, old_timestamp);
+
+        expect(expected_student_file).toEqual(loaded);
+
+        expect(observer.expected_student_file).toEqual(loaded);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(1);
+        expect(observer.deleted_count).toEqual(0);
+    });
+
+    test('Editable fields', () => {
+        do_editable_fields_test(ExpectedStudentFile, 'ExpectedStudentFile');
     });
 
     test('Refresh expected student file', async () => {
-        fail();
+
+        let old_timestamp = expected_student_file.last_modified;
+        await sleep(1);
+
+        await expected_student_file.refresh();
+        expect_dates_equal(expected_student_file.last_modified, old_timestamp);
+        expect(observer.expected_student_file).toEqual(expected_student_file);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+        expect(observer.deleted_count).toEqual(0);
+
+        let change_expected_student_file = `
+from autograder.core.models import ExpectedStudentFile
+
+expected_student_file = ExpectedStudentFile.objects.get(pk=${expected_student_file.pk})
+expected_student_file.validate_and_update(pattern='new_pattern')
+        `;
+        run_in_django_shell(change_expected_student_file);
+
+        await expected_student_file.refresh();
+
+        expect(expected_student_file.pattern).toEqual('new_pattern');
+        expect_dates_not_equal(expected_student_file.last_modified, old_timestamp);
+
+        expect(observer.expected_student_file).toEqual(expected_student_file);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(1);
+        expect(observer.deleted_count).toEqual(0);
     });
 
     test('Delete expected student file', async () => {
-        fail();
+        await expected_student_file.delete();
+
+        expect(observer.expected_student_file).toBeNull();
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+        expect(observer.deleted_count).toEqual(1);
+
+        let loaded_list = await ExpectedStudentFile.get_all_from_project(project.pk);
+        expect(loaded_list.length).toEqual(0);
     });
 });

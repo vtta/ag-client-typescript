@@ -228,7 +228,7 @@ Project.objects.all().delete()
     });
 
     test('Check editable fields', async () => {
-        do_editable_fields_test(Course, 'Course');
+        do_editable_fields_test(Project, 'Project');
     });
 
     test('Refresh project', async () => {

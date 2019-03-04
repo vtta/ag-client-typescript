@@ -1,5 +1,6 @@
 import { Deletable, SaveableAPIObject } from "src/base";
 import { HttpClient } from 'src/http_client';
+import { filter_keys, safe_assign } from 'src/utils';
 
 export class ExpectedStudentFileData {
     pk: number;
@@ -53,9 +54,12 @@ export class ExpectedStudentFile extends ExpectedStudentFileData implements Save
         return result;
     }
 
-    // static async get_by_pk(expected_student_file_pk: number): Promise<ExpectedStudentFile> {
-    //
-    // }
+    static async get_by_pk(expected_student_file_pk: number): Promise<ExpectedStudentFile> {
+        let response = await HttpClient.get_instance().get<ExpectedStudentFileData>(
+            `/expected_student_files/${expected_student_file_pk}/`
+        );
+        return new ExpectedStudentFile(response.data);
+    }
 
     static async create(project_pk: number,
                         data: NewExpectedStudentFileData): Promise<ExpectedStudentFile> {
@@ -75,11 +79,25 @@ export class ExpectedStudentFile extends ExpectedStudentFileData implements Save
     }
 
     async save(): Promise<void> {
+        let response = await HttpClient.get_instance().patch<ExpectedStudentFileData>(
+            `/expected_student_files/${this.pk}/`,
+            filter_keys(this, ExpectedStudentFile.EDITABLE_FIELDS)
+        );
 
+        safe_assign(this, response.data);
+        ExpectedStudentFile.notify_expected_student_file_changed(this);
     }
 
     async refresh(): Promise<void> {
+        let last_modified = this.last_modified;
+        let response = await HttpClient.get_instance().get<ExpectedStudentFileData>(
+            `/expected_student_files/${this.pk}/`
+        );
 
+        safe_assign(this, response.data);
+        if (last_modified !== this.last_modified) {
+            ExpectedStudentFile.notify_expected_student_file_changed(this);
+        }
     }
 
     static notify_expected_student_file_changed(expected_student_file: ExpectedStudentFile) {
@@ -89,7 +107,10 @@ export class ExpectedStudentFile extends ExpectedStudentFileData implements Save
     }
 
     async delete(): Promise<void> {
-
+        await HttpClient.get_instance().delete(
+            `/expected_student_files/${this.pk}/`
+        );
+        ExpectedStudentFile.notify_expected_student_file_deleted(this);
     }
 
     static notify_expected_student_file_deleted(expected_student_file: ExpectedStudentFile) {
