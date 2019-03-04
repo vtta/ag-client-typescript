@@ -142,7 +142,6 @@ Project.objects.all().delete()
         let now = (new Date()).toISOString();
         let data = {
             name: 'project',
-            course: course.pk,
             visible_to_students: true,
             soft_closing_time: now,
             closing_time: now,
@@ -164,7 +163,7 @@ Project.objects.all().delete()
             hide_ultimate_submission_fdbk: true,
         };
 
-        let project = await Project.create(data);
+        let project = await Project.create(course.pk, data);
         expect(project.name).toEqual('project');
         expect(project.course).toEqual(course.pk);
         expect(project.visible_to_students).toEqual(true);
@@ -196,7 +195,7 @@ Project.objects.all().delete()
             name: 'project',
             course: course.pk
         };
-        let project = await Project.create(data);
+        let project = await Project.create(course.pk, data);
         expect(project.name).toEqual('project');
         expect(project.course).toEqual(course.pk);
         expect(project.visible_to_students).toEqual(false);
@@ -212,7 +211,7 @@ Project.objects.all().delete()
             name: 'project',
             course: course.pk
         };
-        let project = await Project.create(data);
+        let project = await Project.create(course.pk, data);
         expect(project.name).toEqual('project');
         expect(project.course).toEqual(course.pk);
         expect(project.visible_to_students).toEqual(false);
@@ -233,7 +232,7 @@ Project.objects.all().delete()
     });
 
     test('Refresh project', async () => {
-        let project = await Project.create({name: 'project', course: course.pk});
+        let project = await Project.create(course.pk, {name: 'project'});
 
         let rename_project = `
 from autograder.core.models import Project
@@ -248,7 +247,7 @@ project.validate_and_update(name='projy')
     });
 
     test('Copy project to same course', async () => {
-        let project = await Project.create({name: 'project', course: course.pk});
+        let project = await Project.create(course.pk, {name: 'project'});
 
         let new_project = await project.copy_to_course(project.course, 'clone');
         expect(new_project.name).toEqual('clone');
@@ -263,7 +262,7 @@ project.validate_and_update(name='projy')
     });
 
     test('Copy project to new course', async () => {
-        let project = await Project.create({name: 'project', course: course.pk});
+        let project = await Project.create(course.pk, {name: 'project'});
 
         let new_course = await Course.create({name: 'New course'});
 
@@ -276,7 +275,7 @@ project.validate_and_update(name='projy')
     });
 
     test('Num queued submissions', async () => {
-        let project = await Project.create({name: 'project', course: course.pk});
+        let project = await Project.create(course.pk, {name: 'project'});
         let num_queued = await project.num_queued_submissions();
         expect(num_queued).toEqual(0);
 

@@ -58,7 +58,7 @@ beforeEach(async () => {
     reset_db();
     make_superuser();
     course = await Course.create({name: 'Course'});
-    project = await Project.create({name: 'Project', course: course.pk});
+    project = await Project.create(course.pk, {name: 'Project'});
 
     observer = new TestObserver();
     InstructorFile.subscribe(observer);

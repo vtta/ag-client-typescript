@@ -1,4 +1,5 @@
 import { Deletable, SaveableAPIObject } from "src/base";
+import { HttpClient } from 'src/http_client';
 
 export class ExpectedStudentFileData {
     pk: number;
@@ -31,7 +32,8 @@ export interface ExpectedStudentFileObserver {
     update_expected_student_file_deleted(expected_student_file: ExpectedStudentFile): void;
 }
 
-export class ExpectedStudentFile extends ExpectedStudentFileData implements SaveableAPIObject, Deletable {
+export class ExpectedStudentFile extends ExpectedStudentFileData implements SaveableAPIObject,
+                                                                            Deletable {
     private static _subscribers = new Set<ExpectedStudentFileObserver>();
 
     static subscribe(observer: ExpectedStudentFileObserver) {
@@ -43,30 +45,78 @@ export class ExpectedStudentFile extends ExpectedStudentFileData implements Save
     }
 
     static async get_all_from_project(project_pk: number): Promise<ExpectedStudentFile[]> {
-
+        let response = await HttpClient.get_instance().get<ExpectedStudentFileData[]>(
+            `/projects/${project_pk}/expected_student_files/`
+        );
+        let result = response.data.map((data) => new ExpectedStudentFile(data));
+        result.sort((first, second) => first.pattern.localeCompare(second.pattern));
+        return result;
     }
 
-    static async get_by_pk(expected_student_file_pk: number): Promise<ExpectedStudentFile> {
+    // static async get_by_pk(expected_student_file_pk: number): Promise<ExpectedStudentFile> {
+    //
+    // }
 
-    }
-
-    static async create(project_pk: number, name: string, content: Blob): Promise<ExpectedStudentFile> {
-
+    static async create(project_pk: number,
+                        data: NewExpectedStudentFileData): Promise<ExpectedStudentFile> {
+        let response = await HttpClient.get_instance().post<ExpectedStudentFileData>(
+            `/projects/${project_pk}/expected_student_files/`,
+            data
+        );
+        let result = new ExpectedStudentFile(response.data);
+        ExpectedStudentFile.notify_expected_student_file_created(result);
+        return result;
     }
 
     static notify_expected_student_file_created(expected_student_file: ExpectedStudentFile) {
-
-    }
-
-    static notify_expected_student_file_changed(expected_student_file: ExpectedStudentFile) {
-
+        for (let subscriber of ExpectedStudentFile._subscribers) {
+            subscriber.update_expected_student_file_created(expected_student_file);
+        }
     }
 
     async save(): Promise<void> {
 
     }
 
-    static readonly EDITABLE_FIELDS: (keyof ExpectedStudentFileData)[] = [
+    async refresh(): Promise<void> {
 
+    }
+
+    static notify_expected_student_file_changed(expected_student_file: ExpectedStudentFile) {
+        for (let subscriber of ExpectedStudentFile._subscribers) {
+            subscriber.update_expected_student_file_changed(expected_student_file);
+        }
+    }
+
+    async delete(): Promise<void> {
+
+    }
+
+    static notify_expected_student_file_deleted(expected_student_file: ExpectedStudentFile) {
+        for (let subscriber of ExpectedStudentFile._subscribers) {
+            subscriber.update_expected_student_file_deleted(expected_student_file);
+        }
+    }
+
+    static readonly EDITABLE_FIELDS: (keyof ExpectedStudentFileData)[] = [
+        'pattern',
+        'min_num_matches',
+        'max_num_matches'
     ];
+}
+
+export class NewExpectedStudentFileData {
+    pattern: string;
+    min_num_matches?: number;
+    max_num_matches?: number;
+
+    constructor({
+        pattern,
+        min_num_matches,
+        max_num_matches
+    }: NewExpectedStudentFileData) {
+        this.pattern = pattern;
+        this.min_num_matches = min_num_matches;
+        this.max_num_matches = max_num_matches;
+    }
 }
