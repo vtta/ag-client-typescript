@@ -26,6 +26,11 @@ export function reset_db() {
     child_process.spawnSync(
         'docker exec typescript-cli-django rm -r /usr/src/app/media_root_dev',
         {shell: true});
+
+    child_process.spawnSync(
+        'docker exec typescript-cli-django python3.6 manage.py '
+        + '-c "from django.core.cache import cache; cache.clear()"'
+    );
 }
 
 export function run_in_django_shell(python_str: string) {
