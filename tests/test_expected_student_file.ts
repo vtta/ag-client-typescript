@@ -145,6 +145,21 @@ ExpectedStudentFile.objects.validate_and_create(project=project, pattern=f'expec
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
     });
+
+    test('Unsubscribe', async () => {
+        let expected_student_file = await ExpectedStudentFile.create(
+            project.pk, {pattern: 'file.py'});
+
+        expect(observer.expected_student_file).toEqual(expected_student_file);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+
+        ExpectedStudentFile.unsubscribe(observer);
+
+        await expected_student_file.save();
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+    });
 });
 
 describe('Get/update/delete expected student file tests', () => {

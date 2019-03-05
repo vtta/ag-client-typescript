@@ -1,4 +1,10 @@
-import { Course, NewProjectData, Project, UltimateSubmissionPolicy } from '..';
+import {
+    Course,
+    NewProjectData,
+    Project,
+    ProjectObserver,
+    UltimateSubmissionPolicy
+} from '..';
 
 import { do_editable_fields_test, expect_dates_equal, global_setup, make_superuser,
          reset_db, run_in_django_shell, sleep } from './utils';
@@ -99,8 +105,26 @@ describe('Project ctor tests', () => {
     });
 });
 
+class TestObserver implements ProjectObserver {
+    project: Project | null = null;
+
+    created_count = 0;
+    changed_count = 0;
+
+    update_project_changed(project: Project): void {
+        this.changed_count += 1;
+        this.project = project;
+    }
+
+    update_project_created(project: Project): void {
+        this.created_count += 1;
+        this.project = project;
+    }
+}
+
 describe('Project API tests', () => {
     let course: Course;
+    let observer: TestObserver;
 
     beforeEach(async () => {
         reset_db();
@@ -113,6 +137,9 @@ Project.objects.validate_and_create(course=${course.pk}, name='Project1')
 Project.objects.validate_and_create(course=${course.pk}, name='Project2')
         `;
         run_in_django_shell(make_projects);
+
+        observer = new TestObserver();
+        Project.subscribe(observer);
     });
 
     test('Get projects from course', async () => {
@@ -188,6 +215,9 @@ Project.objects.all().delete()
 
         let projects = await Project.get_all_from_course(course.pk);
         expect(projects.length).toEqual(3);
+
+        expect(project).toEqual(observer.project);
+        expect(observer.created_count).toEqual(1);
     });
 
     test('Create project only required params', async () => {
@@ -224,6 +254,9 @@ Project.objects.all().delete()
         let reloaded = await Project.get_by_pk(project.pk);
         expect(reloaded.name).toEqual('Projamas');
         expect(reloaded.visible_to_students).toEqual(true);
+
+        expect(observer.project).toEqual(project);
+        expect(observer.changed_count).toEqual(1);
     });
 
     test('Check editable fields', async () => {
@@ -232,6 +265,11 @@ Project.objects.all().delete()
 
     test('Refresh project', async () => {
         let project = await Project.create(course.pk, {name: 'project'});
+
+        await project.refresh();
+        expect(observer.changed_count).toEqual(0);
+
+        await sleep(1);
 
         let rename_project = `
 from autograder.core.models import Project
@@ -243,6 +281,9 @@ project.validate_and_update(name='projy')
 
         await project.refresh();
         expect(project.name).toEqual('projy');
+
+        expect(observer.project).toEqual(project);
+        expect(observer.changed_count).toEqual(1);
     });
 
     test('Copy project to same course', async () => {
@@ -292,5 +333,19 @@ s.save()
 
         num_queued = await project.num_queued_submissions();
         expect(num_queued).toEqual(1);
+    });
+
+    test('Unsubscribe', async () => {
+        let project = await Project.create(course.pk, {name: 'Projy'});
+
+        expect(observer.project).toEqual(project);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+
+        Project.unsubscribe(observer);
+
+        await project.save();
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
     });
 });
