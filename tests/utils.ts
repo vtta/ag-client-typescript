@@ -26,6 +26,11 @@ export function reset_db() {
     child_process.spawnSync(
         'docker exec typescript-cli-django rm -r /usr/src/app/media_root_dev',
         {shell: true});
+
+    child_process.spawnSync(
+        'docker exec typescript-cli-django python3.6 manage.py shell '
+        + '-c "from django.core.cache import cache; cache.clear()"',
+        {shell: true});
 }
 
 export function run_in_django_shell(python_str: string) {
@@ -56,7 +61,7 @@ user.save()
 export function do_editable_fields_test(ts_class: {EDITABLE_FIELDS: string[]},
                                         python_class_name: string) {
     let print_editable_fields = `
-from autograder.core.models import Course
+from autograder.core.models import ${python_class_name}
 print('\\n'.join(${python_class_name}.get_editable_fields()))
     `;
     let output = run_in_django_shell(print_editable_fields).stdout.trim();
@@ -77,5 +82,14 @@ export function expect_dates_equal(first: string | null, second: string | null) 
     }
     else {
         expect(new Date(first)).toEqual(new Date(second));
+    }
+}
+
+export function expect_dates_not_equal(first: string | null, second: string | null) {
+    if (first === null || second === null) {
+        expect(first).not.toEqual(second);
+    }
+    else {
+        expect(new Date(first)).not.toEqual(new Date(second));
     }
 }

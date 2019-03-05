@@ -1,4 +1,4 @@
-import { Refreshable } from './base';
+import { Deletable, Refreshable } from './base';
 import { HttpClient } from './http_client';
 import { safe_assign, sort_by_name } from './utils';
 
@@ -32,7 +32,7 @@ export interface InstructorFileObserver {
     update_instructor_file_deleted(instructor_file: InstructorFile): void;
 }
 
-export class InstructorFile extends InstructorFileData implements Refreshable {
+export class InstructorFile extends InstructorFileData implements Refreshable, Deletable {
     private static _subscribers = new Set<InstructorFileObserver>();
 
     static subscribe(observer: InstructorFileObserver) {

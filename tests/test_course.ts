@@ -1,7 +1,7 @@
-import { Course, CourseObserver, Semester, User } from '..';
+import { Course, CourseObserver, NewCourseData, Semester, User } from '..';
 
 import {
-    do_editable_fields_test,
+    do_editable_fields_test, expect_dates_not_equal,
     global_setup,
     make_superuser,
     reset_db,
@@ -172,13 +172,13 @@ handgrader_course.handgraders.add(user)
     });
 
     test('Create course all params', async () => {
-        let course = await Course.create({
+        let course = await Course.create(new NewCourseData({
             name: 'EECS 490',
             semester: Semester.winter,
             year: 2018,
             subtitle: 'PL',
             num_late_days: 1
-        });
+        }));
 
         expect(course.name).toEqual('EECS 490');
         expect(course.semester).toEqual(Semester.winter);
@@ -191,9 +191,9 @@ handgrader_course.handgraders.add(user)
     });
 
     test('Create course only required params', async () => {
-        let course = await Course.create({
+        let course = await Course.create(new NewCourseData({
             name: 'EECS 481'
-        });
+        }));
 
         expect(course.name).toEqual('EECS 481');
         expect(course.semester).toEqual(null);
@@ -236,7 +236,7 @@ course.admins.add(user)
         expect(course.subtitle).toEqual('20x6');
         expect(course.num_late_days).toEqual(1);
 
-        expect(course.last_modified).not.toEqual(old_timestamp);
+        expect_dates_not_equal(course.last_modified, old_timestamp);
 
         let loaded_course = await Course.get_by_pk(course.pk);
         expect(loaded_course.name).toEqual('EECS 9001');
@@ -245,7 +245,7 @@ course.admins.add(user)
         expect(loaded_course.subtitle).toEqual('20x6');
         expect(loaded_course.num_late_days).toEqual(1);
 
-        expect(loaded_course.last_modified).not.toEqual(old_timestamp);
+        expect_dates_not_equal(loaded_course.last_modified, old_timestamp);
     });
 
     test('Check editable fields', async () => {
@@ -286,7 +286,7 @@ course.save()
         expect(course.subtitle).toEqual('Video Gormes');
         expect(course.num_late_days).toEqual(3);
 
-        expect(course.last_modified).not.toEqual(old_timestamp);
+        expect_dates_not_equal(course.last_modified, old_timestamp);
     });
 
     test('Copy course', async () => {

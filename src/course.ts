@@ -219,12 +219,26 @@ export class Course extends CourseData implements SaveableAPIObject {
     }
 }
 
-interface NewCourseData {
+export class NewCourseData {
     name: string;
     semester?: Semester | null;
     year?: number | null;
     subtitle?: string;
     num_late_days?: number;
+
+    constructor({
+        name,
+        semester,
+        year,
+        subtitle,
+        num_late_days,
+    }: NewCourseData) {
+        this.name = name;
+        this.semester = semester;
+        this.year = year;
+        this.subtitle = subtitle;
+        this.num_late_days = num_late_days;
+    }
 }
 
 export enum Semester {
