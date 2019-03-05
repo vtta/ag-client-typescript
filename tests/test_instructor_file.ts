@@ -134,6 +134,21 @@ with file_.open() as f:
         expect(observer.instructor_file).toEqual(new_file);
         expect(observer.created_count).toEqual(1);
     });
+
+    test('Unsubscribe', async () => {
+        let instructor_file = await InstructorFile.create(
+            project.pk, 'filey', new Blob(['content']));
+
+        expect(observer.instructor_file).toEqual(instructor_file);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.renamed_count).toEqual(0);
+
+        InstructorFile.unsubscribe(observer);
+
+        await instructor_file.rename('new_name');
+        expect(observer.created_count).toEqual(1);
+        expect(observer.renamed_count).toEqual(0);
+    });
 });
 
 describe('Get/update/delete instructor file tests', () => {

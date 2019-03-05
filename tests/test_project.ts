@@ -334,4 +334,18 @@ s.save()
         num_queued = await project.num_queued_submissions();
         expect(num_queued).toEqual(1);
     });
+
+    test('Unsubscribe', async () => {
+        let project = await Project.create(course.pk, {name: 'Projy'});
+
+        expect(observer.project).toEqual(project);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+
+        Project.unsubscribe(observer);
+
+        await project.save();
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(0);
+    });
 });
