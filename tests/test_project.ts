@@ -1,4 +1,4 @@
-import { Course, Project, UltimateSubmissionPolicy } from '..';
+import { Course, NewProjectData, Project, UltimateSubmissionPolicy } from '..';
 
 import { do_editable_fields_test, expect_dates_equal, global_setup, make_superuser,
          reset_db, run_in_django_shell, sleep } from './utils';
@@ -140,7 +140,7 @@ Project.objects.all().delete()
 
     test('Create project all params', async () => {
         let now = (new Date()).toISOString();
-        let data = {
+        let data = new NewProjectData({
             name: 'project',
             visible_to_students: true,
             soft_closing_time: now,
@@ -161,7 +161,7 @@ Project.objects.all().delete()
             allow_late_days: true,
             ultimate_submission_policy: UltimateSubmissionPolicy.best,
             hide_ultimate_submission_fdbk: true,
-        };
+        });
 
         let project = await Project.create(course.pk, data);
         expect(project.name).toEqual('project');
@@ -191,10 +191,9 @@ Project.objects.all().delete()
     });
 
     test('Create project only required params', async () => {
-        let data = {
+        let data = new NewProjectData({
             name: 'project',
-            course: course.pk
-        };
+        });
         let project = await Project.create(course.pk, data);
         expect(project.name).toEqual('project');
         expect(project.course).toEqual(course.pk);

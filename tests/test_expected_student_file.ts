@@ -1,7 +1,7 @@
 import {
     Course,
     ExpectedStudentFile,
-    ExpectedStudentFileObserver,
+    ExpectedStudentFileObserver, NewExpectedStudentFileData,
     Project
 } from '..';
 
@@ -100,8 +100,9 @@ ExpectedStudentFile.objects.validate_and_create(project=project, pattern=f'expec
         expect(actual_patterns).toEqual(['expected1', 'expected3', 'expected42']);
     });
 
-    test('Create expected student file with defaults', async () => {
-        let created = await ExpectedStudentFile.create(project.pk, {pattern: 'file.cpp'});
+    test('Create expected student file only required fields', async () => {
+        let created = await ExpectedStudentFile.create(
+            project.pk, new NewExpectedStudentFileData({pattern: 'file.cpp'}));
 
         let loaded = await ExpectedStudentFile.get_all_from_project(project.pk);
         expect(loaded.length).toEqual(1);
@@ -119,9 +120,15 @@ ExpectedStudentFile.objects.validate_and_create(project=project, pattern=f'expec
         expect(observer.deleted_count).toEqual(0);
     });
 
-    test('Create expected student file no defaults', async () => {
+    test('Create expected student file all fields', async () => {
         let created = await ExpectedStudentFile.create(
-            project.pk, {pattern: '*.cpp', min_num_matches: 0, max_num_matches: 3});
+            project.pk,
+            new NewExpectedStudentFileData({
+                pattern: '*.cpp',
+                min_num_matches: 0,
+                max_num_matches: 3
+            })
+        );
 
         let loaded = await ExpectedStudentFile.get_all_from_project(project.pk);
         expect(loaded.length).toEqual(1);

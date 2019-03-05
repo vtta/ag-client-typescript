@@ -1,4 +1,4 @@
-import { Course, CourseObserver, Semester, User } from '..';
+import { Course, CourseObserver, NewCourseData, Semester, User } from '..';
 
 import {
     do_editable_fields_test, expect_dates_not_equal,
@@ -172,13 +172,13 @@ handgrader_course.handgraders.add(user)
     });
 
     test('Create course all params', async () => {
-        let course = await Course.create({
+        let course = await Course.create(new NewCourseData({
             name: 'EECS 490',
             semester: Semester.winter,
             year: 2018,
             subtitle: 'PL',
             num_late_days: 1
-        });
+        }));
 
         expect(course.name).toEqual('EECS 490');
         expect(course.semester).toEqual(Semester.winter);
@@ -191,9 +191,9 @@ handgrader_course.handgraders.add(user)
     });
 
     test('Create course only required params', async () => {
-        let course = await Course.create({
+        let course = await Course.create(new NewCourseData({
             name: 'EECS 481'
-        });
+        }));
 
         expect(course.name).toEqual('EECS 481');
         expect(course.semester).toEqual(null);
