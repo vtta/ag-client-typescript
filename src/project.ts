@@ -93,11 +93,34 @@ export class ProjectData {
     }
 }
 
+export interface ProjectObserver {
+    update_project_created(project: Project): void;
+    update_project_changed(project: Project): void;
+}
+
 export class Project extends ProjectData implements SaveableAPIObject {
+    private static _subscribers = new Set<ProjectObserver>();
+
+    static subscribe(observer: ProjectObserver) {
+        Project._subscribers.add(observer);
+    }
+
+    static unsubscribe(observer: ProjectObserver) {
+        Project._subscribers.delete(observer);
+    }
+
     static async create(course_pk: number, data: NewProjectData) {
         let response = await HttpClient.get_instance().post<ProjectData>(
             `/courses/${course_pk}/projects/`, data);
-        return new Project(response.data);
+        let result = new Project(response.data);
+        Project.notify_project_created(result);
+        return result;
+    }
+
+    static notify_project_created(project: Project) {
+        for (let subscriber of Project._subscribers) {
+            subscriber.update_project_created(project);
+        }
     }
 
     static async get_by_pk(pk: number) {
@@ -118,11 +141,25 @@ export class Project extends ProjectData implements SaveableAPIObject {
             `/projects/${this.pk}/`, filter_keys(this, Project.EDITABLE_FIELDS)
         );
         safe_assign(this, response.data);
+
+        Project.notify_project_changed(this);
     }
 
     async refresh(): Promise<void> {
+        let last_modified = this.last_modified;
+
         let response = await HttpClient.get_instance().get<ProjectData>(`/projects/${this.pk}/`);
         safe_assign(this, response.data);
+
+        if (last_modified !== this.last_modified) {
+            Project.notify_project_changed(this);
+        }
+    }
+
+    static notify_project_changed(project: Project) {
+        for (let subscriber of Project._subscribers) {
+            subscriber.update_project_changed(project);
+        }
     }
 
     static readonly EDITABLE_FIELDS: (keyof ProjectData)[] = [
