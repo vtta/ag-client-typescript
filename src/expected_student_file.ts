@@ -1,6 +1,6 @@
-import { Deletable, SaveableAPIObject } from "src/base";
-import { HttpClient } from 'src/http_client';
-import { filter_keys, safe_assign } from 'src/utils';
+import { Deletable, SaveableAPIObject } from "./base";
+import { HttpClient } from './http_client';
+import { filter_keys, safe_assign } from './utils';
 
 export class ExpectedStudentFileData {
     pk: number;
