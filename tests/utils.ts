@@ -59,9 +59,10 @@ user.save()
 }
 
 export function do_editable_fields_test(ts_class: {EDITABLE_FIELDS: string[]},
-                                        python_class_name: string) {
+                                        python_class_name: string,
+                                        model_location: string = "autograder.core.models") {
     let print_editable_fields = `
-from autograder.core.models import ${python_class_name}
+from ${model_location} import ${python_class_name}
 print('\\n'.join(${python_class_name}.get_editable_fields()))
     `;
     let output = run_in_django_shell(print_editable_fields).stdout.trim();

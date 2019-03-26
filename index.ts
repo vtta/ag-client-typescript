@@ -10,3 +10,16 @@ export { InstructorFile, InstructorFileObserver } from './src/instructor_file';
 export { ExpectedStudentFile, ExpectedStudentFileObserver,
          NewExpectedStudentFileData } from './src/expected_student_file';
 export { Group, GroupObserver, NewGroupData } from './src/group';
+
+export { Annotation, AnnotationData, AnnotationObserver,
+         NewAnnotationData } from './src/annotation';
+export { AppliedAnnotation, AppliedAnnotationData, AppliedAnnotationObserver,
+         NewAppliedAnnotationData } from './src/applied_annotation';
+export { Comment, CommentData, CommentObserver, NewCommentData } from './src/comment';
+export { Criterion, CriterionData, CriterionObserver, NewCriterionData } from './src/criterion';
+export { CriterionResult, CriterionResultData, CriterionResultObserver,
+         NewCriterionResultData } from './src/criterion_result';
+export { HandgradingResult, HandgradingResultData, HandgradingResultObserver,
+         NewHandgradingResultData } from './src/handgrading_result';
+export { HandgradingRubric, HandgradingRubricData, HandgradingRubricObserver,
+         NewHandgradingRubricData, PointsStyle} from './src/handgrading_rubric';
