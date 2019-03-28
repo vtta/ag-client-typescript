@@ -9,3 +9,4 @@ export { NewProjectData, Project, ProjectData, ProjectObserver,
 export { InstructorFile, InstructorFileData, InstructorFileObserver } from './src/instructor_file';
 export { ExpectedStudentFile, ExpectedStudentFileData, ExpectedStudentFileObserver,
          NewExpectedStudentFileData } from './src/expected_student_file';
+export { Group, GroupData, GroupObserver, NewGroupData } from './src/group';
