@@ -22,6 +22,8 @@ let project!: Project;
 
 class TestObserver implements GroupObserver {
     group: Group | null = null;
+    group1_merged_pk: number | null = null;
+    group2_merged_pk: number | null = null;
 
     created_count = 0;
     changed_count = 0;
@@ -37,9 +39,11 @@ class TestObserver implements GroupObserver {
         this.group = group;
     }
 
-    update_group_merged(group: Group): void {
+    update_group_merged(new_group: Group, group1_pk: number, group2_pk: number): void {
         this.merged_count += 1;
-        this.group = group;
+        this.group = new_group;
+        this.group1_merged_pk = group1_pk;
+        this.group2_merged_pk = group2_pk;
     }
 }
 
@@ -266,6 +270,8 @@ group.validate_and_update(bonus_submissions_remaining=12)
         expect(merged.member_names.sort()).toEqual(['member1@umich.edu', 'member2@umich.edu']);
 
         expect(observer.group).toEqual(merged);
+        expect(observer.group1_merged_pk).toEqual(group1.pk);
+        expect(observer.group2_merged_pk).toEqual(group2.pk);
         expect(observer.created_count).toEqual(3);
         expect(observer.changed_count).toEqual(0);
         expect(observer.merged_count).toEqual(1);

@@ -42,7 +42,7 @@ export class GroupData {
 export interface GroupObserver {
     update_group_created(group: Group): void;
     update_group_changed(group: Group): void;
-    update_group_merged(group: Group): void;
+    update_group_merged(new_group: Group, group1_pk: number, group2_pk: number): void;
 }
 
 export class Group extends GroupData implements SaveableAPIObject {
@@ -111,13 +111,13 @@ export class Group extends GroupData implements SaveableAPIObject {
         );
 
         let result = new Group(response.data);
-        Group.notify_group_merged(result);
+        Group.notify_group_merged(result, this.pk, other_group_pk);
         return result;
     }
 
-    static notify_group_merged(group: Group) {
+    static notify_group_merged(new_merged_group: Group, group1_pk: number, group2_pk: number) {
         for (let subscriber of Group._subscribers) {
-            subscriber.update_group_merged(group);
+            subscriber.update_group_merged(new_merged_group, group1_pk, group2_pk);
         }
     }
 
