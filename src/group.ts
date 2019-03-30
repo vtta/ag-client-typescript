@@ -8,7 +8,7 @@ export class GroupData {
     extended_due_date: string | null;
     member_names: string[];
     bonus_submissions_remaining: number;
-    late_days_used: object;
+    late_days_used: {[username: string]: number};
     num_submissions: number;
     num_submits_towards_limit: number;
     created_at: string;
