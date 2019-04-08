@@ -6,17 +6,17 @@ import { filter_keys, safe_assign } from './utils';
 export class CommentData {
     pk: number;
     last_modified: string;
-    location: Location;
+    location?: Location;
     text: string;
     handgrading_result: number;
 
     constructor({
-                    pk,
-                    last_modified,
-                    location,
-                    text,
-                    handgrading_result,
-                }: CommentData) {
+        pk,
+        last_modified,
+        location,
+        text,
+        handgrading_result,
+    }: CommentData) {
         this.pk = pk;
         this.last_modified = last_modified;
         this.location = location;
@@ -57,8 +57,7 @@ export class Comment extends CommentData implements SaveableAPIObject, Deletable
         return new Comment(response.data);
     }
 
-    static async create(handgrading_result_pk: number,
-                        data: NewCommentData): Promise<Comment> {
+    static async create(handgrading_result_pk: number, data: NewCommentData): Promise<Comment> {
         let response = await HttpClient.get_instance().post<CommentData>(
             `/handgrading_results/${handgrading_result_pk}/comments/`,
             data

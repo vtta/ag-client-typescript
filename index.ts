@@ -19,7 +19,7 @@ export { Comment, CommentData, CommentObserver, NewCommentData } from './src/com
 export { Criterion, CriterionData, CriterionObserver, NewCriterionData } from './src/criterion';
 export { CriterionResult, CriterionResultData, CriterionResultObserver,
          NewCriterionResultData } from './src/criterion_result';
-export { HandgradingResult, HandgradingResultData, HandgradingResultObserver,
-         NewHandgradingResultData } from './src/handgrading_result';
+export { HandgradingResult, HandgradingResultData,
+         HandgradingResultObserver } from './src/handgrading_result';
 export { HandgradingRubric, HandgradingRubricData, HandgradingRubricObserver,
          NewHandgradingRubricData, PointsStyle} from './src/handgrading_rubric';

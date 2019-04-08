@@ -149,9 +149,9 @@ export class Criterion extends CriterionData implements SaveableAPIObject, Delet
 }
 
 export class NewCriterionData {
-    short_description: string;
-    long_description: string;
-    points: number;
+    short_description?: string;
+    long_description?: string;
+    points?: number;
 
     constructor({
         short_description,
