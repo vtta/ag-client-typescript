@@ -141,7 +141,7 @@ HandgradingRubric.objects.validate_and_create(project=project, max_points=321)
     });
 
     test('Create handgrading rubric only required fields', async () => {
-        let created = await HandgradingRubric.create(project.pk, new NewHandgradingRubricData({}));
+        let created = await HandgradingRubric.create(project.pk, {});
         let loaded = await HandgradingRubric.get_from_project(project.pk);
 
         expect(created).toEqual(loaded);
