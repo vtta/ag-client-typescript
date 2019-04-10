@@ -4,10 +4,6 @@ import { Criterion } from './criterion';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
-import {
-    sleep,
-} from '../tests/utils';
-
 export class HandgradingRubricData {
     pk: number;
     project: number;
