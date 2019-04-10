@@ -14,7 +14,7 @@ beforeAll(() => {
 });
 
 describe('Project ctor tests', () => {
-    test('Construct Project', async () => {
+    test('Construct Project', () => {
         let now = (new Date()).toISOString();
         let project = new Project({
             pk: 42,
@@ -44,6 +44,9 @@ describe('Project ctor tests', () => {
 
             ultimate_submission_policy: UltimateSubmissionPolicy.best,
             hide_ultimate_submission_fdbk: true,
+
+            instructor_files: [],
+            expected_student_files: [],
         });
 
         expect(project.pk).toEqual(42);
@@ -73,9 +76,12 @@ describe('Project ctor tests', () => {
 
         expect(project.ultimate_submission_policy).toEqual(UltimateSubmissionPolicy.best);
         expect(project.hide_ultimate_submission_fdbk).toEqual(true);
+
+        expect(project.instructor_files).toEqual([]);
+        expect(project.expected_student_files).toEqual([]);
     });
 
-    test('Construct project without closing time', async () => {
+    test('Construct project without closing time or instructor files', () => {
         let project = new Project({
             pk: 42,
             name: 'project',
@@ -99,9 +105,11 @@ describe('Project ctor tests', () => {
             allow_late_days: true,
             ultimate_submission_policy: UltimateSubmissionPolicy.best,
             hide_ultimate_submission_fdbk: true,
+            expected_student_files: [],
         });
 
         expect(project.closing_time).toBeUndefined();
+        expect(project.instructor_files).toBeUndefined();
     });
 });
 
@@ -263,7 +271,7 @@ Project.objects.all().delete()
         do_editable_fields_test(Project, 'Project');
     });
 
-    test('Refresh project', async () => {
+    test.only('Refresh project', async () => {
         let project = await Project.create(course.pk, {name: 'project'});
 
         await project.refresh();
@@ -347,5 +355,9 @@ s.save()
         await project.save();
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
+    });
+
+    test('Project has instructor files and expected student files', () => {
+        fail();
     });
 });
