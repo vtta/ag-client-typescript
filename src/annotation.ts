@@ -153,9 +153,9 @@ export class Annotation extends AnnotationData implements SaveableAPIObject, Del
 }
 
 export class NewAnnotationData {
-    short_description: string;
-    long_description: string;
-    deduction: number;
+    short_description?: string;
+    long_description?: string;
+    deduction?: number;
     max_deduction?: number;
 
     constructor({

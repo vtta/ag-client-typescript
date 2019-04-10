@@ -1,7 +1,6 @@
 import { Annotation } from './annotation';
-import { Deletable, SaveableAPIObject } from "./base";
+import { Deletable } from "./base";
 import { HttpClient } from './http_client';
-import { filter_keys, safe_assign } from './utils';
 
 export class AppliedAnnotationData {
     pk: number;
@@ -27,12 +26,10 @@ export class AppliedAnnotationData {
 
 export interface AppliedAnnotationObserver {
     update_applied_annotation_created(applied_annotation: AppliedAnnotation): void;
-    update_applied_annotation_changed(applied_annotation: AppliedAnnotation): void;
     update_applied_annotation_deleted(applied_annotation: AppliedAnnotation): void;
 }
 
-export class AppliedAnnotation extends AppliedAnnotationData implements SaveableAPIObject,
-                                                                        Deletable {
+export class AppliedAnnotation extends AppliedAnnotationData implements Deletable {
     private static _subscribers = new Set<AppliedAnnotationObserver>();
 
     static subscribe(observer: AppliedAnnotationObserver) {
@@ -75,37 +72,9 @@ export class AppliedAnnotation extends AppliedAnnotationData implements Saveable
         }
     }
 
-    async save(): Promise<void> {
-        let response = await HttpClient.get_instance().patch<AppliedAnnotationData>(
-            `/applied_annotations/${this.pk}/`,
-            filter_keys(this, AppliedAnnotation.EDITABLE_FIELDS)
-        );
-
-        safe_assign(this, response.data);
-        AppliedAnnotation.notify_applied_annotation_changed(this);
-    }
-
-    async refresh(): Promise<void> {
-        let last_modified = this.last_modified;
-        let response = await HttpClient.get_instance().get<AppliedAnnotationData>(
-            `/applied_annotations/${this.pk}/`
-        );
-
-        safe_assign(this, response.data);
-        if (last_modified !== this.last_modified) {
-            AppliedAnnotation.notify_applied_annotation_changed(this);
-        }
-    }
-
-    static notify_applied_annotation_changed(applied_annotation: AppliedAnnotation) {
-        for (let subscriber of AppliedAnnotation._subscribers) {
-            subscriber.update_applied_annotation_changed(applied_annotation);
-        }
-    }
-
     async delete(): Promise<void> {
         await HttpClient.get_instance().delete(
-            `/applied_annotation/${this.pk}/`
+            `/applied_annotations/${this.pk}/`
         );
         AppliedAnnotation.notify_applied_annotation_deleted(this);
     }
@@ -115,25 +84,55 @@ export class AppliedAnnotation extends AppliedAnnotationData implements Saveable
             subscriber.update_applied_annotation_deleted(applied_annotation);
         }
     }
-
-    static readonly EDITABLE_FIELDS: (keyof AppliedAnnotationData)[] = [
-        'location',
-    ];
 }
 
 export class NewAppliedAnnotationData {
-    location: boolean;
+    annotation: number;
+    location: NewLocationData;
 
     constructor({
-        location,
+        annotation,
+        location
     }: NewAppliedAnnotationData) {
+        this.annotation = annotation;
         this.location = location;
     }
 }
 
-export interface Location {
+export class Location {
     pk: number;
     first_line: number;
     last_line: number;
     filename: string;
+    last_modified: string;
+
+    constructor({
+        pk,
+        first_line,
+        last_line,
+        filename,
+        last_modified
+    }: Location) {
+        this.pk = pk;
+        this.first_line = first_line;
+        this.last_line = last_line;
+        this.filename = filename;
+        this.last_modified = last_modified;
+    }
+}
+
+export class NewLocationData {
+    first_line: number;
+    last_line: number;
+    filename: string;
+
+    constructor({
+        first_line,
+        last_line,
+        filename
+    }: NewLocationData) {
+        this.first_line = first_line;
+        this.last_line = last_line;
+        this.filename = filename;
+    }
 }

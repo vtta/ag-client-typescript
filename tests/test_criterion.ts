@@ -268,7 +268,7 @@ describe('Order criterion list tests', () => {
         expect(loaded_ordered_list.length).toBe(3);
         expect(loaded_ordered_list).toEqual(ordered_criterion_list);
 
-        expect(observer.created_count).toEqual(0);
+        expect(observer.created_count).toEqual(3);
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(0);

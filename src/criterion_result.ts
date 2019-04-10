@@ -122,14 +122,14 @@ export class CriterionResult extends CriterionResultData implements SaveableAPIO
 }
 
 export class NewCriterionResultData {
-    selected: boolean;
-    criterion: number;
+    criterion?: number;
+    selected?: boolean;
 
     constructor({
-        selected,
         criterion,
+        selected
     }: NewCriterionResultData) {
-        this.selected = selected;
         this.criterion = criterion;
+        this.selected = selected;
     }
 }
