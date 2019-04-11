@@ -1,5 +1,5 @@
 import {
-    Course,
+    Course, ExpectedStudentFile, InstructorFile,
     NewProjectData,
     Project,
     ProjectObserver,
@@ -16,6 +16,44 @@ beforeAll(() => {
 describe('Project ctor tests', () => {
     test('Construct Project', () => {
         let now = (new Date()).toISOString();
+        let instructor_files = [
+            // Should work with InstructorFileData and InstructorFile
+            {
+                pk: 100,
+                project: 42,
+                name: 'spam',
+                size: 4300,
+                last_modified: ''
+            },
+            // Should work with InstructorFileData and InstructorFile
+            new InstructorFile({
+                pk: 101,
+                project: 42,
+                name: 'spam',
+                size: 4300,
+                last_modified: ''
+            })
+        ];
+        let expected_student_files = [
+            // Should work with ExpectedStudentFileData and ExpectedStudentFile
+            {
+                pk: 300,
+                project: 42,
+                pattern: 'spam',
+                min_num_matches: 1,
+                max_num_matches: 1,
+                last_modified: ''
+            },
+            // Should work with ExpectedStudentFileData and ExpectedStudentFile
+            new ExpectedStudentFile({
+                pk: 300,
+                project: 42,
+                pattern: 'spam',
+                min_num_matches: 1,
+                max_num_matches: 1,
+                last_modified: ''
+            })
+        ];
         let project = new Project({
             pk: 42,
             name: 'project',
@@ -45,8 +83,8 @@ describe('Project ctor tests', () => {
             ultimate_submission_policy: UltimateSubmissionPolicy.best,
             hide_ultimate_submission_fdbk: true,
 
-            instructor_files: [],
-            expected_student_files: [],
+            instructor_files: instructor_files,
+            expected_student_files: expected_student_files,
         });
 
         expect(project.pk).toEqual(42);
@@ -77,8 +115,10 @@ describe('Project ctor tests', () => {
         expect(project.ultimate_submission_policy).toEqual(UltimateSubmissionPolicy.best);
         expect(project.hide_ultimate_submission_fdbk).toEqual(true);
 
-        expect(project.instructor_files).toEqual([]);
-        expect(project.expected_student_files).toEqual([]);
+        expect(project.instructor_files).toEqual(
+            [new InstructorFile(instructor_files[0]), instructor_files[1]]);
+        expect(project.expected_student_files).toEqual(
+            [new ExpectedStudentFile(expected_student_files[0]), expected_student_files[1]]);
     });
 
     test('Construct project without closing time or instructor files', () => {
@@ -271,7 +311,7 @@ Project.objects.all().delete()
         do_editable_fields_test(Project, 'Project');
     });
 
-    test.only('Refresh project', async () => {
+    test('Refresh project', async () => {
         let project = await Project.create(course.pk, {name: 'project'});
 
         await project.refresh();
@@ -355,9 +395,5 @@ s.save()
         await project.save();
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
-    });
-
-    test('Project has instructor files and expected student files', () => {
-        fail();
     });
 });

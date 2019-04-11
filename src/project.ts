@@ -5,7 +5,7 @@ import { InstructorFile, InstructorFileData } from './instructor_file';
 import { filter_keys, safe_assign, sort_by_name } from "./utils";
 
 
-class ProjectPrimitiveData {
+class ProjectCoreData {
     pk: number;
     name: string;
     last_modified: string;
@@ -34,7 +34,7 @@ class ProjectPrimitiveData {
     ultimate_submission_policy: UltimateSubmissionPolicy;
     hide_ultimate_submission_fdbk: boolean;
 
-    constructor(args: ProjectPrimitiveData) {
+    constructor(args: ProjectCoreData) {
         this.pk = args.pk;
         this.name = args.name;
         this.last_modified = args.last_modified;
@@ -65,14 +65,16 @@ class ProjectPrimitiveData {
     }
 }
 
-interface ProjectCtor extends ProjectPrimitiveData {
+interface ProjectCtor extends ProjectCoreData {
     instructor_files?: InstructorFileData[];
     expected_student_files: ExpectedStudentFileData[];
 }
 
 export interface ProjectData extends ProjectCtor {
     // Typescript hack for nominal typing.
-    _project_data_brand: string;
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    _project_data_brand: unknown;
 }
 
 export interface ProjectObserver {
@@ -80,9 +82,11 @@ export interface ProjectObserver {
     update_project_changed(project: Project): void;
 }
 
-export class Project extends ProjectPrimitiveData implements SaveableAPIObject {
+export class Project extends ProjectCoreData implements SaveableAPIObject {
     // Typescript hack for nominal typing.
-    private _project_brand: string = '';
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    private _project_brand: unknown;
 
     instructor_files?: InstructorFile[];
     expected_student_files: ExpectedStudentFile[];
@@ -161,7 +165,7 @@ export class Project extends ProjectPrimitiveData implements SaveableAPIObject {
         }
     }
 
-    static readonly EDITABLE_FIELDS: (keyof ProjectPrimitiveData)[] = [
+    static readonly EDITABLE_FIELDS: (keyof ProjectCoreData)[] = [
         'name',
         'visible_to_students',
         'closing_time',
