@@ -65,12 +65,12 @@ class ProjectCoreData {
     }
 }
 
-interface ProjectCtor extends ProjectCoreData {
+interface ProjectCtorArgs extends ProjectCoreData {
     instructor_files?: InstructorFileData[];
     expected_student_files: ExpectedStudentFileData[];
 }
 
-export interface ProjectData extends ProjectCtor {
+export interface ProjectData extends ProjectCtorArgs {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
@@ -91,7 +91,7 @@ export class Project extends ProjectCoreData implements SaveableAPIObject {
     instructor_files?: InstructorFile[];
     expected_student_files: ExpectedStudentFile[];
 
-    constructor(args: ProjectCtor) {
+    constructor(args: ProjectCtorArgs) {
         super(args);
 
         if (args.instructor_files !== undefined) {
