@@ -9,6 +9,11 @@ export function filter_keys<T, Key extends keyof T>(data: T, include_keys: Key[]
 // A wrapper around Object.assign that adds type checking to enforce
 // that "to" is a derived class of "from".
 // Also limits "from" to a single value.
+// BEWARE: TYPESCRIPT HAS COVARIANT ARRAYS. You may need to add a private member variable
+// to your classes if you want them to behave like nominal types. For example:
+//      class Spam {
+//          private _spam_brand: unknown;
+//      }
 export function safe_assign<ToType extends FromType, FromType>(to: ToType, from: FromType) {
     Object.assign(to, from);
 }
