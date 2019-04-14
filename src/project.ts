@@ -233,56 +233,31 @@ export class NewProjectData {
     ultimate_submission_policy?: UltimateSubmissionPolicy;
     hide_ultimate_submission_fdbk?: boolean;
 
-    constructor({
-        name,
-        visible_to_students,
-        closing_time,
-        soft_closing_time,
-        disallow_student_submissions,
-        disallow_group_registration,
-        guests_can_submit,
-        min_group_size,
-        max_group_size,
+    constructor(args: NewProjectData) {
+        this.name = args.name;
+        this.visible_to_students = args.visible_to_students;
+        this.closing_time = args.closing_time;
+        this.soft_closing_time = args.soft_closing_time;
+        this.disallow_student_submissions = args.disallow_student_submissions;
+        this.disallow_group_registration = args.disallow_group_registration;
+        this.guests_can_submit = args.guests_can_submit;
+        this.min_group_size = args.min_group_size;
+        this.max_group_size = args.max_group_size;
 
-        submission_limit_per_day,
-        allow_submissions_past_limit,
-        groups_combine_daily_submissions,
-        submission_limit_reset_time,
-        submission_limit_reset_timezone,
+        this.submission_limit_per_day = args.submission_limit_per_day;
+        this.allow_submissions_past_limit = args.allow_submissions_past_limit;
+        this.groups_combine_daily_submissions = args.groups_combine_daily_submissions;
+        this.submission_limit_reset_time = args.submission_limit_reset_time;
+        this.submission_limit_reset_timezone = args.submission_limit_reset_timezone;
 
-        num_bonus_submissions,
+        this.num_bonus_submissions = args.num_bonus_submissions;
 
-        total_submission_limit,
+        this.total_submission_limit = args.total_submission_limit;
 
-        allow_late_days,
+        this.allow_late_days = args.allow_late_days;
 
-        ultimate_submission_policy,
-        hide_ultimate_submission_fdbk,
-    }: NewProjectData) {
-        this.name = name;
-        this.visible_to_students = visible_to_students;
-        this.closing_time = closing_time;
-        this.soft_closing_time = soft_closing_time;
-        this.disallow_student_submissions = disallow_student_submissions;
-        this.disallow_group_registration = disallow_group_registration;
-        this.guests_can_submit = guests_can_submit;
-        this.min_group_size = min_group_size;
-        this.max_group_size = max_group_size;
-
-        this.submission_limit_per_day = submission_limit_per_day;
-        this.allow_submissions_past_limit = allow_submissions_past_limit;
-        this.groups_combine_daily_submissions = groups_combine_daily_submissions;
-        this.submission_limit_reset_time = submission_limit_reset_time;
-        this.submission_limit_reset_timezone = submission_limit_reset_timezone;
-
-        this.num_bonus_submissions = num_bonus_submissions;
-
-        this.total_submission_limit = total_submission_limit;
-
-        this.allow_late_days = allow_late_days;
-
-        this.ultimate_submission_policy = ultimate_submission_policy;
-        this.hide_ultimate_submission_fdbk = hide_ultimate_submission_fdbk;
+        this.ultimate_submission_policy = args.ultimate_submission_policy;
+        this.hide_ultimate_submission_fdbk = args.hide_ultimate_submission_fdbk;
     }
 }
 
