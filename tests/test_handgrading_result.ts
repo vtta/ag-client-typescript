@@ -3,7 +3,7 @@ import {
     Comment,
     Course, Criterion, CriterionResult, ExpectedStudentFile, Group,
     HandgradingResult, HandgradingResultObserver,
-    HandgradingRubric,
+    HandgradingRubric, HandgradingRubricData, PointsStyle,
     Project
 } from '..';
 
@@ -86,6 +86,46 @@ afterEach(() => {
 describe('List/create handgrading result tests', () => {
     test('Handgrading result ctor', () => {
         let now = (new Date()).toISOString();
+        let annotations = [
+            new Annotation({
+                pk: 2,
+                handgrading_rubric: handgrading_rubric.pk,
+                short_description: "short1",
+                long_description: "long1",
+                deduction: -1,
+                max_deduction: -1,
+                last_modified: now,
+            }),
+            new Annotation({
+                pk: 2,
+                handgrading_rubric: handgrading_rubric.pk,
+                short_description: "short2",
+                long_description: "long2",
+                deduction: -2,
+                max_deduction: -2,
+                last_modified: now,
+            })
+        ];
+
+        let criteria = [
+            new Criterion({
+                pk: 1,
+                handgrading_rubric: handgrading_rubric.pk,
+                last_modified: now,
+                short_description: "short",
+                long_description: "long",
+                points: 7,
+            }),
+            new Criterion({
+                pk: 2,
+                handgrading_rubric: handgrading_rubric.pk,
+                last_modified: now,
+                short_description: "short2",
+                long_description: "long2",
+                points: 5,
+            })
+        ];
+
         let applied_annotations = [
             // Should work with AppliedAnnotationData and AppliedAnnotation
             {
@@ -98,15 +138,7 @@ describe('List/create handgrading result tests', () => {
                     filename: 'file1.txt',
                     last_modified: now,
                 },
-                annotation: new Annotation({
-                    pk: 2,
-                    handgrading_rubric: handgrading_rubric.pk,
-                    short_description: "short1",
-                    long_description: "long1",
-                    deduction: -1,
-                    max_deduction: -1,
-                    last_modified: now,
-                }),
+                annotation: annotations[0],
                 handgrading_result: 22,
             },
             // Should work with AppliedAnnotationData and AppliedAnnotation
@@ -120,15 +152,7 @@ describe('List/create handgrading result tests', () => {
                     filename: 'file1.txt',
                     last_modified: now,
                 },
-                annotation: new Annotation({
-                    pk: 2,
-                    handgrading_rubric: handgrading_rubric.pk,
-                    short_description: "short2",
-                    long_description: "long2",
-                    deduction: -2,
-                    max_deduction: -2,
-                    last_modified: now,
-                }),
+                annotation: annotations[1],
                 handgrading_result: 22,
             })
         ];
@@ -139,14 +163,7 @@ describe('List/create handgrading result tests', () => {
                 pk: 1,
                 last_modified: now,
                 selected: false,
-                criterion: new Criterion({
-                    pk: 1,
-                    handgrading_rubric: handgrading_rubric.pk,
-                    last_modified: now,
-                    short_description: "short",
-                    long_description: "long",
-                    points: 7,
-                }),
+                criterion: criteria[0],
                 handgrading_result: 22,
             },
             // Should work with CriterionResultData and CriterionResult
@@ -154,14 +171,7 @@ describe('List/create handgrading result tests', () => {
                 pk: 2,
                 last_modified: now,
                 selected: true,
-                criterion: new Criterion({
-                    pk: 2,
-                    handgrading_rubric: handgrading_rubric.pk,
-                    last_modified: now,
-                    short_description: "short2",
-                    long_description: "long2",
-                    points: 5,
-                }),
+                criterion: criteria[1],
                 handgrading_result: 22,
             })
         ];
@@ -195,11 +205,24 @@ describe('List/create handgrading result tests', () => {
             })
         ];
 
+        let handgrading_rubric_data = {
+            pk: 1,
+            project: 1,
+            last_modified: now,
+            points_style: PointsStyle.start_at_zero_and_add,
+            max_points: null,
+            show_grades_and_rubric_to_students: false,
+            handgraders_can_leave_comments: false,
+            handgraders_can_adjust_points: false,
+            criteria: criteria,
+            annotations: annotations
+        };
+
         let handgrading_result = new HandgradingResult({
             pk: 22,
             last_modified: now,
             submission: 2,
-            handgrading_rubric: handgrading_rubric,
+            handgrading_rubric: handgrading_rubric_data,
             group: 2,
             applied_annotations: applied_annotations,
             comments: comments,

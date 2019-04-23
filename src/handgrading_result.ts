@@ -1,8 +1,8 @@
-import { AppliedAnnotation } from './applied_annotation';
+import { AppliedAnnotation, AppliedAnnotationData } from './applied_annotation';
 import { SaveableAPIObject } from "./base";
-import { Comment } from "./comment";
-import { CriterionResult } from './criterion_result';
-import { HandgradingRubric } from './handgrading_rubric';
+import { Comment, CommentData } from "./comment";
+import { CriterionResult, CriterionResultData } from './criterion_result';
+import { HandgradingRubric, HandgradingRubricData } from './handgrading_rubric';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
@@ -31,10 +31,10 @@ export class HandgradingResultCoreData {
 }
 
 interface HandgradingResultCtorArgs extends HandgradingResultCoreData {
-    handgrading_rubric: HandgradingRubric;
-    applied_annotations: AppliedAnnotation[];
-    comments: Comment[];
-    criterion_results: CriterionResult[];
+    handgrading_rubric: HandgradingRubricData;
+    applied_annotations: AppliedAnnotationData[];
+    comments: CommentData[];
+    criterion_results: CriterionResultData[];
 }
 
 export interface HandgradingResultData extends HandgradingResultCtorArgs {
@@ -64,7 +64,7 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
     constructor(args: HandgradingResultCtorArgs) {
         super(args);
 
-        this.handgrading_rubric = args.handgrading_rubric;
+        this.handgrading_rubric = new HandgradingRubric(args.handgrading_rubric);
         this.applied_annotations = args.applied_annotations.map(
             item => new AppliedAnnotation(item));
         this.comments = args.comments.map(item => new Comment(item));

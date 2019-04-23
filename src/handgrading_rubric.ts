@@ -1,6 +1,6 @@
-import { Annotation } from './annotation';
+import { Annotation, AnnotationData } from './annotation';
 import { Deletable, SaveableAPIObject } from "./base";
-import { Criterion } from './criterion';
+import { Criterion, CriterionData } from './criterion';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
@@ -27,8 +27,8 @@ export class HandgradingRubricCoreData {
 }
 
 interface HandgradingRubricCtorArgs extends HandgradingRubricCoreData {
-    criteria: Criterion[];
-    annotations: Annotation[];
+    criteria: CriterionData[];
+    annotations: AnnotationData[];
 }
 
 export interface HandgradingRubricData extends HandgradingRubricCtorArgs {

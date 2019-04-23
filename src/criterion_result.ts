@@ -1,5 +1,5 @@
 import { Deletable, SaveableAPIObject } from "./base";
-import { Criterion } from './criterion';
+import { Criterion, CriterionData } from './criterion';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
@@ -18,7 +18,7 @@ export class CriterionResultCoreData {
 }
 
 interface CriterionResultCtorArgs extends CriterionResultCoreData {
-    criterion: Criterion;
+    criterion: CriterionData;
 }
 
 export interface CriterionResultData extends CriterionResultCtorArgs {
@@ -44,7 +44,7 @@ export class CriterionResult extends CriterionResultCoreData implements Saveable
 
     constructor(args: CriterionResultCtorArgs) {
         super(args);
-        this.criterion = args.criterion;
+        this.criterion = new Criterion(args.criterion);
     }
 
     private static _subscribers = new Set<CriterionResultObserver>();
