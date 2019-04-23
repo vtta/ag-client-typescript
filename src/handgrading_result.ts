@@ -1,54 +1,47 @@
 import { AppliedAnnotation } from './applied_annotation';
 import { SaveableAPIObject } from "./base";
+import { Comment } from "./comment";
 import { CriterionResult } from './criterion_result';
 import { HandgradingRubric } from './handgrading_rubric';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
-export class HandgradingResultData {
+export class HandgradingResultCoreData {
     pk: number;
     last_modified: string;
     submission: number;
-    handgrading_rubric: HandgradingRubric;
     group: number;
-    applied_annotations: AppliedAnnotation[];
-    comments: Comment[];
-    criterion_results: CriterionResult[];
     finished_grading: boolean;
     points_adjustment: number;
     submitted_filenames: string[];
     total_points: number;
     total_points_possible: number;
 
-    constructor({
-        pk,
-        last_modified,
-        submission,
-        handgrading_rubric,
-        group,
-        applied_annotations,
-        comments,
-        criterion_results,
-        finished_grading,
-        points_adjustment,
-        submitted_filenames,
-        total_points,
-        total_points_possible,
-    }: HandgradingResultData) {
-        this.pk = pk;
-        this.last_modified = last_modified;
-        this.submission = submission;
-        this.handgrading_rubric = handgrading_rubric;
-        this.group = group;
-        this.applied_annotations = applied_annotations;
-        this.comments = comments;
-        this.criterion_results = criterion_results;
-        this.finished_grading = finished_grading;
-        this.points_adjustment = points_adjustment;
-        this.submitted_filenames = submitted_filenames;
-        this.total_points = total_points;
-        this.total_points_possible = total_points_possible;
+    constructor(args: HandgradingResultCoreData) {
+        this.pk = args.pk;
+        this.last_modified = args.last_modified;
+        this.submission = args.submission;
+        this.group = args.group;
+        this.finished_grading = args.finished_grading;
+        this.points_adjustment = args.points_adjustment;
+        this.submitted_filenames = args.submitted_filenames;
+        this.total_points = args.total_points;
+        this.total_points_possible = args.total_points_possible;
     }
+}
+
+interface HandgradingResultCtorArgs extends HandgradingResultCoreData {
+    handgrading_rubric: HandgradingRubric;
+    applied_annotations: AppliedAnnotation[];
+    comments: Comment[];
+    criterion_results: CriterionResult[];
+}
+
+export interface HandgradingResultData extends HandgradingResultCtorArgs {
+    // Typescript hack for nominal typing.
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    _handgrading_result_data_brand: unknown;
 }
 
 export interface HandgradingResultObserver {
@@ -57,7 +50,27 @@ export interface HandgradingResultObserver {
     update_handgrading_result_deleted(handgrading_result: HandgradingResult): void;
 }
 
-export class HandgradingResult extends HandgradingResultData implements SaveableAPIObject {
+export class HandgradingResult extends HandgradingResultCoreData implements SaveableAPIObject {
+    // Typescript hack for nominal typing.
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    private _handgrading_result_brand: unknown;
+
+    handgrading_rubric: HandgradingRubric;
+    applied_annotations: AppliedAnnotation[];
+    comments: Comment[];
+    criterion_results: CriterionResult[];
+
+    constructor(args: HandgradingResultCtorArgs) {
+        super(args);
+
+        this.handgrading_rubric = args.handgrading_rubric;
+        this.applied_annotations = args.applied_annotations.map(
+            item => new AppliedAnnotation(item));
+        this.comments = args.comments.map(item => new Comment(item));
+        this.criterion_results = args.criterion_results.map(item => new CriterionResult(item));
+    }
+
     private static _subscribers = new Set<HandgradingResultObserver>();
 
     static subscribe(observer: HandgradingResultObserver) {
@@ -91,8 +104,7 @@ export class HandgradingResult extends HandgradingResultData implements Saveable
 
     static async get_or_create(group_pk: number): Promise<HandgradingResult> {
         let response = await HttpClient.get_instance().post<HandgradingResultData>(
-            `/groups/${group_pk}/handgrading_result/`,
-            {}
+            `/groups/${group_pk}/handgrading_result/`, {}
         );
 
         let result = new HandgradingResult(response.data);
@@ -125,7 +137,7 @@ export class HandgradingResult extends HandgradingResultData implements Saveable
             filter_keys(this, HandgradingResult.EDITABLE_FIELDS)
         );
 
-        safe_assign(this, response.data);
+        safe_assign(this, new HandgradingResult(response.data));
         HandgradingResult.notify_handgrading_result_changed(this);
     }
 
@@ -135,7 +147,7 @@ export class HandgradingResult extends HandgradingResultData implements Saveable
             `/groups/${this.group}/handgrading_result/`
         );
 
-        safe_assign(this, response.data);
+        safe_assign(this, new HandgradingResult(response.data));
         if (last_modified !== this.last_modified) {
             HandgradingResult.notify_handgrading_result_changed(this);
         }
@@ -147,7 +159,7 @@ export class HandgradingResult extends HandgradingResultData implements Saveable
         }
     }
 
-    static readonly EDITABLE_FIELDS: (keyof HandgradingResultData)[] = [
+    static readonly EDITABLE_FIELDS: (keyof HandgradingResultCoreData)[] = [
         'finished_grading',
         'points_adjustment',
     ];
@@ -166,22 +178,14 @@ export class GroupHandgradingResultSummary {
     project: number;
     pk: number;
 
-    constructor({
-        extended_due_date,
-        handgrading_result,
-        member_names,
-        num_submissions,
-        num_submits_towards_limit,
-        project,
-        pk,
-    }: GroupHandgradingResultSummary) {
-        this.extended_due_date = extended_due_date;
-        this.handgrading_result = handgrading_result;
-        this.member_names = member_names;
-        this.num_submissions = num_submissions;
-        this.num_submits_towards_limit = num_submits_towards_limit;
-        this.project = project;
-        this.pk = pk;
+    constructor(args: GroupHandgradingResultSummary) {
+        this.extended_due_date = args.extended_due_date;
+        this.handgrading_result = args.handgrading_result;
+        this.member_names = args.member_names;
+        this.num_submissions = args.num_submissions;
+        this.num_submits_towards_limit = args.num_submits_towards_limit;
+        this.project = args.project;
+        this.pk = args.pk;
     }
 }
 
@@ -191,15 +195,10 @@ export class SubmissionGroupHandgradingInfo {
     previous: string;
     results: GroupHandgradingResultSummary[];
 
-    constructor({
-        count,
-        next,
-        previous,
-        results
-    }: SubmissionGroupHandgradingInfo) {
-        this.count = count;
-        this.next = next;
-        this.previous = previous;
-        this.results = results;
+    constructor(args: SubmissionGroupHandgradingInfo) {
+        this.count = args.count;
+        this.next = args.next;
+        this.previous = args.previous;
+        this.results = args.results;
     }
 }

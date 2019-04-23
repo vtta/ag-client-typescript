@@ -32,17 +32,11 @@ let criterion!: Criterion;
 class TestObserver implements CriterionResultObserver {
     criterion_result: CriterionResult | null = null;
 
-    created_count = 0;
     changed_count = 0;
     deleted_count = 0;
 
     update_criterion_result_changed(criterion_result: CriterionResult): void {
         this.changed_count += 1;
-        this.criterion_result = criterion_result;
-    }
-
-    update_criterion_result_created(criterion_result: CriterionResult): void {
-        this.created_count += 1;
         this.criterion_result = criterion_result;
     }
 
@@ -130,62 +124,116 @@ CriterionResult.objects.validate_and_create(handgrading_result=result, selected=
             (criterion_result) => criterion_result.selected);
         expect(actual_selected.sort()).toEqual([false, true, true]);
     });
+});
 
-    test('Create criterion result only required fields', async () => {
-        let created = await CriterionResult.create(
-            project.pk, {criterion: criterion.pk, selected: false});
+describe('Get/update/delete criterion result tests', () => {
+    let criterion_result!: CriterionResult;
 
-        let loaded = await CriterionResult.get_all_from_handgrading_result(handgrading_result.pk);
-        expect(loaded.length).toEqual(1);
-        let actual = loaded[0];
+    /** NOTE: This assumes pks are assigned sequentially, and so CriterionResult with pk=1
+     *  exists (since once Criterion was created in beforeAll method, a matching CriterionResult
+     *  would be created)
+     */
+    let criterion_result_pk: number = 1;
 
-        expect(created).toEqual(actual);
+    test('Get criterion result', async () => {
+        /* Since create method isn't available, we create a CriterionResult manually and only check
+             "important" fields */
+        let now = (new Date()).toISOString();
+        criterion_result = new CriterionResult({
+            pk: 1,
+            last_modified: now,
+            selected: false,
+            criterion: criterion,
+            handgrading_result: handgrading_result.pk,
+        });
 
-        expect(actual.criterion).toEqual(criterion);
-        expect(actual.selected).toEqual(false);
+        let loaded = await CriterionResult.get_by_pk(criterion_result.pk);
+        expect(loaded.pk).toEqual(criterion_result.pk);
+        expect(loaded.selected).toEqual(criterion_result.selected);
+        expect(loaded.criterion).toEqual(criterion_result);
+        expect(loaded.handgrading_result).toEqual(criterion_result.handgrading_result);
+    });
 
-        expect(observer.criterion_result).toEqual(actual);
-        expect(observer.created_count).toEqual(1);
-        expect(observer.changed_count).toEqual(0);
+    test('Update criterion result', async () => {
+        criterion_result = await CriterionResult.get_by_pk(criterion_result_pk);
+
+        let old_timestamp = criterion_result.last_modified;
+        criterion_result.selected = false;
+
+        await sleep(1);
+        await criterion_result.save();
+
+        let loaded = await CriterionResult.get_by_pk(criterion_result.pk);
+        expect(loaded.selected).toEqual(false);
+        expect_dates_not_equal(loaded.last_modified, old_timestamp);
+
+        expect(criterion_result).toEqual(loaded);
+
+        expect(observer.criterion_result).toEqual(loaded);
+        expect(observer.changed_count).toEqual(1);
         expect(observer.deleted_count).toEqual(0);
     });
 
-    test('Create criterion result all fields', async () => {
-        let created = await CriterionResult.create(
-            handgrading_result.pk,
-            new NewCriterionResultData({
-                criterion: criterion.pk,
-                selected: true,
-            })
-        );
+    test('Editable fields', () => {
+        do_editable_fields_test(
+            CriterionResult, 'CriterionResult', 'autograder.handgrading.models');
+    });
 
-        let loaded = await CriterionResult.get_all_from_handgrading_result(handgrading_result.pk);
-        expect(loaded.length).toEqual(1);
-        let actual = loaded[0];
+    test('Refresh criterion result', async () => {
+        criterion_result = await CriterionResult.get_by_pk(criterion_result_pk);
 
-        expect(created).toEqual(actual);
+        let old_timestamp = criterion_result.last_modified;
+        await sleep(1);
 
-        expect(actual.criterion).toEqual(criterion);
-        expect(actual.selected).toEqual(true);
-
-        expect(observer.criterion_result).toEqual(actual);
-        expect(observer.created_count).toEqual(1);
+        await criterion_result.refresh();
+        expect_dates_equal(criterion_result.last_modified, old_timestamp);
+        expect(observer.criterion_result).toEqual(criterion_result);
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
+
+        let change_criterion_result = `
+from autograder.handgrading.models import CriterionResult
+
+criterion_result = CriterionResult.objects.get(pk=${criterion_result.pk})
+criterion_result.validate_and_update(selected=True)
+        `;
+        run_in_django_shell(change_criterion_result);
+
+        await criterion_result.refresh();
+
+        expect(criterion_result.selected).toEqual(true);
+        expect_dates_not_equal(criterion_result.last_modified, old_timestamp);
+
+        expect(observer.criterion_result).toEqual(criterion_result);
+        expect(observer.changed_count).toEqual(1);
+        expect(observer.deleted_count).toEqual(0);
+    });
+
+    test('Delete criterion result', async () => {
+        criterion_result = await CriterionResult.get_by_pk(criterion_result_pk);
+        await criterion_result.delete();
+
+        expect(observer.criterion_result).toBeNull();
+        expect(observer.changed_count).toEqual(0);
+        expect(observer.deleted_count).toEqual(1);
+
+        let loaded_list = await CriterionResult.get_all_from_handgrading_result(
+            handgrading_result.pk);
+        expect(loaded_list.length).toEqual(0);
     });
 
     test('Unsubscribe', async () => {
-        let criterion_result = await CriterionResult.create(
-            handgrading_result.pk, {criterion: criterion.pk});
+        criterion_result = await CriterionResult.get_by_pk(criterion_result_pk);
 
         expect(observer.criterion_result).toEqual(criterion_result);
-        expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
+        expect(observer.deleted_count).toEqual(0);
 
         CriterionResult.unsubscribe(observer);
 
         await criterion_result.save();
-        expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
+        expect(observer.deleted_count).toEqual(0);
     });
 });
+

@@ -4,7 +4,7 @@ import { Criterion } from './criterion';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
-export class HandgradingRubricData {
+export class HandgradingRubricCoreData {
     pk: number;
     project: number;
     last_modified: string;
@@ -13,32 +13,29 @@ export class HandgradingRubricData {
     show_grades_and_rubric_to_students: boolean;
     handgraders_can_leave_comments: boolean;
     handgraders_can_adjust_points: boolean;
+
+    constructor(args: HandgradingRubricCoreData) {
+        this.pk = args.pk;
+        this.project = args.project;
+        this.last_modified = args.last_modified;
+        this.points_style = args.points_style;
+        this.max_points = args.max_points;
+        this.show_grades_and_rubric_to_students = args.show_grades_and_rubric_to_students;
+        this.handgraders_can_leave_comments = args.handgraders_can_leave_comments;
+        this.handgraders_can_adjust_points = args.handgraders_can_adjust_points;
+    }
+}
+
+interface HandgradingRubricCtorArgs extends HandgradingRubricCoreData {
     criteria: Criterion[];
     annotations: Annotation[];
+}
 
-    constructor({
-        pk,
-        project,
-        last_modified,
-        points_style,
-        max_points,
-        show_grades_and_rubric_to_students,
-        handgraders_can_leave_comments,
-        handgraders_can_adjust_points,
-        criteria,
-        annotations,
-    }: HandgradingRubricData) {
-        this.pk = pk;
-        this.project = project;
-        this.last_modified = last_modified;
-        this.points_style = points_style;
-        this.max_points = max_points;
-        this.show_grades_and_rubric_to_students = show_grades_and_rubric_to_students;
-        this.handgraders_can_leave_comments = handgraders_can_leave_comments;
-        this.handgraders_can_adjust_points = handgraders_can_adjust_points;
-        this.criteria = criteria;
-        this.annotations = annotations;
-    }
+export interface HandgradingRubricData extends HandgradingRubricCtorArgs {
+    // Typescript hack for nominal typing.
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    _handgrading_rubric_data_brand: unknown;
 }
 
 export interface HandgradingRubricObserver {
@@ -47,8 +44,22 @@ export interface HandgradingRubricObserver {
     update_handgrading_rubric_deleted(handgrading_rubric: HandgradingRubric): void;
 }
 
-export class HandgradingRubric extends HandgradingRubricData implements SaveableAPIObject,
-    Deletable {
+export class HandgradingRubric extends HandgradingRubricCoreData implements SaveableAPIObject,
+                                                                            Deletable {
+    // Typescript hack for nominal typing.
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    private _handgrading_rubric_brand: unknown;
+
+    criteria: Criterion[];
+    annotations: Annotation[];
+
+    constructor(args: HandgradingRubricCtorArgs) {
+        super(args);
+        this.criteria = args.criteria.map(item => new Criterion(item));
+        this.annotations = args.annotations.map(item => new Annotation(item));
+    }
+
     private static _subscribers = new Set<HandgradingRubricObserver>();
 
     static subscribe(observer: HandgradingRubricObserver) {
@@ -96,7 +107,7 @@ export class HandgradingRubric extends HandgradingRubricData implements Saveable
             filter_keys(this, HandgradingRubric.EDITABLE_FIELDS)
         );
 
-        safe_assign(this, response.data);
+        safe_assign(this, new HandgradingRubric(response.data));
         HandgradingRubric.notify_handgrading_rubric_changed(this);
     }
 
@@ -105,7 +116,7 @@ export class HandgradingRubric extends HandgradingRubricData implements Saveable
         let response = await HttpClient.get_instance().get<HandgradingRubricData>(
             `/handgrading_rubrics/${this.pk}/`
         );
-        safe_assign(this, response.data);
+        safe_assign(this, new HandgradingRubric(response.data));
 
         if (last_modified !== this.last_modified) {
             HandgradingRubric.notify_handgrading_rubric_changed(this);
@@ -131,7 +142,7 @@ export class HandgradingRubric extends HandgradingRubricData implements Saveable
         }
     }
 
-    static readonly EDITABLE_FIELDS: (keyof HandgradingRubricData)[] = [
+    static readonly EDITABLE_FIELDS: (keyof HandgradingRubricCoreData)[] = [
         'points_style',
         'max_points',
         'show_grades_and_rubric_to_students',

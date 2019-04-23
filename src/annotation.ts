@@ -11,22 +11,14 @@ export class AnnotationData {
     max_deduction: number | null;
     last_modified: string;
 
-    constructor({
-        pk,
-        handgrading_rubric,
-        short_description,
-        long_description,
-        deduction,
-        max_deduction,
-        last_modified,
-    }: AnnotationData) {
-        this.pk = pk;
-        this.handgrading_rubric = handgrading_rubric;
-        this.short_description = short_description;
-        this.long_description = long_description;
-        this.deduction = deduction;
-        this.max_deduction = max_deduction;
-        this.last_modified = last_modified;
+    constructor(args: AnnotationData) {
+        this.pk = args.pk;
+        this.handgrading_rubric = args.handgrading_rubric;
+        this.short_description = args.short_description;
+        this.long_description = args.long_description;
+        this.deduction = args.deduction;
+        this.max_deduction = args.max_deduction;
+        this.last_modified = args.last_modified;
     }
 }
 
@@ -158,15 +150,10 @@ export class NewAnnotationData {
     deduction?: number;
     max_deduction?: number;
 
-    constructor({
-        short_description,
-        long_description,
-        deduction,
-        max_deduction,
-    }: NewAnnotationData) {
-        this.short_description = short_description;
-        this.long_description = long_description;
-        this.deduction = deduction;
-        this.max_deduction = max_deduction;
+    constructor(args: NewAnnotationData) {
+        this.short_description = args.short_description;
+        this.long_description = args.long_description;
+        this.deduction = args.deduction;
+        this.max_deduction = args.max_deduction;
     }
 }

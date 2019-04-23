@@ -86,54 +86,114 @@ afterEach(() => {
 describe('List/create handgrading result tests', () => {
     test('Handgrading result ctor', () => {
         let now = (new Date()).toISOString();
-        let applied_annotation = new AppliedAnnotation({
-            pk: 1,
-            last_modified: now,
-            location: {
+        let applied_annotations = [
+            // Should work with AppliedAnnotationData and AppliedAnnotation
+            {
                 pk: 1,
-                first_line: 2,
-                last_line: 3,
-                filename: 'file1.txt',
-            },
-            annotation: new Annotation({
-                pk: 1,
-                handgrading_rubric: handgrading_rubric.pk,
-                short_description: "short",
-                long_description: "long",
-                deduction: -1,
-                max_deduction: -1,
                 last_modified: now,
-            }),
-            handgrading_result: 22,
-        });
-
-        let criterion_result = new CriterionResult({
-            pk: 1,
-            last_modified: now,
-            selected: false,
-            criterion: new Criterion({
-                pk: 1,
-                handgrading_rubric: handgrading_rubric.pk,
-                last_modified: now,
-                short_description: "short",
-                long_description: "long",
-                points: 7,
-            }),
-            handgrading_result: 22,
-        });
-
-        let comment: Comment = new Comment({
-            pk: 1,
-            last_modified: now,
-            location: {
-                pk: 1,
-                first_line: 2,
-                last_line: 3,
-                filename: 'file1.txt',
+                location: {
+                    pk: 2,
+                    first_line: 3,
+                    last_line: 4,
+                    filename: 'file1.txt',
+                    last_modified: now,
+                },
+                annotation: new Annotation({
+                    pk: 2,
+                    handgrading_rubric: handgrading_rubric.pk,
+                    short_description: "short1",
+                    long_description: "long1",
+                    deduction: -1,
+                    max_deduction: -1,
+                    last_modified: now,
+                }),
+                handgrading_result: 22,
             },
-            text: "sample comment",
-            handgrading_result: 22,
-        });
+            // Should work with AppliedAnnotationData and AppliedAnnotation
+            new AppliedAnnotation({
+                pk: 2,
+                last_modified: now,
+                location: {
+                    pk: 2,
+                    first_line: 2,
+                    last_line: 3,
+                    filename: 'file1.txt',
+                    last_modified: now,
+                },
+                annotation: new Annotation({
+                    pk: 2,
+                    handgrading_rubric: handgrading_rubric.pk,
+                    short_description: "short2",
+                    long_description: "long2",
+                    deduction: -2,
+                    max_deduction: -2,
+                    last_modified: now,
+                }),
+                handgrading_result: 22,
+            })
+        ];
+
+        let criterion_results = [
+            // Should work with CriterionResultData and CriterionResult
+            {
+                pk: 1,
+                last_modified: now,
+                selected: false,
+                criterion: new Criterion({
+                    pk: 1,
+                    handgrading_rubric: handgrading_rubric.pk,
+                    last_modified: now,
+                    short_description: "short",
+                    long_description: "long",
+                    points: 7,
+                }),
+                handgrading_result: 22,
+            },
+            // Should work with CriterionResultData and CriterionResult
+            new CriterionResult({
+                pk: 2,
+                last_modified: now,
+                selected: true,
+                criterion: new Criterion({
+                    pk: 2,
+                    handgrading_rubric: handgrading_rubric.pk,
+                    last_modified: now,
+                    short_description: "short2",
+                    long_description: "long2",
+                    points: 5,
+                }),
+                handgrading_result: 22,
+            })
+        ];
+
+        let comments = [
+            // Should work with CommentData and Comment
+            {
+                pk: 1,
+                last_modified: now,
+                location: {
+                    pk: 1,
+                    first_line: 2,
+                    last_line: 3,
+                    filename: 'file1.txt',
+                },
+                text: "sample comment",
+                handgrading_result: 22,
+            },
+            // Should work with CommentData and Comment
+            new Comment({
+                pk: 2,
+                last_modified: now,
+                location: {
+                    pk: 2,
+                    first_line: 3,
+                    last_line: 4,
+                    filename: 'file1.txt',
+                },
+                text: "sample comment 2",
+                handgrading_result: 22,
+            })
+        ];
 
         let handgrading_result = new HandgradingResult({
             pk: 22,
@@ -141,9 +201,9 @@ describe('List/create handgrading result tests', () => {
             submission: 2,
             handgrading_rubric: handgrading_rubric,
             group: 2,
-            applied_annotations: [applied_annotation],
-            comments: [comment],
-            criterion_results: [criterion_result],
+            applied_annotations: applied_annotations,
+            comments: comments,
+            criterion_results: criterion_results,
             finished_grading: false,
             points_adjustment: 0,
             submitted_filenames: ['file1.txt'],
@@ -156,14 +216,17 @@ describe('List/create handgrading result tests', () => {
         expect(handgrading_result.submission).toEqual(2);
         expect(handgrading_result.handgrading_rubric).toEqual(handgrading_rubric);
         expect(handgrading_result.group).toEqual(2);
-        expect(handgrading_result.applied_annotations).toEqual([applied_annotation]);
-        expect(handgrading_result.comments).toEqual([comment]);
-        expect(handgrading_result.criterion_results).toEqual([criterion_result]);
         expect(handgrading_result.finished_grading).toEqual(false);
         expect(handgrading_result.points_adjustment).toEqual(0);
         expect(handgrading_result.submitted_filenames).toEqual(['file1.txt']);
         expect(handgrading_result.total_points).toEqual(10);
         expect(handgrading_result.total_points_possible).toEqual(10);
+
+        expect(handgrading_result.applied_annotations).toEqual(
+            [new AppliedAnnotation(applied_annotations[0]), applied_annotations[1]]);
+        expect(handgrading_result.comments).toEqual([new Comment(comments[0]), comments[1]]);
+        expect(handgrading_result.criterion_results).toEqual(
+            [new CriterionResult(criterion_results[0]), criterion_results[1]]);
     });
 
     test('List handgrading results from project no next or previous', async () => {

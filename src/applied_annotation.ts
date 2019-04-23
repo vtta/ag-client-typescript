@@ -9,18 +9,12 @@ export class AppliedAnnotationData {
     annotation: Annotation;
     handgrading_result: number;
 
-    constructor({
-        pk,
-        last_modified,
-        location,
-        annotation,
-        handgrading_result,
-    }: AppliedAnnotationData) {
-        this.pk = pk;
-        this.last_modified = last_modified;
-        this.location = location;
-        this.annotation = annotation;
-        this.handgrading_result = handgrading_result;
+    constructor(args: AppliedAnnotationData) {
+        this.pk = args.pk;
+        this.last_modified = args.last_modified;
+        this.location = args.location;
+        this.annotation = args.annotation;
+        this.handgrading_result = args.handgrading_result;
     }
 }
 
@@ -90,12 +84,9 @@ export class NewAppliedAnnotationData {
     annotation: number;
     location: NewLocationData;
 
-    constructor({
-        annotation,
-        location
-    }: NewAppliedAnnotationData) {
-        this.annotation = annotation;
-        this.location = location;
+    constructor(args: NewAppliedAnnotationData) {
+        this.annotation = args.annotation;
+        this.location = args.location;
     }
 }
 
@@ -106,18 +97,12 @@ export class Location {
     filename: string;
     last_modified: string;
 
-    constructor({
-        pk,
-        first_line,
-        last_line,
-        filename,
-        last_modified
-    }: Location) {
-        this.pk = pk;
-        this.first_line = first_line;
-        this.last_line = last_line;
-        this.filename = filename;
-        this.last_modified = last_modified;
+    constructor(args: Location) {
+        this.pk = args.pk;
+        this.first_line = args.first_line;
+        this.last_line = args.last_line;
+        this.filename = args.filename;
+        this.last_modified = args.last_modified;
     }
 }
 
@@ -126,13 +111,9 @@ export class NewLocationData {
     last_line: number;
     filename: string;
 
-    constructor({
-        first_line,
-        last_line,
-        filename
-    }: NewLocationData) {
-        this.first_line = first_line;
-        this.last_line = last_line;
-        this.filename = filename;
+    constructor(args: NewLocationData) {
+        this.first_line = args.first_line;
+        this.last_line = args.last_line;
+        this.filename = args.filename;
     }
 }

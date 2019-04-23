@@ -3,36 +3,50 @@ import { Criterion } from './criterion';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
-export class CriterionResultData {
+export class CriterionResultCoreData {
     pk: number;
     last_modified: string;
     selected: boolean;
-    criterion: Criterion;
     handgrading_result: number;
 
-    constructor({
-        pk,
-        last_modified,
-        selected,
-        criterion,
-        handgrading_result,
-    }: CriterionResultData) {
-        this.pk = pk;
-        this.last_modified = last_modified;
-        this.selected = selected;
-        this.criterion = criterion;
-        this.handgrading_result = handgrading_result;
+    constructor(args: CriterionResultCoreData) {
+        this.pk = args.pk;
+        this.last_modified = args.last_modified;
+        this.selected = args.selected;
+        this.handgrading_result = args.handgrading_result;
     }
 }
 
+interface CriterionResultCtorArgs extends CriterionResultCoreData {
+    criterion: Criterion;
+}
+
+export interface CriterionResultData extends CriterionResultCtorArgs {
+    // Typescript hack for nominal typing.
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    _criterion_result_data_brand: unknown;
+}
+
 export interface CriterionResultObserver {
-    update_criterion_result_created(criterion_result: CriterionResult): void;
     update_criterion_result_changed(criterion_result: CriterionResult): void;
     update_criterion_result_deleted(criterion_result: CriterionResult): void;
 }
 
-export class CriterionResult extends CriterionResultData implements SaveableAPIObject,
-                                                                    Deletable {
+export class CriterionResult extends CriterionResultCoreData implements SaveableAPIObject,
+                                                                        Deletable {
+    // Typescript hack for nominal typing.
+    // See https://github.com/Microsoft/Typescript/issues/202
+    // and https://michalzalecki.com/nominal-typing-in-typescript/
+    private _criterion_result_brand: unknown;
+
+    criterion: Criterion;
+
+    constructor(args: CriterionResultCtorArgs) {
+        super(args);
+        this.criterion = args.criterion;
+    }
+
     private static _subscribers = new Set<CriterionResultObserver>();
 
     static subscribe(observer: CriterionResultObserver) {
@@ -58,30 +72,13 @@ export class CriterionResult extends CriterionResultData implements SaveableAPIO
         return new CriterionResult(response.data);
     }
 
-    static async create(handgrading_result_pk: number,
-                        data: NewCriterionResultData): Promise<CriterionResult> {
-        let response = await HttpClient.get_instance().post<CriterionResultData>(
-            `/handgrading_results/${handgrading_result_pk}/criterion_results/`,
-            data
-        );
-        let result = new CriterionResult(response.data);
-        CriterionResult.notify_criterion_result_created(result);
-        return result;
-    }
-
-    static notify_criterion_result_created(criterion_result: CriterionResult) {
-        for (let subscriber of CriterionResult._subscribers) {
-            subscriber.update_criterion_result_created(criterion_result);
-        }
-    }
-
     async save(): Promise<void> {
         let response = await HttpClient.get_instance().patch<CriterionResultData>(
             `/criterion_results/${this.pk}/`,
             filter_keys(this, CriterionResult.EDITABLE_FIELDS)
         );
 
-        safe_assign(this, response.data);
+        safe_assign(this, new CriterionResult(response.data));
         CriterionResult.notify_criterion_result_changed(this);
     }
 
@@ -91,7 +88,7 @@ export class CriterionResult extends CriterionResultData implements SaveableAPIO
             `/criterion_results/${this.pk}/`
         );
 
-        safe_assign(this, response.data);
+        safe_assign(this, new CriterionResult(response.data));
         if (last_modified !== this.last_modified) {
             CriterionResult.notify_criterion_result_changed(this);
         }
@@ -116,7 +113,7 @@ export class CriterionResult extends CriterionResultData implements SaveableAPIO
         }
     }
 
-    static readonly EDITABLE_FIELDS: (keyof CriterionResultData)[] = [
+    static readonly EDITABLE_FIELDS: (keyof CriterionResultCoreData)[] = [
         'selected',
     ];
 }
@@ -125,11 +122,8 @@ export class NewCriterionResultData {
     criterion?: number;
     selected?: boolean;
 
-    constructor({
-        criterion,
-        selected
-    }: NewCriterionResultData) {
-        this.criterion = criterion;
-        this.selected = selected;
+    constructor(args: NewCriterionResultData) {
+        this.criterion = args.criterion;
+        this.selected = args.selected;
     }
 }

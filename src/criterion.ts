@@ -10,20 +10,13 @@ export class CriterionData {
     long_description: string;
     points: number;
 
-    constructor({
-        pk,
-        handgrading_rubric,
-        last_modified,
-        short_description,
-        long_description,
-        points
-    }: CriterionData) {
-        this.pk = pk;
-        this.handgrading_rubric = handgrading_rubric;
-        this.last_modified = last_modified;
-        this.short_description = short_description;
-        this.long_description = long_description;
-        this.points = points;
+    constructor(args: CriterionData) {
+        this.pk = args.pk;
+        this.handgrading_rubric = args.handgrading_rubric;
+        this.last_modified = args.last_modified;
+        this.short_description = args.short_description;
+        this.long_description = args.long_description;
+        this.points = args.points;
     }
 }
 
@@ -153,13 +146,9 @@ export class NewCriterionData {
     long_description?: string;
     points?: number;
 
-    constructor({
-        short_description,
-        long_description,
-        points
-    }: NewCriterionData) {
-        this.short_description = short_description;
-        this.long_description = long_description;
-        this.points = points;
+    constructor(args: NewCriterionData) {
+        this.short_description = args.short_description;
+        this.long_description = args.long_description;
+        this.points = args.points;
     }
 }

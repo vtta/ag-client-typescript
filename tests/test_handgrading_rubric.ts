@@ -64,24 +64,49 @@ afterEach(() => {
 describe('List/create handgrading rubric tests', () => {
     test('Handgrading rubric ctor', () => {
         let now = (new Date()).toISOString();
-        let criterion = new Criterion({
-            pk: 3,
-            handgrading_rubric: 21,
-            last_modified: now,
-            short_description: "short1",
-            long_description: "long1",
-            points: 3,
-        });
+        let criteria = [
+            // Should work with CriterionData and Criterion
+            {
+                pk: 4,
+                handgrading_rubric: 21,
+                last_modified: now,
+                short_description: "short123",
+                long_description: "long123",
+                points: 21,
+            },
+            // Should work with CriterionData and Criterion
+            new Criterion({
+                pk: 3,
+                handgrading_rubric: 21,
+                last_modified: now,
+                short_description: "short1",
+                long_description: "long1",
+                points: 3,
+            })
+        ];
 
-        let annotation = new Annotation({
-            pk: 2,
-            handgrading_rubric: 21,
-            short_description: "short2",
-            long_description: "long2",
-            deduction: -2,
-            max_deduction: null,
-            last_modified: now,
-        });
+        let annotations = [
+            // Should work with AnnotationData and Annotation
+            {
+                pk: 2,
+                handgrading_rubric: 22,
+                short_description: "short321",
+                long_description: "long321",
+                deduction: -3,
+                max_deduction: -6,
+                last_modified: now,
+            },
+            // Should work with AnnotationData and Annotation
+            new Annotation({
+                pk: 2,
+                handgrading_rubric: 25,
+                short_description: "short2",
+                long_description: "long2",
+                deduction: -2,
+                max_deduction: null,
+                last_modified: now,
+            })
+        ];
 
         let handgrading_rubric = new HandgradingRubric({
             pk: 21,
@@ -92,8 +117,8 @@ describe('List/create handgrading rubric tests', () => {
             show_grades_and_rubric_to_students: false,
             handgraders_can_leave_comments: true,
             handgraders_can_adjust_points: true,
-            criteria: [criterion],
-            annotations: [annotation],
+            criteria: criteria,
+            annotations: annotations,
         });
 
         expect(handgrading_rubric.pk).toEqual(21);
@@ -105,22 +130,9 @@ describe('List/create handgrading rubric tests', () => {
         expect(handgrading_rubric.handgraders_can_leave_comments).toEqual(true);
         expect(handgrading_rubric.handgraders_can_adjust_points).toEqual(true);
 
-        expect(handgrading_rubric.criteria.length).toEqual(1);
-        expect(handgrading_rubric.criteria[0].pk).toEqual(3);
-        expect(handgrading_rubric.criteria[0].handgrading_rubric).toEqual(21);
-        expect(handgrading_rubric.criteria[0].last_modified).toEqual(now);
-        expect(handgrading_rubric.criteria[0].short_description).toEqual("short1");
-        expect(handgrading_rubric.criteria[0].long_description).toEqual("long1");
-        expect(handgrading_rubric.criteria[0].points).toEqual(3);
-
-        expect(handgrading_rubric.annotations.length).toEqual(1);
-        expect(handgrading_rubric.annotations[0].pk).toEqual(2);
-        expect(handgrading_rubric.annotations[0].handgrading_rubric).toEqual(21);
-        expect(handgrading_rubric.annotations[0].short_description).toEqual("short2");
-        expect(handgrading_rubric.annotations[0].long_description).toEqual("long2");
-        expect(handgrading_rubric.annotations[0].deduction).toEqual(-2);
-        expect(handgrading_rubric.annotations[0].max_deduction).toBeNull();
-        expect(handgrading_rubric.annotations[0].last_modified).toEqual(now);
+        expect(handgrading_rubric.criteria).toEqual([new Criterion(criteria[0]), criteria[1]]);
+        expect(handgrading_rubric.annotations).toEqual(
+            [new Annotation(annotations[0]), annotations[1]]);
     });
 
     test('Get handgrading rubric from project', async () => {

@@ -10,18 +10,12 @@ export class CommentData {
     text: string;
     handgrading_result: number;
 
-    constructor({
-        pk,
-        last_modified,
-        location,
-        text,
-        handgrading_result,
-    }: CommentData) {
-        this.pk = pk;
-        this.last_modified = last_modified;
-        this.location = location;
-        this.text = text;
-        this.handgrading_result = handgrading_result;
+    constructor(args: CommentData) {
+        this.pk = args.pk;
+        this.last_modified = args.last_modified;
+        this.location = args.location;
+        this.text = args.text;
+        this.handgrading_result = args.handgrading_result;
     }
 }
 
@@ -123,9 +117,8 @@ export class NewCommentData {
     text: string;
     location?: NewLocationData;
 
-    constructor({
-        text,
-    }: NewCommentData) {
-        this.text = text;
+    constructor(args: NewCommentData) {
+        this.text = args.text;
+        this.location = args.location;
     }
 }
