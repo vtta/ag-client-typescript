@@ -26,16 +26,27 @@ export class HandgradingRubricCoreData {
     }
 }
 
-interface HandgradingRubricCtorArgs extends HandgradingRubricCoreData {
+export class HandgradingRubricCtorArgs extends HandgradingRubricCoreData {
     criteria: CriterionData[];
     annotations: AnnotationData[];
+
+    constructor(args: HandgradingRubricCtorArgs) {
+        super(args);
+
+        this.criteria = args.criteria;
+        this.annotations = args.annotations;
+    }
 }
 
-export interface HandgradingRubricData extends HandgradingRubricCtorArgs {
+export class HandgradingRubricData extends HandgradingRubricCtorArgs {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
-    _handgrading_rubric_data_brand: unknown;
+    private _handgrading_rubric_data_brand: unknown;
+
+    constructor(args: HandgradingRubricCtorArgs) {
+        super(args);
+    }
 }
 
 export interface HandgradingRubricObserver {

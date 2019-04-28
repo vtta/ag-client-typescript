@@ -1,8 +1,8 @@
 import { AppliedAnnotation, AppliedAnnotationData } from './applied_annotation';
 import { SaveableAPIObject } from "./base";
 import { Comment, CommentData } from "./comment";
-import { CriterionResult, CriterionResultData } from './criterion_result';
-import { HandgradingRubric, HandgradingRubricData } from './handgrading_rubric';
+import { CriterionResult, CriterionResultCtorArgs } from './criterion_result';
+import { HandgradingRubric, HandgradingRubricCtorArgs } from './handgrading_rubric';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
@@ -30,18 +30,33 @@ export class HandgradingResultCoreData {
     }
 }
 
-interface HandgradingResultCtorArgs extends HandgradingResultCoreData {
-    handgrading_rubric: HandgradingRubricData;
+class HandgradingResultCtorArgs extends HandgradingResultCoreData {
+    // Need to use *CtorArgs instead of *Data because HandgradingResultData has _brand
+    handgrading_rubric: HandgradingRubricCtorArgs;
     applied_annotations: AppliedAnnotationData[];
     comments: CommentData[];
-    criterion_results: CriterionResultData[];
+    // Need to use *CtorArgs instead of Data because CriterionResultData has _brand
+    criterion_results: CriterionResultCtorArgs[];
+
+    constructor(args: HandgradingResultCtorArgs) {
+        super(args);
+
+        this.handgrading_rubric = args.handgrading_rubric;
+        this.applied_annotations = args.applied_annotations;
+        this.comments = args.comments;
+        this.criterion_results = args.criterion_results;
+    }
 }
 
-export interface HandgradingResultData extends HandgradingResultCtorArgs {
+export class HandgradingResultData extends HandgradingResultCtorArgs {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
-    _handgrading_result_data_brand: unknown;
+    private _handgrading_result_data_brand: unknown;
+
+    constructor(args: HandgradingResultData) {
+        super(args);
+    }
 }
 
 export interface HandgradingResultObserver {

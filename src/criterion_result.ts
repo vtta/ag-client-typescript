@@ -17,15 +17,25 @@ export class CriterionResultCoreData {
     }
 }
 
-interface CriterionResultCtorArgs extends CriterionResultCoreData {
+export class CriterionResultCtorArgs extends CriterionResultCoreData {
     criterion: CriterionData;
+
+    constructor(args: CriterionResultCtorArgs) {
+        super(args);
+
+        this.criterion = args.criterion;
+    }
 }
 
-export interface CriterionResultData extends CriterionResultCtorArgs {
+export class CriterionResultData extends CriterionResultCtorArgs {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
-    _criterion_result_data_brand: unknown;
+    private _criterion_result_data_brand: unknown;
+
+    constructor(args: CriterionResultCtorArgs) {
+        super(args);
+    }
 }
 
 export interface CriterionResultObserver {

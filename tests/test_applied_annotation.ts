@@ -184,7 +184,7 @@ AppliedAnnotation.objects.validate_and_create(handgrading_result=result, locatio
         expect(observer.deleted_count).toEqual(0);
 
         AppliedAnnotation.unsubscribe(observer);
-        applied_annotation.delete();
+        await applied_annotation.delete();
 
         expect(observer.created_count).toEqual(1);
         expect(observer.deleted_count).toEqual(0);
@@ -205,9 +205,12 @@ describe('Get/delete applied annotation tests', () => {
                 }
             }
         );
+
+        console.log("HERE: ", applied_annotation);
     });
 
     test('Get applied annotation', async () => {
+        console.log("here 2", applied_annotation);
         let loaded = await AppliedAnnotation.get_by_pk(applied_annotation.pk);
         expect(loaded).toEqual(applied_annotation);
     });

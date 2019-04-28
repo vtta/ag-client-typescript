@@ -1,11 +1,11 @@
 import {
     Course,
     Criterion,
-    CriterionResult, CriterionResultData, CriterionResultObserver,
+    CriterionResult, CriterionResultObserver,
     ExpectedStudentFile,
     Group,
     HandgradingResult,
-    HandgradingRubric, NewCriterionResultData,
+    HandgradingRubric,
     Project
 } from '..';
 
@@ -150,7 +150,7 @@ describe('Get/update/delete criterion result tests', () => {
         let loaded = await CriterionResult.get_by_pk(criterion_result.pk);
         expect(loaded.pk).toEqual(criterion_result.pk);
         expect(loaded.selected).toEqual(criterion_result.selected);
-        expect(loaded.criterion).toEqual(criterion_result);
+        expect(loaded.criterion).toEqual(criterion_result.criterion);
         expect(loaded.handgrading_result).toEqual(criterion_result.handgrading_result);
     });
 
@@ -187,7 +187,7 @@ describe('Get/update/delete criterion result tests', () => {
 
         await criterion_result.refresh();
         expect_dates_equal(criterion_result.last_modified, old_timestamp);
-        expect(observer.criterion_result).toEqual(criterion_result);
+        expect(observer.criterion_result).toBeNull();
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
 
@@ -225,7 +225,7 @@ criterion_result.validate_and_update(selected=True)
     test('Unsubscribe', async () => {
         criterion_result = await CriterionResult.get_by_pk(criterion_result_pk);
 
-        expect(observer.criterion_result).toEqual(criterion_result);
+        expect(observer.criterion_result).toBeNull();
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
 

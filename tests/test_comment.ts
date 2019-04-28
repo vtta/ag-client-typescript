@@ -1,5 +1,4 @@
 import {
-    Annotation,
     Comment,
     CommentObserver, Course, ExpectedStudentFile, Group, HandgradingResult, HandgradingRubric,
     NewCommentData,
@@ -157,11 +156,15 @@ Comment.objects.validate_and_create(handgrading_result=result, text='comment 3')
         expect(created).toEqual(actual);
 
         expect(actual.text).toEqual('some other text');
-        expect(actual.location).toEqual({
-            filename: "f1.txt",
-            first_line: 0,
-            last_line: 1
-        });
+        // Used to disable "object might be null" error
+        if (actual.location !== null) {
+            expect(actual.location.filename).toEqual("f1.txt");
+            expect(actual.location.first_line).toEqual(0);
+            expect(actual.location.last_line).toEqual(1);
+        }
+        else {
+            throw new Error("Location should not be null");
+        }
 
         expect(observer.comment).toEqual(actual);
         expect(observer.created_count).toEqual(1);

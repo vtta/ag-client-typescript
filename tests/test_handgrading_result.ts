@@ -1,9 +1,9 @@
 import {
     Annotation, AppliedAnnotation,
     Comment,
-    Course, Criterion, CriterionResult, ExpectedStudentFile, Group,
+    Course, Criterion, CriterionResult, CriterionResultData, ExpectedStudentFile, Group,
     HandgradingResult, HandgradingResultObserver,
-    HandgradingRubric, HandgradingRubricData, PointsStyle,
+    HandgradingRubric, PointsStyle,
     Project
 } from '..';
 
@@ -167,7 +167,7 @@ describe('List/create handgrading result tests', () => {
                 handgrading_result: 22,
             },
             // Should work with CriterionResultData and CriterionResult
-            new CriterionResult({
+            new CriterionResultData({
                 pk: 2,
                 last_modified: now,
                 selected: true,
@@ -237,7 +237,7 @@ describe('List/create handgrading result tests', () => {
         expect(handgrading_result.pk).toEqual(22);
         expect(handgrading_result.last_modified).toEqual(now);
         expect(handgrading_result.submission).toEqual(2);
-        expect(handgrading_result.handgrading_rubric).toEqual(handgrading_rubric);
+        expect(handgrading_result.handgrading_rubric).toEqual(handgrading_rubric_data);
         expect(handgrading_result.group).toEqual(2);
         expect(handgrading_result.finished_grading).toEqual(false);
         expect(handgrading_result.points_adjustment).toEqual(0);
