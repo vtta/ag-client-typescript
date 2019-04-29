@@ -1,7 +1,7 @@
 import {
     Annotation, AppliedAnnotation,
     Comment,
-    Course, Criterion, CriterionResult, CriterionResultData, ExpectedStudentFile, Group,
+    Course, Criterion, CriterionResult, ExpectedStudentFile, Group,
     HandgradingResult, HandgradingResultObserver,
     HandgradingRubric, PointsStyle,
     Project
@@ -169,7 +169,7 @@ describe('List/create handgrading result tests', () => {
                 handgrading_result: 22,
             },
             // Should work with CriterionResultData and CriterionResult
-            new CriterionResultData({
+            new CriterionResult({
                 pk: 2,
                 last_modified: now,
                 selected: true,

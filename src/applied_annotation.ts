@@ -90,30 +90,16 @@ export class NewAppliedAnnotationData {
     }
 }
 
-export class Location {
+export interface Location {
     pk: number;
     first_line: number;
     last_line: number;
     filename: string;
     last_modified: string;
-
-    constructor(args: Location) {
-        this.pk = args.pk;
-        this.first_line = args.first_line;
-        this.last_line = args.last_line;
-        this.filename = args.filename;
-        this.last_modified = args.last_modified;
-    }
 }
 
-export class NewLocationData {
+export interface NewLocationData {
     first_line: number;
     last_line: number;
     filename: string;
-
-    constructor(args: NewLocationData) {
-        this.first_line = args.first_line;
-        this.last_line = args.last_line;
-        this.filename = args.filename;
-    }
 }

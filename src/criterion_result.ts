@@ -17,25 +17,15 @@ export class CriterionResultCoreData {
     }
 }
 
-export class CriterionResultCtorArgs extends CriterionResultCoreData {
+export interface CriterionResultCtorArgs extends CriterionResultCoreData {
     criterion: CriterionData;
-
-    constructor(args: CriterionResultCtorArgs) {
-        super(args);
-
-        this.criterion = args.criterion;
-    }
 }
 
-export class CriterionResultData extends CriterionResultCtorArgs {
+export interface CriterionResultData extends CriterionResultCtorArgs {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
-    private _criterion_result_data_brand: unknown;
-
-    constructor(args: CriterionResultCtorArgs) {
-        super(args);
-    }
+    _criterion_result_data_brand: unknown;
 }
 
 export interface CriterionResultObserver {
@@ -128,12 +118,7 @@ export class CriterionResult extends CriterionResultCoreData implements Saveable
     ];
 }
 
-export class NewCriterionResultData {
+export interface NewCriterionResultData {
     criterion?: number;
     selected?: boolean;
-
-    constructor(args: NewCriterionResultData) {
-        this.criterion = args.criterion;
-        this.selected = args.selected;
-    }
 }
