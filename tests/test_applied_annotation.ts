@@ -205,12 +205,9 @@ describe('Get/delete applied annotation tests', () => {
                 }
             }
         );
-
-        console.log("HERE: ", applied_annotation);
     });
 
     test('Get applied annotation', async () => {
-        console.log("here 2", applied_annotation);
         let loaded = await AppliedAnnotation.get_by_pk(applied_annotation.pk);
         expect(loaded).toEqual(applied_annotation);
     });
