@@ -357,7 +357,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         expect(actual_result_summary.handgrading_result.total_points_possible).toEqual(0);
 
         // If statement included to suppress tslint "object could be null" error
-        if (observer.handgrading_result) {
+        if (observer.handgrading_result !== null) {
             expect(observer.handgrading_result.pk).toEqual(actual_result_summary.pk);
         }
         expect(observer.created_count).toEqual(1);

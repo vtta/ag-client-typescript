@@ -103,7 +103,7 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
                                               include_staff: boolean = true
     ): Promise<SubmissionGroupHandgradingInfo> {
         const queries = `?page_size=${page_size}&page=${page_num}&include_staff=${include_staff}`;
-        const url = page_url || (
+        const url = page_url !== '' ? page_url : (
             `/projects/${project_pk}/handgrading_results/${queries}`
         );
         let response = await HttpClient.get_instance().get<SubmissionGroupHandgradingInfo>(url);
