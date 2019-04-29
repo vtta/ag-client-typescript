@@ -80,14 +80,9 @@ export class AppliedAnnotation extends AppliedAnnotationData implements Deletabl
     }
 }
 
-export class NewAppliedAnnotationData {
+export interface NewAppliedAnnotationData {
     annotation: number;
     location: NewLocationData;
-
-    constructor(args: NewAppliedAnnotationData) {
-        this.annotation = args.annotation;
-        this.location = args.location;
-    }
 }
 
 export interface Location {

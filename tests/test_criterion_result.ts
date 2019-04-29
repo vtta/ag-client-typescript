@@ -117,12 +117,23 @@ CriterionResult.objects.validate_and_create(handgrading_result=result, selected=
         `;
         run_in_django_shell(create_criterion_result);
 
-        let loaded_criterion_result = await CriterionResult.get_all_from_handgrading_result(
+        let loaded_criterion_results = await CriterionResult.get_all_from_handgrading_result(
             handgrading_result.pk);
 
-        let actual_selected = loaded_criterion_result.map(
-            (criterion_result) => criterion_result.selected);
-        expect(actual_selected.sort()).toEqual([false, true, true]);
+        let sorted_criterion_results = loaded_criterion_results.sort((a, b) => a.pk - b.pk);
+        expect(sorted_criterion_results.length).toEqual(3);
+        expect(sorted_criterion_results[0].pk).toEqual(1);
+        expect(sorted_criterion_results[0].selected).toEqual(false);
+        expect(sorted_criterion_results[0].handgrading_result).toEqual(handgrading_result.pk);
+        expect(sorted_criterion_results[0].criterion).toEqual(criterion);
+
+        expect(sorted_criterion_results[1].pk).toEqual(2);
+        expect(sorted_criterion_results[1].selected).toEqual(true);
+        expect(sorted_criterion_results[1].handgrading_result).toEqual(handgrading_result.pk);
+
+        expect(sorted_criterion_results[2].pk).toEqual(3);
+        expect(sorted_criterion_results[2].selected).toEqual(true);
+        expect(sorted_criterion_results[2].handgrading_result).toEqual(handgrading_result.pk);
     });
 });
 

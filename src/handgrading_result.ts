@@ -167,7 +167,7 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
     ];
 }
 
-export class GroupHandgradingResultSummary {
+export interface GroupHandgradingResultSummary {
     pk: number;
     project: number;
     extended_due_date: string;
@@ -182,19 +182,6 @@ export class GroupHandgradingResultSummary {
         total_points: number;
         total_points_possible: number;
     };
-
-    constructor(args: GroupHandgradingResultSummary) {
-        this.pk = args.pk;
-        this.project = args.project;
-        this.extended_due_date = args.extended_due_date;
-        this.member_names = args.member_names;
-        this.bonus_submissions_remaining = args.bonus_submissions_remaining;
-        this.late_days_used = args.late_days_used;
-        this.num_submissions = args.num_submissions;
-        this.num_submits_towards_limit = args.num_submits_towards_limit;
-        this.created_at = args.created_at;
-        this.handgrading_result = args.handgrading_result;
-    }
 }
 
 export class SubmissionGroupHandgradingInfo {
