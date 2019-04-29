@@ -292,9 +292,6 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         let sorted_results = loaded_handgrading_results_info.results.sort((a, b) => a.pk - b.pk);
 
         // Check first result info
-        console.log("result: ", sorted_results[0].bonus_submissions_remaining);
-        console.log("group: ", group.bonus_submissions_remaining);
-
         expect(sorted_results[0].pk).toEqual(1);
         expect(sorted_results[0].project).toEqual(project.pk);
         expect(sorted_results[0].extended_due_date).toEqual(group.extended_due_date);

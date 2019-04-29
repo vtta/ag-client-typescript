@@ -30,33 +30,20 @@ export class HandgradingResultCoreData {
     }
 }
 
-class HandgradingResultCtorArgs extends HandgradingResultCoreData {
+interface HandgradingResultCtorArgs extends HandgradingResultCoreData {
     // Need to use *CtorArgs instead of *Data because HandgradingResultData has _brand
     handgrading_rubric: HandgradingRubricCtorArgs;
     applied_annotations: AppliedAnnotationData[];
     comments: CommentData[];
     // Need to use *CtorArgs instead of Data because CriterionResultData has _brand
     criterion_results: CriterionResultCtorArgs[];
-
-    constructor(args: HandgradingResultCtorArgs) {
-        super(args);
-
-        this.handgrading_rubric = args.handgrading_rubric;
-        this.applied_annotations = args.applied_annotations;
-        this.comments = args.comments;
-        this.criterion_results = args.criterion_results;
-    }
 }
 
-export class HandgradingResultData extends HandgradingResultCtorArgs {
+export interface HandgradingResultData extends HandgradingResultCtorArgs {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
-    private _handgrading_result_data_brand: unknown;
-
-    constructor(args: HandgradingResultData) {
-        super(args);
-    }
+    _handgrading_result_data_brand: unknown;
 }
 
 export interface HandgradingResultObserver {
