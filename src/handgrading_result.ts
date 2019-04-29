@@ -98,14 +98,14 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
 
     static async get_all_summary_from_project(project_pk: number,
                                               page_url: string = '',
-                                              page_size: number = 1000,
+                                              include_staff: boolean = true,
                                               page_num: number = 1,
-                                              include_staff: boolean = true
+                                              page_size: number = 1000
     ): Promise<SubmissionGroupHandgradingInfo> {
         const queries = `?page_size=${page_size}&page=${page_num}&include_staff=${include_staff}`;
-        const url = page_url !== '' ? page_url : (
-            `/projects/${project_pk}/handgrading_results/${queries}`
-        );
+        const url = page_url !== '' ? page_url :
+            `/projects/${project_pk}/handgrading_results/${queries}`;
+
         let response = await HttpClient.get_instance().get<SubmissionGroupHandgradingInfo>(url);
         return new SubmissionGroupHandgradingInfo(response.data);
     }
@@ -181,26 +181,32 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
 }
 
 export class GroupHandgradingResultSummary {
+    pk: number;
+    project: number;
     extended_due_date: string;
+    member_names: string[];
+    bonus_submissions_remaining: number;
+    late_days_used: number;
+    num_submissions: number;
+    num_submits_towards_limit: number;
+    created_at: string;
     handgrading_result: {
         finished_grading: boolean;
         total_points: number;
         total_points_possible: number;
     };
-    member_names: string[];
-    num_submissions: number;
-    num_submits_towards_limit: number;
-    project: number;
-    pk: number;
 
     constructor(args: GroupHandgradingResultSummary) {
+        this.pk = args.pk;
+        this.project = args.project;
         this.extended_due_date = args.extended_due_date;
-        this.handgrading_result = args.handgrading_result;
         this.member_names = args.member_names;
+        this.bonus_submissions_remaining = args.bonus_submissions_remaining;
+        this.late_days_used = args.late_days_used;
         this.num_submissions = args.num_submissions;
         this.num_submits_towards_limit = args.num_submits_towards_limit;
-        this.project = args.project;
-        this.pk = args.pk;
+        this.created_at = args.created_at;
+        this.handgrading_result = args.handgrading_result;
     }
 }
 

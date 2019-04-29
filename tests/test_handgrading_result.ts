@@ -25,6 +25,7 @@ let course!: Course;
 let project!: Project;
 let handgrading_rubric!: HandgradingRubric;
 let group!: Group;
+let group2!: Group;
 
 class TestObserver implements HandgradingResultObserver {
     handgrading_result: HandgradingResult | null = null;
@@ -59,6 +60,7 @@ beforeEach(async () => {
     handgrading_rubric = await HandgradingRubric.create(project.pk, {});
     await ExpectedStudentFile.create(project.pk, {pattern: 'f1.txt'});      // for submission
     group = await Group.create_solo_group(project.pk);
+    group2 = await Group.create(project.pk, { member_names: ['ffuxa@umich.edu'] });
 
     // Create submission (using django shell since Submission API hasn't been created yet
     let create_submission = `
@@ -262,9 +264,7 @@ from django.contrib.auth.models import User
 project = Project.objects.get(pk=${project.pk})
 handgrading_rubric = HandgradingRubric.objects.get(pk=${handgrading_rubric.pk})
 group = Group.objects.get(pk=${group.pk})
-
-member2 = User.objects.get_or_create(username='ffuxa@umich.edu')[0]
-group2 = Group.objects.validate_and_create(project=project, members=[member2])
+group2 = Group.objects.get(pk=${group2.pk})
 
 submission1 = Submission.objects.validate_and_create(group=group,
     submitted_files=[SimpleUploadedFile('f1.txt', b'blah1')])
@@ -279,16 +279,50 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
 
         run_in_django_shell(create_handgrading_results);
         await sleep(2);
+        await group.refresh();
+        await group2.refresh();
         let loaded_handgrading_results_info =
             await HandgradingResult.get_all_summary_from_project(project.pk);
 
         expect(loaded_handgrading_results_info.count).toEqual(2);
         expect(loaded_handgrading_results_info.next).toBeNull();
         expect(loaded_handgrading_results_info.previous).toBeNull();
+        expect(loaded_handgrading_results_info.results.length).toEqual(2);
 
-        let actual_total_points = loaded_handgrading_results_info.results.map(
-            result => result.handgrading_result.total_points);
-        expect(actual_total_points.sort()).toEqual([2, 5]);
+        let sorted_results = loaded_handgrading_results_info.results.sort((a, b) => a.pk - b.pk);
+
+        // Check first result info
+        console.log("result: ", sorted_results[0].bonus_submissions_remaining);
+        console.log("group: ", group.bonus_submissions_remaining);
+
+        expect(sorted_results[0].pk).toEqual(1);
+        expect(sorted_results[0].project).toEqual(project.pk);
+        expect(sorted_results[0].extended_due_date).toEqual(group.extended_due_date);
+        expect(sorted_results[0].member_names).toEqual(group.member_names);
+        expect(sorted_results[0].bonus_submissions_remaining).toEqual(
+            group.bonus_submissions_remaining);
+        expect(sorted_results[0].late_days_used).toEqual(group.late_days_used);
+        expect(sorted_results[0].num_submissions).toEqual(group.num_submissions);
+        expect(sorted_results[0].num_submits_towards_limit).toEqual(
+            group.num_submits_towards_limit);
+        expect(sorted_results[0].handgrading_result.finished_grading).toEqual(false);
+        expect(sorted_results[0].handgrading_result.total_points).toEqual(2);
+        expect(sorted_results[0].handgrading_result.total_points_possible).toEqual(0);
+
+        // Check second result info
+        expect(sorted_results[1].pk).toEqual(2);
+        expect(sorted_results[1].project).toEqual(project.pk);
+        expect(sorted_results[1].extended_due_date).toEqual(group2.extended_due_date);
+        expect(sorted_results[1].member_names).toEqual(group2.member_names);
+        expect(sorted_results[1].bonus_submissions_remaining).toEqual(
+            group2.bonus_submissions_remaining);
+        expect(sorted_results[1].late_days_used).toEqual(group2.late_days_used);
+        expect(sorted_results[1].num_submissions).toEqual(group2.num_submissions);
+        expect(sorted_results[1].num_submits_towards_limit).toEqual(
+            group2.num_submits_towards_limit);
+        expect(sorted_results[1].handgrading_result.finished_grading).toEqual(false);
+        expect(sorted_results[1].handgrading_result.total_points).toEqual(5);
+        expect(sorted_results[1].handgrading_result.total_points_possible).toEqual(0);
     });
 
 
@@ -301,12 +335,10 @@ from django.contrib.auth.models import User
 
 project = Project.objects.get(pk=${project.pk})
 handgrading_rubric = HandgradingRubric.objects.get(pk=${handgrading_rubric.pk})
-
-member1 = User.objects.get_or_create(username='ffuxa@umich.edu')[0]
 member2 = User.objects.get_or_create(username='thisisarealname@umich.edu')[0]
 
 group1 = Group.objects.get(pk=${group.pk})
-group2 = Group.objects.validate_and_create(project=project, members=[member1])
+group2 = Group.objects.get(pk=${group2.pk})
 group3 = Group.objects.validate_and_create(project=project, members=[member2])
 
 submission1 = Submission.objects.validate_and_create(group=group1,
@@ -326,7 +358,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         run_in_django_shell(create_handgrading_results);
         let loaded_second_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', 1, 2);
+            await HandgradingResult.get_all_summary_from_project(project.pk, '', true, 2, 1);
 
         expect(loaded_second_handgrading_results_page.count).toEqual(3);
 
@@ -339,7 +371,95 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         expect(previous_url_without_base).toBe(
             "/api/projects/1/handgrading_results/?include_staff=true&page_size=1"
         );
-        expect(loaded_second_handgrading_results_page.results.length).toBe(1);
+        expect(loaded_second_handgrading_results_page.results.length).toEqual(1);
+    });
+
+    test('List handgrading results do not include staff', async () => {
+        let create_handgrading_results = `
+from autograder.core.models import Group, Project, Submission
+from autograder.handgrading.models import HandgradingRubric, HandgradingResult
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.models import User
+
+project = Project.objects.get(pk=${project.pk})
+handgrading_rubric = HandgradingRubric.objects.get(pk=${handgrading_rubric.pk})
+group = Group.objects.get(pk=${group.pk})
+group2 = Group.objects.get(pk=${group2.pk})
+
+submission1 = Submission.objects.validate_and_create(group=group,
+    submitted_files=[SimpleUploadedFile('f1.txt', b'blah1')])
+submission2 = Submission.objects.validate_and_create(group=group2,
+    submitted_files=[SimpleUploadedFile('f1.txt', b'blah2')])
+
+HandgradingResult.objects.validate_and_create(group=group, handgrading_rubric=handgrading_rubric,
+                                              points_adjustment=2, submission=submission1)
+HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=handgrading_rubric,
+                                              points_adjustment=5, submission=submission2)
+        `;
+
+        run_in_django_shell(create_handgrading_results);
+        await sleep(2);
+        let loaded_handgrading_results_info =
+            await HandgradingResult.get_all_summary_from_project(project.pk, '', false);
+
+        expect(loaded_handgrading_results_info.count).toEqual(1);
+        expect(loaded_handgrading_results_info.next).toBeNull();
+        expect(loaded_handgrading_results_info.previous).toBeNull();
+
+        let actual_total_points = loaded_handgrading_results_info.results.map(
+            result => result.handgrading_result.total_points);
+        expect(actual_total_points).toEqual([5]);
+    });
+
+    test('List handgrading results with page_url', async () => {
+        let create_handgrading_results = `
+from autograder.core.models import Group, Project, Submission, Course
+from autograder.handgrading.models import HandgradingRubric, HandgradingResult
+from django.core.files.uploadedfile import SimpleUploadedFile
+from django.contrib.auth.models import User
+
+project = Project.objects.get(pk=${project.pk})
+course = Course.objects.get(pk=${course.pk})
+handgrading_rubric = HandgradingRubric.objects.get(pk=${handgrading_rubric.pk})
+member3 = User.objects.get_or_create(username='thisisarealname@umich.edu')[0]
+
+group1 = Group.objects.get(pk=${group.pk})
+group2 = Group.objects.get(pk=${group2.pk})
+group3 = Group.objects.validate_and_create(project=project, members=[member3])
+
+submission1 = Submission.objects.validate_and_create(group=group1,
+    submitted_files=[SimpleUploadedFile('f1.txt', b'blah1')])
+submission2 = Submission.objects.validate_and_create(group=group2,
+    submitted_files=[SimpleUploadedFile('f1.txt', b'blah2')])
+submission3 = Submission.objects.validate_and_create(group=group3,
+    submitted_files=[SimpleUploadedFile('f1.txt', b'blah3')])
+
+HandgradingResult.objects.validate_and_create(group=group1, handgrading_rubric=handgrading_rubric,
+                                              points_adjustment=2, submission=submission1)
+HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=handgrading_rubric,
+                                              points_adjustment=5, submission=submission2)
+HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=handgrading_rubric,
+                                              points_adjustment=4, submission=submission3)
+        `;
+
+        run_in_django_shell(create_handgrading_results);
+        let loaded_second_handgrading_results_page =
+            await HandgradingResult.get_all_summary_from_project(project.pk, '', true, 2, 1);
+        let next_url = loaded_second_handgrading_results_page.next;
+        let loaded_third_handgrading_results_page =
+            await HandgradingResult.get_all_summary_from_project(project.pk, next_url);
+
+        expect(loaded_third_handgrading_results_page.count).toEqual(3);
+
+        let next_url_without_base = remove_base_url(loaded_third_handgrading_results_page.next);
+        let previous_url_without_base = remove_base_url(
+            loaded_third_handgrading_results_page.previous);
+
+        expect(next_url_without_base).toBeNull();
+        expect(previous_url_without_base).toEqual(
+            "/api/projects/1/handgrading_results/?include_staff=true&page=2&page_size=1"
+        );
+        expect(loaded_third_handgrading_results_page.results.length).toEqual(1);
     });
 
     test('Create handgrading result', async () => {
@@ -347,8 +467,10 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         // First check if result from summary matches
         let loaded_summary = await HandgradingResult.get_all_summary_from_project(project.pk);
-        expect(loaded_summary.count).toEqual(1);
-        let actual_result_summary = loaded_summary.results[0];
+        expect(loaded_summary.count).toEqual(2);
+        let sorted_results = loaded_summary.results.sort((a, b) => b.pk - a.pk);
+        // Highest pk will be one that was just created
+        let actual_result_summary = sorted_results[sorted_results.length - 1];
 
         expect(created.pk).toEqual(actual_result_summary.pk);
 

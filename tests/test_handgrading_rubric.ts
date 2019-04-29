@@ -148,8 +148,15 @@ HandgradingRubric.objects.validate_and_create(project=project, max_points=321)
         let loaded_handgrading_rubric = await HandgradingRubric.get_from_project(project.pk);
 
         // Make sure the loaded HandgradingRubric is the correct one
-        let actual_max_points = loaded_handgrading_rubric.max_points;
-        expect(actual_max_points).toEqual(321);
+        expect(loaded_handgrading_rubric.pk).toEqual(1);
+        expect(loaded_handgrading_rubric.project).toEqual(project.pk);
+        expect(loaded_handgrading_rubric.points_style).toEqual(PointsStyle.start_at_zero_and_add);
+        expect(loaded_handgrading_rubric.max_points).toEqual(321);
+        expect(loaded_handgrading_rubric.show_grades_and_rubric_to_students).toEqual(false);
+        expect(loaded_handgrading_rubric.handgraders_can_leave_comments).toEqual(false);
+        expect(loaded_handgrading_rubric.handgraders_can_adjust_points).toEqual(false);
+        expect(loaded_handgrading_rubric.criteria).toEqual([]);
+        expect(loaded_handgrading_rubric.annotations).toEqual([]);
     });
 
     test('Create handgrading rubric only required fields', async () => {
@@ -261,6 +268,26 @@ describe('Get/update/delete handgrading rubric tests', () => {
         expect(loaded.annotations).not.toEqual(handgrading_rubric.annotations);
         expect(loaded.criteria).toEqual([criterion]);
         expect(loaded.annotations).toEqual([annotation]);
+
+        // Now check that the same is true if loaded by pk
+        let loaded_from_project = await HandgradingRubric.get_by_pk(handgrading_rubric.pk);
+        expect(loaded_from_project).not.toEqual(handgrading_rubric);
+
+        // Check that all fields match except for criteria and annotations
+        expect(loaded_from_project.points_style).toEqual(handgrading_rubric.points_style);
+        expect(loaded_from_project.max_points).toEqual(handgrading_rubric.max_points);
+        expect(loaded_from_project.show_grades_and_rubric_to_students).toEqual(
+            handgrading_rubric.show_grades_and_rubric_to_students);
+        expect(loaded_from_project.handgraders_can_leave_comments).toEqual(
+            handgrading_rubric.handgraders_can_leave_comments);
+        expect(loaded_from_project.handgraders_can_adjust_points).toEqual(
+            handgrading_rubric.handgraders_can_adjust_points);
+
+        // Check criteria and annotations
+        expect(loaded_from_project.criteria).not.toEqual(handgrading_rubric.criteria);
+        expect(loaded_from_project.annotations).not.toEqual(handgrading_rubric.annotations);
+        expect(loaded_from_project.criteria).toEqual([criterion]);
+        expect(loaded_from_project.annotations).toEqual([annotation]);
     });
 
     test('Update handgrading rubric', async () => {
