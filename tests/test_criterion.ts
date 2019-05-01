@@ -26,6 +26,7 @@ let handgrading_rubric!: HandgradingRubric;
 class TestObserver implements CriterionObserver {
     criterion: Criterion | null = null;
     criterion_list: number[] | null = null;
+    order_changed_handgrading_rubric_pk: number | null = null;
 
     created_count = 0;
     changed_count = 0;
@@ -47,9 +48,11 @@ class TestObserver implements CriterionObserver {
         this.criterion = null;
     }
 
-    update_criteria_order_changed(criterion_list: number[]): void {
+    update_criteria_order_changed(criterion_list: number[],
+                                  handgrading_rubric_pk: number): void {
         this.order_changed_count += 1;
         this.criterion_list = criterion_list;
+        this.order_changed_handgrading_rubric_pk = handgrading_rubric_pk;
     }
 }
 
@@ -272,6 +275,7 @@ describe('Order criterion list tests', () => {
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(0);
+        expect(observer.order_changed_handgrading_rubric_pk).toBeNull();
     });
 
     test('Update ordered criterion list ctor', async () => {
@@ -283,6 +287,7 @@ describe('Order criterion list tests', () => {
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(0);
+        expect(observer.order_changed_handgrading_rubric_pk).toBeNull();
 
         let changed_ordered_list = [
             loaded_ordered_list[1], loaded_ordered_list[0], loaded_ordered_list[2]
@@ -300,5 +305,6 @@ describe('Order criterion list tests', () => {
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(1);
+        expect(observer.order_changed_handgrading_rubric_pk).toEqual(handgrading_rubric.pk);
     });
 });

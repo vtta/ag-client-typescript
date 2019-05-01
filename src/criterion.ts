@@ -24,7 +24,7 @@ export interface CriterionObserver {
     update_criterion_created(criterion: Criterion): void;
     update_criterion_changed(criterion: Criterion): void;
     update_criterion_deleted(criterion: Criterion): void;
-    update_criteria_order_changed(criterion_list: number[]): void;
+    update_criteria_order_changed(criterion_list: number[], handgrading_rubric_pk: number): void;
 }
 
 export class Criterion extends CriterionData implements SaveableAPIObject, Deletable {
@@ -124,13 +124,13 @@ export class Criterion extends CriterionData implements SaveableAPIObject, Delet
             data
         );
         let result = response.data;
-        Criterion.notify_criteria_order_updated(result);
+        Criterion.notify_criteria_order_updated(result, handgrading_rubric_pk);
         return result;
     }
 
-    static notify_criteria_order_updated(criterion_list: number[]) {
+    static notify_criteria_order_updated(criterion_list: number[], handgrading_rubric_pk: number) {
         for (let subscriber of Criterion._subscribers) {
-            subscriber.update_criteria_order_changed(criterion_list);
+            subscriber.update_criteria_order_changed(criterion_list, handgrading_rubric_pk);
         }
     }
 

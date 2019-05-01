@@ -26,6 +26,7 @@ let handgrading_rubric!: HandgradingRubric;
 class TestObserver implements AnnotationObserver {
     annotation: Annotation | null = null;
     annotation_list: number[] | null = null;
+    order_changed_handgrading_rubric_pk: number | null = null;
 
     created_count = 0;
     changed_count = 0;
@@ -47,9 +48,11 @@ class TestObserver implements AnnotationObserver {
         this.annotation = null;
     }
 
-    update_annotations_order_changed(annotation_list: number[]): void {
+    update_annotations_order_changed(annotation_list: number[],
+                                     handgrading_rubric_pk: number): void {
         this.order_changed_count += 1;
         this.annotation_list = annotation_list;
+        this.order_changed_handgrading_rubric_pk = handgrading_rubric_pk;
     }
 }
 
@@ -279,6 +282,7 @@ describe('Order annotation list tests', () => {
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(0);
+        expect(observer.order_changed_handgrading_rubric_pk).toBeNull();
     });
 
     test('Update ordered annotation list ctor', async () => {
@@ -290,6 +294,7 @@ describe('Order annotation list tests', () => {
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(0);
+        expect(observer.order_changed_handgrading_rubric_pk).toBeNull();
 
         let changed_ordered_list = [
             loaded_ordered_list[1], loaded_ordered_list[0], loaded_ordered_list[2]
@@ -307,5 +312,6 @@ describe('Order annotation list tests', () => {
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
         expect(observer.order_changed_count).toEqual(1);
+        expect(observer.order_changed_handgrading_rubric_pk).toEqual(handgrading_rubric.pk);
     });
 });

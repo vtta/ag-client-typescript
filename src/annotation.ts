@@ -26,7 +26,8 @@ export interface AnnotationObserver {
     update_annotation_created(annotation: Annotation): void;
     update_annotation_changed(annotation: Annotation): void;
     update_annotation_deleted(annotation: Annotation): void;
-    update_annotations_order_changed(annotation_list: number[]): void;
+    update_annotations_order_changed(annotation_list: number[],
+                                     handgrading_rubric_pk: number): void;
 }
 
 export class Annotation extends AnnotationData implements SaveableAPIObject, Deletable {
@@ -126,13 +127,14 @@ export class Annotation extends AnnotationData implements SaveableAPIObject, Del
             data
         );
         let result = response.data;
-        Annotation.notify_annotations_order_updated(result);
+        Annotation.notify_annotations_order_updated(result, handgrading_rubric_pk);
         return result;
     }
 
-    static notify_annotations_order_updated(annotation_list: number[]) {
+    static notify_annotations_order_updated(annotation_list: number[],
+                                            handgrading_rubric_pk: number) {
         for (let subscriber of Annotation._subscribers) {
-            subscriber.update_annotations_order_changed(annotation_list);
+            subscriber.update_annotations_order_changed(annotation_list, handgrading_rubric_pk);
         }
     }
 

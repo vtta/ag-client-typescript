@@ -28,6 +28,7 @@ let project!: Project;
 let handgrading_rubric!: HandgradingRubric;
 let handgrading_result!: HandgradingResult;
 let criterion!: Criterion;
+let criterion_result_pk: number = 1;
 
 class TestObserver implements CriterionResultObserver {
     criterion_result: CriterionResult | null = null;
@@ -57,7 +58,7 @@ beforeEach(async () => {
     await ExpectedStudentFile.create(project.pk, {pattern: 'f1.txt'});      // for submission
     let group = await Group.create_solo_group(project.pk);
 
-    // Create submission (using django shell since Submission API hasn't been created yet
+    // Create submission (using django shell since Submission API hasn't been created yet)
     let create_submission = `
 from autograder.core.models import Project, Group, Submission
 from django.core.files.uploadedfile import SimpleUploadedFile
@@ -74,6 +75,16 @@ submission.save()
 
     handgrading_result = await HandgradingResult.get_or_create(group.pk);
     criterion = await Criterion.create(handgrading_rubric.pk, {});
+
+    // A CriterionResult is automatically created for each HandgradingResult when a Criterion is
+    // created. We want to get the pk of this CriterionResult for later use
+    let print_criterion_result_pk = `
+from autograder.handgrading.models import CriterionResult
+criterion_results = CriterionResult.objects.all()
+print(criterion_results[0].pk)
+`;
+    let shell_output = run_in_django_shell(print_criterion_result_pk).stdout;
+    criterion_result_pk = parseInt(shell_output, 10);
 
     observer = new TestObserver();
     CriterionResult.subscribe(observer);
@@ -140,29 +151,12 @@ CriterionResult.objects.validate_and_create(handgrading_result=result, selected=
 describe('Get/update/delete criterion result tests', () => {
     let criterion_result!: CriterionResult;
 
-    /** NOTE: This assumes pks are assigned sequentially, and so CriterionResult with pk=1
-     *  exists (since once Criterion was created in beforeAll method, a matching CriterionResult
-     *  would be created)
-     */
-    let criterion_result_pk: number = 1;
-
     test('Get criterion result', async () => {
-        /* Since create method isn't available, we create a CriterionResult manually and only check
-             "important" fields */
-        let now = (new Date()).toISOString();
-        criterion_result = new CriterionResult({
-            pk: 1,
-            last_modified: now,
-            selected: false,
-            criterion: criterion,
-            handgrading_result: handgrading_result.pk,
-        });
-
-        let loaded = await CriterionResult.get_by_pk(criterion_result.pk);
-        expect(loaded.pk).toEqual(criterion_result.pk);
-        expect(loaded.selected).toEqual(criterion_result.selected);
-        expect(loaded.criterion).toEqual(criterion_result.criterion);
-        expect(loaded.handgrading_result).toEqual(criterion_result.handgrading_result);
+        let loaded = await CriterionResult.get_by_pk(criterion_result_pk);
+        expect(loaded.pk).toEqual(criterion_result_pk);
+        expect(loaded.selected).toEqual(false);
+        expect(loaded.criterion).toEqual(criterion);
+        expect(loaded.handgrading_result).toEqual(handgrading_result.pk);
     });
 
     test('Update criterion result', async () => {
@@ -247,4 +241,3 @@ criterion_result.validate_and_update(selected=True)
         expect(observer.deleted_count).toEqual(0);
     });
 });
-
