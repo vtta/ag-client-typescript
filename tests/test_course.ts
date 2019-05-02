@@ -326,7 +326,6 @@ describe('Course observer tests', () => {
         reset_db();
         make_superuser();
         observer = new TestObserver();
-        console.log(observer);
         Course.subscribe(observer);
     });
 
