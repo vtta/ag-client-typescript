@@ -273,7 +273,7 @@ describe('Order annotation list tests', () => {
         ordered_annotation_list = [annotation1.pk, annotation2.pk, annotation3.pk].sort();
     });
 
-    test('Get ordered annotation list ctor', async () => {
+    test('Get ordered annotation list', async () => {
         let loaded_ordered_list = await Annotation.get_order(handgrading_rubric.pk);
         expect(loaded_ordered_list.length).toBe(3);
         expect(loaded_ordered_list).toEqual(ordered_annotation_list);
@@ -285,7 +285,7 @@ describe('Order annotation list tests', () => {
         expect(observer.order_changed_handgrading_rubric_pk).toBeNull();
     });
 
-    test('Update ordered annotation list ctor', async () => {
+    test('Update ordered annotation list', async () => {
         let loaded_ordered_list = await Annotation.get_order(handgrading_rubric.pk);
         expect(loaded_ordered_list.length).toBe(3);
         expect(loaded_ordered_list).toEqual(ordered_annotation_list);
@@ -302,7 +302,7 @@ describe('Order annotation list tests', () => {
 
         let loaded_changed_list = await Annotation.update_order(
             handgrading_rubric.pk,
-            changed_ordered_list.map(String)    // Convert to string array
+            changed_ordered_list
         );
 
         expect(loaded_changed_list).not.toEqual(loaded_ordered_list);

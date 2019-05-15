@@ -121,7 +121,7 @@ export class Annotation extends AnnotationData implements SaveableAPIObject, Del
         return response.data;
     }
 
-    static async update_order(handgrading_rubric_pk: number, data: string[]): Promise<number[]> {
+    static async update_order(handgrading_rubric_pk: number, data: number[]): Promise<number[]> {
         let response = await HttpClient.get_instance().put<number[]>(
             `/handgrading_rubrics/${handgrading_rubric_pk}/annotations/order/`,
             data

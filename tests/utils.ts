@@ -31,6 +31,20 @@ export function reset_db() {
         'docker exec typescript-cli-django python3.6 manage.py shell '
         + '-c "from django.core.cache import cache; cache.clear()"',
         {shell: true});
+
+    // We can't drop and delete the database, and there's currently a problem with one
+    // of the migrations being irreversible (no reverse function was specified). Because of
+    // these things, we will just manually re-create it here.
+    let recreate_default_sandbox_image = `
+import autograder_sandbox
+from autograder.core.models import SandboxDockerImage
+SandboxDockerImage.objects.create(
+    name='default',
+    display_name='Default',
+    tag=f'jameslp/autograder-sandbox:{autograder_sandbox.VERSION}'
+)
+    `;
+    run_in_django_shell(recreate_default_sandbox_image);
 }
 
 export function run_in_django_shell(python_str: string) {
@@ -58,9 +72,8 @@ user.save()
     run_in_django_shell(make_superuser_code);
 }
 
-export function do_editable_fields_test(ts_class: {EDITABLE_FIELDS: string[]},
-                                        python_class_name: string,
-                                        model_location: string = "autograder.core.models") {
+export function get_expected_editable_fields(python_class_name: string,
+                                             model_location: string = "autograder.core.models") {
     let print_editable_fields = `
 from ${model_location} import ${python_class_name}
 print('\\n'.join(${python_class_name}.get_editable_fields()))
@@ -68,6 +81,13 @@ print('\\n'.join(${python_class_name}.get_editable_fields()))
     let output = run_in_django_shell(print_editable_fields).stdout.trim();
     let expected = output.split(/\s+/);
     expected.sort();
+    return expected;
+}
+
+export function do_editable_fields_test(ts_class: {EDITABLE_FIELDS: string[]},
+                                        python_class_name: string,
+                                        model_location: string = "autograder.core.models") {
+    let expected = get_expected_editable_fields(python_class_name, model_location);
     let actual = ts_class.EDITABLE_FIELDS.slice();
     actual.sort();
     expect(actual).toEqual(expected);
@@ -93,4 +113,8 @@ export function expect_dates_not_equal(first: string | null, second: string | nu
     else {
         expect(new Date(first)).not.toEqual(new Date(second));
     }
+}
+
+export function rand_bool() {
+    return Math.random() < 0.5;
 }
