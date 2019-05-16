@@ -102,7 +102,7 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
         let new_case = await AGTestCase.create(
             this.ag_test_suite,
             {
-                name: this.name,
+                name: new_name,
                 normal_fdbk_config: this.normal_fdbk_config,
                 ultimate_submission_fdbk_config: this.ultimate_submission_fdbk_config,
                 past_limit_submission_fdbk_config: this.past_limit_submission_fdbk_config,

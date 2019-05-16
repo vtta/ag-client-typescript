@@ -122,11 +122,11 @@ describe('AGTestCase ctor tests', () => {
 
                 points_for_correct_return_code: 1,
 
-                points_for_correct_stdout: 0,
-                points_for_correct_stderr: 1,
+                points_for_correct_stdout: 3,
+                points_for_correct_stderr: 2,
 
-                deduction_for_wrong_return_code: -3,
-                deduction_for_wrong_stdout: -1,
+                deduction_for_wrong_return_code: -1,
+                deduction_for_wrong_stdout: -3,
                 deduction_for_wrong_stderr: -2,
 
                 normal_fdbk_config: ag_test_commnad_fdbk,
