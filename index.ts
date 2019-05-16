@@ -11,6 +11,34 @@ export { ExpectedStudentFile, ExpectedStudentFileObserver,
          NewExpectedStudentFileData } from './src/expected_student_file';
 export { Group, GroupObserver, NewGroupData } from './src/group';
 
+export {
+    AGTestCaseData,
+    AGTestCaseObserver,
+    AGTestCase,
+    AGTestCaseFeedbackConfig,
+    NewAGTestCaseData,
+} from './src/ag_test_case';
+export {
+    AGTestCommandData,
+    AGTestCommandObserver,
+    AGTestCommand,
+    AGTestCommandFeedbackConfig,
+    ValueFeedbackLevel,
+    StdinSource,
+    ExpectedOutputSource,
+    ExpectedReturnCode,
+} from './src/ag_test_command';
+export {
+    AGTestSuiteCoreData,
+    AGTestSuiteData,
+    AGTestSuiteObserver,
+    AGTestSuite,
+    AGTestSuiteFeedbackConfig,
+    NewAGTestSuiteData,
+
+    SandboxDockerImageData,
+} from './src/ag_test_suite';
+
 export { Annotation, AnnotationData, AnnotationObserver,
          NewAnnotationData } from './src/annotation';
 export { AppliedAnnotation, AppliedAnnotationData, AppliedAnnotationObserver,

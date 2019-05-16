@@ -1,5 +1,8 @@
+// The type for an API object's ID or primary key.
+export type ID = number;
+
 export interface SaveableAPIObject extends Refreshable {
-    pk: number;
+    pk: ID;
     save(): Promise<void>;
 }
 
