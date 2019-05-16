@@ -84,7 +84,7 @@ print('\\n'.join(${python_class_name}.get_editable_fields()))
     return expected;
 }
 
-export function do_editable_fields_test(ts_class: {EDITABLE_FIELDS: string[]},
+export function do_editable_fields_test(ts_class: {EDITABLE_FIELDS: ReadonlyArray<string>},
                                         python_class_name: string,
                                         model_location: string = "autograder.core.models") {
     let expected = get_expected_editable_fields(python_class_name, model_location);
@@ -117,4 +117,8 @@ export function expect_dates_not_equal(first: string | null, second: string | nu
 
 export function rand_bool() {
     return Math.random() < 0.5;
+}
+
+export function rand_int(max: number) {
+    return Math.floor(Math.random() * max);
 }

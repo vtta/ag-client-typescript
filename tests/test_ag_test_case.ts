@@ -73,10 +73,11 @@ describe('AGTestCase ctor tests', () => {
 
                 points_for_correct_return_code: 1,
 
-                points_for_correct_stdout: 0,
-                points_for_correct_stderr: 1,
+                points_for_correct_stdout: 3,
+                points_for_correct_stderr: 2,
 
-                deduction_for_wrong_stdout: 0,
+                deduction_for_wrong_return_code: -1,
+                deduction_for_wrong_stdout: -3,
                 deduction_for_wrong_stderr: -2,
 
                 normal_fdbk_config: ag_test_commnad_fdbk,
@@ -124,7 +125,8 @@ describe('AGTestCase ctor tests', () => {
                 points_for_correct_stdout: 0,
                 points_for_correct_stderr: 1,
 
-                deduction_for_wrong_stdout: 0,
+                deduction_for_wrong_return_code: -3,
+                deduction_for_wrong_stdout: -1,
                 deduction_for_wrong_stderr: -2,
 
                 normal_fdbk_config: ag_test_commnad_fdbk,
@@ -301,6 +303,28 @@ AGTestCase.objects.all().delete()
         expect(cases.length).toEqual(3);
     });
 
+    test('Copy AG test case', async () => {
+        let ag_test_case = (await AGTestCase.get_all_from_ag_test_suite(ag_test_suite.pk))[0];
+        await AGTestCommand.create(ag_test_case.pk, {name: 'cmd1', cmd: 'cmd1'});
+        await AGTestCommand.create(ag_test_case.pk, {name: 'cmd2', cmd: 'cmd2'});
+
+        await ag_test_case.refresh();
+        expect(ag_test_case.ag_test_commands.length).toEqual(2);
+
+        let copied = await ag_test_case.copy('Copied');
+
+        expect(copied.pk).not.toEqual(ag_test_case.pk);
+        expect(copied.name).toEqual('Copied');
+        expect(copied.ag_test_commands.length).toEqual(2);
+        expect(copied.ag_test_commands[0].pk).not.toEqual(ag_test_case.ag_test_commands[0].pk);
+        expect(copied.ag_test_commands[0].name).toEqual(ag_test_case.ag_test_commands[0].name);
+        expect(copied.ag_test_commands[1].pk).not.toEqual(ag_test_case.ag_test_commands[1].pk);
+        expect(copied.ag_test_commands[1].name).toEqual(ag_test_case.ag_test_commands[1].name);
+
+        expect(observer.ag_test_case).toEqual(copied);
+        expect(observer.created_count).toEqual(1);
+    });
+
     test('Save AG test case', async () => {
         let ag_test_case = (await AGTestCase.get_all_from_ag_test_suite(ag_test_suite.pk))[0];
         ag_test_case.name = 'Such Rename';
@@ -346,7 +370,7 @@ AGTestCase.objects.get(pk=${ag_test_case.pk}).validate_and_update(name='Renamed'
         await cases[0].delete();
 
         cases = await AGTestCase.get_all_from_ag_test_suite(ag_test_suite.pk);
-        expect(cases.length).toEqual(1)
+        expect(cases.length).toEqual(1);
         expect(observer.deleted_count).toEqual(1);
     });
 

@@ -1,4 +1,4 @@
-import { AGTestCommand, AGTestCommandData } from "./ag_test_command";
+import { AGTestCommand, AGTestCommandData, NewAGTestCommandData } from "./ag_test_command";
 import { Deletable, ID, SaveableAPIObject } from "./base";
 import { HttpClient } from "./http_client";
 import { filter_keys, safe_assign } from "./utils";
@@ -98,6 +98,29 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
         }
     }
 
+    async copy(new_name: string): Promise<AGTestCase> {
+        let new_case = await AGTestCase.create(
+            this.ag_test_suite,
+            {
+                name: this.name,
+                normal_fdbk_config: this.normal_fdbk_config,
+                ultimate_submission_fdbk_config: this.ultimate_submission_fdbk_config,
+                past_limit_submission_fdbk_config: this.past_limit_submission_fdbk_config,
+                staff_viewer_fdbk_config: this.staff_viewer_fdbk_config,
+            }
+        );
+
+        for (let cmd of this.ag_test_commands) {
+            new_case.ag_test_commands.push(
+                await AGTestCommand.create(
+                    this.pk,
+                    <NewAGTestCommandData> filter_keys(cmd, AGTestCommand.EDITABLE_FIELDS))
+            );
+        }
+
+        return new_case;
+    }
+
     async save(): Promise<void> {
         let response = await HttpClient.get_instance().patch<AGTestCaseData>(
             `/ag_test_cases/${this.pk}/`, filter_keys(this, AGTestCase.EDITABLE_FIELDS));
@@ -139,10 +162,11 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
         return response.data;
     }
 
-    static async update_order(ag_test_suite_pk: ID, ag_test_case_order: ID[]): Promise<ID> {
+    static async update_order(ag_test_suite_pk: ID, ag_test_case_order: ID[]): Promise<ID[]> {
         let response = await HttpClient.get_instance().put<ID[]>(
             `/ag_test_suites/${ag_test_suite_pk}/ag_test_cases/order/`, ag_test_case_order);
         AGTestCase.notify_ag_test_case_order_updated(ag_test_suite_pk, response.data);
+        return response.data;
     }
 
     static notify_ag_test_case_order_updated(ag_test_case_pk: ID, ag_test_case_order: ID[]) {
@@ -163,6 +187,7 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
 }
 
 export class NewAGTestCaseData {
+    // IMPORTANT!! If you add fields here, update the whitelist in AGTestCase.copy()
     name: string;
     normal_fdbk_config?: AGTestCaseFeedbackConfig;
     ultimate_submission_fdbk_config?: AGTestCaseFeedbackConfig;

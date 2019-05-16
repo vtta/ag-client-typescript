@@ -1,5 +1,7 @@
 import { Deletable, ID, SaveableAPIObject } from "./base";
+import { HttpClient } from "./http_client";
 import { InstructorFile } from "./instructor_file";
+import { filter_keys, safe_assign } from "./utils";
 
 export class AGTestCommandData {
     pk: ID;
@@ -10,7 +12,7 @@ export class AGTestCommandData {
 
     cmd: string;
 
-    stdin_source: string;
+    stdin_source: StdinSource;
     stdin_text: string;
     stdin_instructor_file: InstructorFile | null;
 
@@ -33,6 +35,8 @@ export class AGTestCommandData {
 
     points_for_correct_stdout: number;
     points_for_correct_stderr: number;
+
+    deduction_for_wrong_return_code: number;
 
     deduction_for_wrong_stdout: number;
     deduction_for_wrong_stderr: number;
@@ -76,6 +80,7 @@ export class AGTestCommandData {
         this.points_for_correct_return_code = args.points_for_correct_return_code;
         this.points_for_correct_stdout = args.points_for_correct_stdout;
         this.points_for_correct_stderr = args.points_for_correct_stderr;
+        this.deduction_for_wrong_return_code = args.deduction_for_wrong_return_code;
         this.deduction_for_wrong_stdout = args.deduction_for_wrong_stdout;
         this.deduction_for_wrong_stderr = args.deduction_for_wrong_stderr;
 
@@ -96,8 +101,8 @@ export interface AGTestCommandObserver {
     update_ag_test_command_created(ag_test_command: AGTestCommand): void;
     update_ag_test_command_changed(ag_test_command: AGTestCommand): void;
     update_ag_test_command_deleted(ag_test_command: AGTestCommand): void;
-    update_ag_test_commands_order_changed(ag_test_command_order: number[],
-                                          ag_test_case_pk: number): void;
+    update_ag_test_commands_order_changed(ag_test_case_pk: number,
+                                          ag_test_command_order: number[]): void;
 }
 
 export class AGTestCommand extends AGTestCommandData implements SaveableAPIObject, Deletable {
@@ -112,15 +117,23 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
     }
 
     static async get_all_from_ag_test_case(ag_test_case_pk: ID): Promise<AGTestCommand[]> {
-
+        let response = await HttpClient.get_instance().get<AGTestCommandData[]>(
+            `/ag_test_cases/${ag_test_case_pk}/ag_test_commands/`);
+        return response.data.map((data) => new AGTestCommand(data));
     }
 
     static async get_by_pk(ag_test_command_pk: ID): Promise<AGTestCommand> {
-
+        let response = await HttpClient.get_instance().get<AGTestCommandData>(
+            `/ag_test_commands/${ag_test_command_pk}/`);
+        return new AGTestCommand(response.data);
     }
 
     static async create(ag_test_case_pk: ID, data: NewAGTestCommandData): Promise<AGTestCommand> {
-
+        let response = await HttpClient.get_instance().post<AGTestCommandData>(
+            `/ag_test_cases/${ag_test_case_pk}/ag_test_commands/`, data);
+        let result = new AGTestCommand(response.data);
+        AGTestCommand.notify_ag_test_command_created(result);
+        return result;
     }
 
     static notify_ag_test_command_created(ag_test_command: AGTestCommand) {
@@ -130,11 +143,21 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
     }
 
     async save(): Promise<void> {
-
+        let response = await HttpClient.get_instance().patch<AGTestCommandData>(
+            `/ag_test_commands/${this.pk}/`, filter_keys(this, AGTestCommand.EDITABLE_FIELDS));
+        safe_assign(this, new AGTestCommand(response.data));
+        AGTestCommand.notify_ag_test_command_changed(this);
     }
 
     async refresh(): Promise<void> {
+        let last_modified = this.last_modified;
 
+        let reloaded = await AGTestCommand.get_by_pk(this.pk);
+        safe_assign(this, reloaded);
+
+        if (last_modified !== this.last_modified) {
+            AGTestCommand.notify_ag_test_command_changed(this);
+        }
     }
 
     static notify_ag_test_command_changed(ag_test_command: AGTestCommand) {
@@ -144,7 +167,8 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
     }
 
     async delete(): Promise<void> {
-
+        await HttpClient.get_instance().delete(`/ag_test_commands/${this.pk}/`);
+        AGTestCommand.notify_ag_test_command_deleted(this);
     }
 
     static notify_ag_test_command_deleted(ag_test_command: AGTestCommand) {
@@ -154,17 +178,23 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
     }
 
     static async get_order(ag_test_case_pk: ID): Promise<ID[]> {
+        let response = await HttpClient.get_instance().get<ID[]>(
+            `/ag_test_cases/${ag_test_case_pk}/ag_test_commands/order/`);
+        return response.data;
 
     }
 
-    static async update_order(ag_test_case_pk: ID, ag_test_command_order: ID[]): Promise<ID> {
-
+    static async update_order(ag_test_case_pk: ID, ag_test_command_order: ID[]): Promise<ID[]> {
+        let response = await HttpClient.get_instance().put<ID[]>(
+            `/ag_test_cases/${ag_test_case_pk}/ag_test_commands/order/`, ag_test_command_order);
+        AGTestCommand.notify_ag_test_command_order_updated(ag_test_case_pk, response.data);
+        return response.data;
     }
 
-    static notify_ag_test_command_order_updated(ag_test_command_order: ID[], ag_test_case_pk: ID) {
+    static notify_ag_test_command_order_updated(ag_test_case_pk: ID, ag_test_command_order: ID[]) {
         for (let subscriber of AGTestCommand._subscribers) {
             subscriber.update_ag_test_commands_order_changed(
-                ag_test_command_order, ag_test_case_pk);
+                ag_test_case_pk, ag_test_command_order);
         }
     }
 
@@ -195,6 +225,8 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
 
         'points_for_correct_stdout',
         'points_for_correct_stderr',
+
+        'deduction_for_wrong_return_code',
 
         'deduction_for_wrong_stdout',
         'deduction_for_wrong_stderr',
@@ -240,6 +272,8 @@ export class NewAGTestCommandData {
     points_for_correct_stdout?: number;
     points_for_correct_stderr?: number;
 
+    deduction_for_wrong_return_code?: number;
+
     deduction_for_wrong_stdout?: number;
     deduction_for_wrong_stderr?: number;
 
@@ -278,6 +312,7 @@ export class NewAGTestCommandData {
         this.points_for_correct_return_code = args.points_for_correct_return_code;
         this.points_for_correct_stdout = args.points_for_correct_stdout;
         this.points_for_correct_stderr = args.points_for_correct_stderr;
+        this.deduction_for_wrong_return_code = args.deduction_for_wrong_return_code;
         this.deduction_for_wrong_stdout = args.deduction_for_wrong_stdout;
         this.deduction_for_wrong_stderr = args.deduction_for_wrong_stderr;
 
