@@ -147,9 +147,8 @@ export class AGTestSuite extends AGTestSuiteCoreData implements SaveableAPIObjec
     async refresh(): Promise<void> {
         let last_modified = this.last_modified;
 
-        let response = await HttpClient.get_instance().get<AGTestSuiteData>(
-            `/ag_test_suites/${this.pk}/`);
-        safe_assign(this, new AGTestSuite(response.data));
+        let reloaded = await AGTestSuite.get_by_pk(this.pk);
+        safe_assign(this, reloaded);
 
         if (last_modified !== this.last_modified) {
             AGTestSuite.notify_ag_test_suite_changed(this);

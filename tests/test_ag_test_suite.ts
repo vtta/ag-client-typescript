@@ -230,14 +230,7 @@ describe('AGTestSuite API tests', () => {
     beforeEach(async () => {
        reset_db();
        make_superuser();
-       let course: Course;
-       try {
-            course = await Course.create({name: 'Coursey'});
-       }
-       catch (e) {
-           console.log(e.response);
-           throw e;
-       }
+       let course = await Course.create({name: 'Coursey'});
        project = await Project.create(course.pk, {name: 'Projy'});
 
        let make_suites = `
@@ -354,7 +347,7 @@ print(image.pk)
     });
 
     test('Save AG test suite', async () => {
-        let suite = await AGTestSuite.create(project.pk, {name: 'Very Suite'});
+        let suite = (await AGTestSuite.get_all_from_project(project.pk))[0];
         suite.name = 'Renamed';
         suite.setup_suite_cmd = './compile.exe';
         await suite.save();
@@ -378,7 +371,7 @@ print(image.pk)
     });
 
     test('Refresh AG test suite', async () => {
-        let suite = await AGTestSuite.create(project.pk, {name: 'Spam Suite'});
+        let suite = (await AGTestSuite.get_all_from_project(project.pk))[0];
 
         await suite.refresh();
         expect(observer.changed_count).toEqual(0);

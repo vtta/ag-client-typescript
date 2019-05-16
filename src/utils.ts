@@ -1,4 +1,4 @@
-export function filter_keys<T, Key extends keyof T>(data: T, include_keys: Key[]): Partial<T> {
+export function filter_keys<T, Key extends keyof T>(data: T, include_keys: ReadonlyArray<Key>): Partial<T> {
     let result: Partial<T> = {};
     for (let key of include_keys) {
         result[key] = data[key];

@@ -1,5 +1,7 @@
-import { AGTestCommandData, AGTestCommand } from "./ag_test_command";
-import { SaveableAPIObject, Deletable, ID } from "./base";
+import { AGTestCommand, AGTestCommandData } from "./ag_test_command";
+import { Deletable, ID, SaveableAPIObject } from "./base";
+import { HttpClient } from "./http_client";
+import { filter_keys, safe_assign } from "./utils";
 
 class AGTestCaseCoreData {
     pk: ID;
@@ -42,8 +44,8 @@ export interface AGTestCaseObserver {
     update_ag_test_case_created(ag_test_case: AGTestCase): void;
     update_ag_test_case_changed(ag_test_case: AGTestCase): void;
     update_ag_test_case_deleted(ag_test_case: AGTestCase): void;
-    update_ag_test_cases_order_changed(ag_test_case_order: number[],
-                                       ag_test_suite_pk: number): void;
+    update_ag_test_cases_order_changed(ag_test_suite_pk: number,
+                                       ag_test_case_order: number[]): void;
 }
 
 export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject, Deletable {
@@ -71,15 +73,23 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
     }
 
     static async get_all_from_ag_test_suite(ag_test_suite_pk: ID): Promise<AGTestCase[]> {
-
+        let response = await HttpClient.get_instance().get<AGTestCaseData[]>(
+            `/ag_test_suites/${ag_test_suite_pk}/ag_test_cases/`);
+        return response.data.map((data) => new AGTestCase(data));
     }
 
     static async get_by_pk(ag_test_case_pk: ID): Promise<AGTestCase> {
-
+        let response = await HttpClient.get_instance().get<AGTestCaseData>(
+            `/ag_test_cases/${ag_test_case_pk}/`);
+        return new AGTestCase(response.data);
     }
 
     static async create(ag_test_suite_pk: ID, data: NewAGTestCaseData): Promise<AGTestCase> {
-
+        let response = await HttpClient.get_instance().post<AGTestCaseData>(
+            `/ag_test_suites/${ag_test_suite_pk}/ag_test_cases/`, data);
+        let result = new AGTestCase(response.data);
+        AGTestCase.notify_ag_test_case_created(result);
+        return result;
     }
 
     static notify_ag_test_case_created(ag_test_case: AGTestCase) {
@@ -89,11 +99,21 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
     }
 
     async save(): Promise<void> {
-
+        let response = await HttpClient.get_instance().patch<AGTestCaseData>(
+            `/ag_test_cases/${this.pk}/`, filter_keys(this, AGTestCase.EDITABLE_FIELDS));
+        safe_assign(this, new AGTestCase(response.data));
+        AGTestCase.notify_ag_test_case_changed(this);
     }
 
     async refresh(): Promise<void> {
+        let last_modified = this.last_modified;
 
+        let reloaded = await AGTestCase.get_by_pk(this.pk);
+        safe_assign(this, reloaded);
+
+        if (last_modified !== this.last_modified) {
+            AGTestCase.notify_ag_test_case_changed(this);
+        }
     }
 
     static notify_ag_test_case_changed(ag_test_case: AGTestCase) {
@@ -103,7 +123,8 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
     }
 
     async delete(): Promise<void> {
-
+        await HttpClient.get_instance().delete(`/ag_test_cases/${this.pk}/`);
+        AGTestCase.notify_ag_test_case_deleted(this);
     }
 
     static notify_ag_test_case_deleted(ag_test_case: AGTestCase) {
@@ -113,19 +134,32 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
     }
 
     static async get_order(ag_test_suite_pk: ID): Promise<ID[]> {
-
+        let response = await HttpClient.get_instance().get<ID[]>(
+            `/ag_test_suites/${ag_test_suite_pk}/ag_test_cases/order/`);
+        return response.data;
     }
 
     static async update_order(ag_test_suite_pk: ID, ag_test_case_order: ID[]): Promise<ID> {
-
+        let response = await HttpClient.get_instance().put<ID[]>(
+            `/ag_test_suites/${ag_test_suite_pk}/ag_test_cases/order/`, ag_test_case_order);
+        AGTestCase.notify_ag_test_case_order_updated(ag_test_suite_pk, response.data);
     }
 
-    static notify_ag_test_case_order_updated(ag_test_case_order: ID[], ag_test_case_pk: ID) {
+    static notify_ag_test_case_order_updated(ag_test_case_pk: ID, ag_test_case_order: ID[]) {
         for (let subscriber of AGTestCase._subscribers) {
             subscriber.update_ag_test_cases_order_changed(
-                ag_test_case_order, ag_test_case_pk);
+                ag_test_case_pk, ag_test_case_order);
         }
     }
+
+    static readonly EDITABLE_FIELDS: ReadonlyArray<(keyof AGTestCase)> = [
+        'name',
+        'ag_test_suite',  // Editing this changes the suite the test belongs to.
+        'normal_fdbk_config',
+        'ultimate_submission_fdbk_config',
+        'past_limit_submission_fdbk_config',
+        'staff_viewer_fdbk_config',
+    ];
 }
 
 export class NewAGTestCaseData {

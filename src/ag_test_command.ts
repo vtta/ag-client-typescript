@@ -1,28 +1,28 @@
-import { SaveableAPIObject, Deletable, ID } from "./base";
+import { Deletable, ID, SaveableAPIObject } from "./base";
 import { InstructorFile } from "./instructor_file";
 
 export class AGTestCommandData {
     pk: ID;
-    name: string
+    name: string;
 
     ag_test_case: ID;
     last_modified: string;
 
-    cmd: string
+    cmd: string;
 
     stdin_source: string;
     stdin_text: string;
-    stdin_instructor_file: InstructorFile;
+    stdin_instructor_file: InstructorFile | null;
 
     expected_return_code: ExpectedReturnCode;
 
     expected_stdout_source: ExpectedOutputSource;
     expected_stdout_text: string;
-    expected_stdout_instructor_file: InstructorFile;
+    expected_stdout_instructor_file: InstructorFile | null;
 
     expected_stderr_source: ExpectedOutputSource;
-    expected_stderr_text: string
-    expected_stderr_instructor_file: InstructorFile;
+    expected_stderr_text: string;
+    expected_stderr_instructor_file: InstructorFile | null;
 
     ignore_case: boolean;
     ignore_whitespace: boolean;
@@ -38,7 +38,7 @@ export class AGTestCommandData {
     deduction_for_wrong_stderr: number;
 
     normal_fdbk_config: AGTestCommandFeedbackConfig;
-    first_failed_test_normal_fdbk_config: AGTestCommandFeedbackConfig;
+    first_failed_test_normal_fdbk_config: AGTestCommandFeedbackConfig | null;
     ultimate_submission_fdbk_config: AGTestCommandFeedbackConfig;
     past_limit_submission_fdbk_config: AGTestCommandFeedbackConfig;
     staff_viewer_fdbk_config: AGTestCommandFeedbackConfig;
@@ -213,22 +213,22 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
 }
 
 export class NewAGTestCommandData {
-    name: string
-    cmd: string
+    name: string;
+    cmd: string;
 
     stdin_source?: string;
     stdin_text?: string;
-    stdin_instructor_file?: InstructorFile;
+    stdin_instructor_file?: InstructorFile | null;
 
     expected_return_code?: ExpectedReturnCode;
 
     expected_stdout_source?: ExpectedOutputSource;
     expected_stdout_text?: string;
-    expected_stdout_instructor_file?: InstructorFile;
+    expected_stdout_instructor_file?: InstructorFile | null;
 
     expected_stderr_source?: ExpectedOutputSource;
-    expected_stderr_text?: string
-    expected_stderr_instructor_file?: InstructorFile;
+    expected_stderr_text?: string;
+    expected_stderr_instructor_file?: InstructorFile | null;
 
     ignore_case?: boolean;
     ignore_whitespace?: boolean;
@@ -244,7 +244,7 @@ export class NewAGTestCommandData {
     deduction_for_wrong_stderr?: number;
 
     normal_fdbk_config?: AGTestCommandFeedbackConfig;
-    first_failed_test_normal_fdbk_config?: AGTestCommandFeedbackConfig;
+    first_failed_test_normal_fdbk_config?: AGTestCommandFeedbackConfig | null;
     ultimate_submission_fdbk_config?: AGTestCommandFeedbackConfig;
     past_limit_submission_fdbk_config?: AGTestCommandFeedbackConfig;
     staff_viewer_fdbk_config?: AGTestCommandFeedbackConfig;
