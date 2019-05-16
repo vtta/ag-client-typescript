@@ -5,7 +5,7 @@ import {
     AGTestSuite,
     Course,
     ExpectedOutputSource,
-    ExpectedReturnCode,
+    ExpectedReturnCode, NewAGTestCaseData,
     Project,
     StdinSource,
     ValueFeedbackLevel
@@ -274,13 +274,16 @@ AGTestCase.objects.all().delete()
         let past_limit_submission_fdbk = make_random_fdbk_config();
         let staff_viewer_fdbk = make_random_fdbk_config();
 
-        let ag_test_case = await AGTestCase.create(ag_test_suite.pk, {
-            name: 'A case',
-            normal_fdbk_config: normal_fdbk,
-            ultimate_submission_fdbk_config: ultimate_submission_fdbk,
-            past_limit_submission_fdbk_config: past_limit_submission_fdbk,
-            staff_viewer_fdbk_config: staff_viewer_fdbk,
-        });
+        let ag_test_case = await AGTestCase.create(
+            ag_test_suite.pk,
+            new NewAGTestCaseData({
+                name: 'A case',
+                normal_fdbk_config: normal_fdbk,
+                ultimate_submission_fdbk_config: ultimate_submission_fdbk,
+                past_limit_submission_fdbk_config: past_limit_submission_fdbk,
+                staff_viewer_fdbk_config: staff_viewer_fdbk,
+            })
+        );
 
         expect(ag_test_case.name).toEqual('A case');
         expect(ag_test_case.normal_fdbk_config).toEqual(normal_fdbk);

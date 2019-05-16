@@ -8,7 +8,7 @@ import {
 
     Course,
     ExpectedStudentFile,
-    InstructorFile,
+    InstructorFile, NewAGTestSuiteData,
     Project,
 
     SandboxDockerImageData
@@ -292,7 +292,7 @@ print(image.pk)
         let staff_viewer_fdbk = make_random_feedback_config();
         let suite = await AGTestSuite.create(
             project.pk,
-            {
+            new NewAGTestSuiteData({
                 name: 'A suite',
                 instructor_files_needed: [instructor_file],
                 student_files_needed: [expected_student_file],
@@ -306,7 +306,7 @@ print(image.pk)
                 ultimate_submission_fdbk_config: ultimate_submission_fdbk,
                 past_limit_submission_fdbk_config: past_limit_submission_fdbk,
                 staff_viewer_fdbk_config: staff_viewer_fdbk,
-            }
+            })
         );
 
         expect(suite.name).toEqual('A suite');

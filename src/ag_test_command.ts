@@ -288,7 +288,7 @@ export class NewAGTestCommandData {
     virtual_memory_limit?: number;
     process_spawn_limit?: number;
 
-    constructor(args: AGTestCommandData) {
+    constructor(args: NewAGTestCommandData) {
         this.name = args.name;
         this.cmd = args.cmd;
 

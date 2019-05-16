@@ -6,6 +6,7 @@ import {
     Project, StdinSource,
     ValueFeedbackLevel
 } from "..";
+import { NewAGTestCommandData } from "../src/ag_test_command";
 
 import {
     global_setup,
@@ -304,50 +305,53 @@ AGTestCommand.objects.all().delete()
         let past_limit_submission_fdbk = make_random_fdbk_config();
         let staff_viewer_fdbk = make_random_fdbk_config();
 
-        let cmd = await AGTestCommand.create(ag_test_case.pk, {
-            name: 'some cmd',
-            cmd: 'voop!',
+        let cmd = await AGTestCommand.create(
+            ag_test_case.pk,
+            new NewAGTestCommandData({
+                name: 'some cmd',
+                cmd: 'voop!',
 
-            stdin_source: StdinSource.text,
-            stdin_text: 'weee',
-            stdin_instructor_file: null,
+                stdin_source: StdinSource.text,
+                stdin_text: 'weee',
+                stdin_instructor_file: null,
 
-            expected_return_code: ExpectedReturnCode.zero,
+                expected_return_code: ExpectedReturnCode.zero,
 
-            expected_stdout_source: ExpectedOutputSource.text,
-            expected_stdout_text: 'waaa',
-            expected_stdout_instructor_file: null,
+                expected_stdout_source: ExpectedOutputSource.text,
+                expected_stdout_text: 'waaa',
+                expected_stdout_instructor_file: null,
 
-            expected_stderr_source: ExpectedOutputSource.text,
-            expected_stderr_text: 'wuuuu',
-            expected_stderr_instructor_file: null,
+                expected_stderr_source: ExpectedOutputSource.text,
+                expected_stderr_text: 'wuuuu',
+                expected_stderr_instructor_file: null,
 
-            ignore_case: true,
-            ignore_whitespace: false,
-            ignore_whitespace_changes: false,
-            ignore_blank_lines: true,
+                ignore_case: true,
+                ignore_whitespace: false,
+                ignore_whitespace_changes: false,
+                ignore_blank_lines: true,
 
-            points_for_correct_return_code: 1,
+                points_for_correct_return_code: 1,
 
-            points_for_correct_stdout: 2,
-            points_for_correct_stderr: 3,
+                points_for_correct_stdout: 2,
+                points_for_correct_stderr: 3,
 
-            deduction_for_wrong_return_code: -3,
+                deduction_for_wrong_return_code: -3,
 
-            deduction_for_wrong_stdout: -1,
-            deduction_for_wrong_stderr: -2,
+                deduction_for_wrong_stdout: -1,
+                deduction_for_wrong_stderr: -2,
 
-            normal_fdbk_config: normal_fdbk,
-            first_failed_test_normal_fdbk_config: first_failure_fdbk,
-            ultimate_submission_fdbk_config: ultimate_submission_fdbk,
-            past_limit_submission_fdbk_config: past_limit_submission_fdbk,
-            staff_viewer_fdbk_config: staff_viewer_fdbk,
+                normal_fdbk_config: normal_fdbk,
+                first_failed_test_normal_fdbk_config: first_failure_fdbk,
+                ultimate_submission_fdbk_config: ultimate_submission_fdbk,
+                past_limit_submission_fdbk_config: past_limit_submission_fdbk,
+                staff_viewer_fdbk_config: staff_viewer_fdbk,
 
-            time_limit: 3,
-            stack_size_limit: 10000,
-            virtual_memory_limit: 40000,
-            process_spawn_limit: 2,
-        });
+                time_limit: 3,
+                stack_size_limit: 10000,
+                virtual_memory_limit: 40000,
+                process_spawn_limit: 2,
+            })
+        );
 
         expect(cmd.name).toEqual('some cmd');
         expect(cmd.cmd).toEqual('voop!');

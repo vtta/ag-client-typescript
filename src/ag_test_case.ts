@@ -113,8 +113,9 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
         for (let cmd of this.ag_test_commands) {
             new_case.ag_test_commands.push(
                 await AGTestCommand.create(
-                    this.pk,
-                    <NewAGTestCommandData> filter_keys(cmd, AGTestCommand.EDITABLE_FIELDS))
+                    new_case.pk,
+                    <NewAGTestCommandData> filter_keys(cmd, AGTestCommand.EDITABLE_FIELDS)
+                )
             );
         }
 
