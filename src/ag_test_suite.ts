@@ -1,9 +1,9 @@
-import { HttpClient } from "src/http_client";
-import { filter_keys, safe_assign } from "src/utils";
 import { AGTestCase, AGTestCaseData } from './ag_test_case';
 import { Deletable, ID, SaveableAPIObject } from './base';
 import { ExpectedStudentFile, ExpectedStudentFileData } from './expected_student_file';
+import { HttpClient } from "./http_client";
 import { InstructorFile, InstructorFileData } from './instructor_file';
+import { filter_keys, safe_assign } from "./utils";
 
 export interface SandboxDockerImageData {
     pk: ID;

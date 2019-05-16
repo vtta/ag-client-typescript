@@ -15,7 +15,7 @@ import {
 } from "..";
 
 import {
-    do_editable_fields_test, get_expected_editable_fields,
+    get_expected_editable_fields,
     global_setup,
     make_superuser,
     rand_bool,
