@@ -1,5 +1,6 @@
 import { Refreshable } from "./base";
 import { Course, CourseData } from "./course";
+import { Group, GroupData } from "./group";
 import { HttpClient } from "./http_client";
 import { safe_assign } from "./utils";
 
@@ -49,33 +50,39 @@ export class User extends UserData implements Refreshable {
         return new User(response.data);
     }
 
-    async refresh() {
+    async refresh(): Promise<void> {
         let response = await HttpClient.get_instance().get<UserData>(`/users/${this.pk}/`);
         safe_assign(this, response.data);
     }
 
-    async courses_is_admin_for() {
+    async courses_is_admin_for(): Promise<Course[]> {
         let response = await HttpClient.get_instance().get<CourseData[]>(
             `/users/${this.pk}/courses_is_admin_for/`);
         return response.data.map(course_data => new Course(course_data));
     }
 
-    async courses_is_staff_for() {
+    async courses_is_staff_for(): Promise<Course[]> {
         let response = await HttpClient.get_instance().get<CourseData[]>(
             `/users/${this.pk}/courses_is_staff_for/`);
         return response.data.map(course_data => new Course(course_data));
     }
 
-    async courses_is_student_in() {
+    async courses_is_student_in(): Promise<Course[]> {
         let response = await HttpClient.get_instance().get<CourseData[]>(
             `/users/${this.pk}/courses_is_enrolled_in/`);
         return response.data.map(course_data => new Course(course_data));
     }
 
-    async courses_is_handgrader_for() {
+    async courses_is_handgrader_for(): Promise<Course[]> {
         let response = await HttpClient.get_instance().get<CourseData[]>(
             `/users/${this.pk}/courses_is_handgrader_for/`);
         return response.data.map(course_data => new Course(course_data));
+    }
+
+    async groups_is_member_of(): Promise<Group[]> {
+        let response = await HttpClient.get_instance().get<GroupData[]>(
+            `/users/${this.pk}/groups_is_member_of/`);
+        return response.data.map(data => new Group(data));
     }
 }
 
