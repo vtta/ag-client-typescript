@@ -1,14 +1,13 @@
-import { Course, Group, Project, Semester, User } from "..";
+import { Course, Group, GroupInvitation, Project, Semester, User } from "..";
 
 import { global_setup, make_superuser, reset_db, run_in_django_shell,
          SUPERUSER_NAME } from "./utils";
 
+beforeAll(() => {
+    global_setup();
+});
 
 describe('User tests', () => {
-    beforeAll(() => {
-        global_setup();
-    });
-
     beforeEach(() => {
         reset_db();
     });
@@ -171,7 +170,7 @@ user.user_permissions.add(Permission.objects.get(codename='create_course'))
 
 // ----------------------------------------------------------------------------
 
-describe.only('User reverse relation ship endpoint tests', () => {
+describe('User reverse relation ship endpoint tests', () => {
     beforeEach(() => {
         reset_db();
     });
@@ -278,15 +277,9 @@ for c in Course.objects.all():
         expect(course_names).toEqual(['course1', 'course2', 'course3']);
     });
 
-    test.skip('group invitations received', async () => {
-        fail();
-    });
+    // ------------------------------------------------------------------------
 
-    test.skip('group invitations sent', async () => {
-        fail();
-    });
-
-    test.only('groups is member of', async () => {
+    test('Groups is member of', async () => {
         make_superuser();
         let add_groups = `
 from autograder.core.models import Course, Project, Group
@@ -316,5 +309,59 @@ Group.objects.validate_and_create(members=[user], project=p2)
         expect((await Project.get_by_pk(groups[0].pk)).name).toEqual('P1');
         expect((await Project.get_by_pk(groups[1].pk)).name).toEqual('P2');
     });
+});
 
+describe('Group invitations sent and received tests', () => {
+    let user: User;
+    let project: Project;
+
+    beforeEach(async () => {
+        reset_db();
+        make_superuser();
+        user = await User.get_current();
+
+        let course = await Course.create({name: 'Coursey'});
+        project = await Project.create(course.pk, {name: 'Projy', max_group_size: 3});
+
+        let make_users = `
+from django.contrib.auth.models import User
+from autograder.core.models import Course
+
+User.objects.create(username='user1')
+User.objects.create(username='user2')
+
+Course.objects.get(pk=${course.pk}).admins.add(*User.objects.all())
+        `;
+        run_in_django_shell(make_users);
+    });
+
+    test('Group invitations sent', async () => {
+        let invitation = await GroupInvitation.send_invitation(project.pk, ['user1', 'user2']);
+        let invitations_sent = await user.group_invitations_sent();
+        expect(invitations_sent).toEqual([invitation]);
+    });
+
+    test('Group invitations received', async () => {
+        let make_invitation = `
+from django.contrib.auth.models import User
+from autograder.core.models import GroupInvitation, Project
+
+invitor = User.objects.get(username='user1')
+invitee = User.objects.get(username='${SUPERUSER_NAME}')
+
+invitation = GroupInvitation.objects.validate_and_create(
+    project=Project.objects.get(pk=${project.pk}),
+    invitation_creator=invitor,
+    invited_users=[invitee]
+)
+
+print(invitation.pk)
+        `;
+
+        let result = run_in_django_shell(make_invitation);
+        let invitation = await GroupInvitation.get_by_pk(parseInt(result.stdout, 10));
+
+        let invitations_received = await user.group_invitations_received();
+        expect(invitations_received).toEqual([invitation]);
+    });
 });

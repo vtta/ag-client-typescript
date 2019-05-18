@@ -1,6 +1,7 @@
 import { Refreshable } from "./base";
 import { Course, CourseData } from "./course";
 import { Group, GroupData } from "./group";
+import { GroupInvitation, GroupInvitationData } from "./group_invitation";
 import { HttpClient } from "./http_client";
 import { safe_assign } from "./utils";
 
@@ -83,6 +84,18 @@ export class User extends UserData implements Refreshable {
         let response = await HttpClient.get_instance().get<GroupData[]>(
             `/users/${this.pk}/groups_is_member_of/`);
         return response.data.map(data => new Group(data));
+    }
+
+    async group_invitations_sent(): Promise<GroupInvitation[]> {
+        let response = await HttpClient.get_instance().get<GroupInvitationData[]>(
+            `/users/${this.pk}/group_invitations_sent/`);
+        return response.data.map(data => new GroupInvitation(data));
+    }
+
+    async group_invitations_received(): Promise<GroupInvitation[]> {
+        let response = await HttpClient.get_instance().get<GroupInvitationData[]>(
+            `/users/${this.pk}/group_invitations_received/`);
+        return response.data.map(data => new GroupInvitation(data));
     }
 }
 
