@@ -6,7 +6,8 @@ import {
     make_superuser,
     reset_db,
     run_in_django_shell,
-    sleep
+    sleep,
+    SUPERUSER_NAME
 } from './utils';
 
 beforeAll(() => {
@@ -214,7 +215,7 @@ handgrader_course.handgraders.add(user)
 from django.contrib.auth.models import User
 from autograder.core.models import Course
 
-user = User.objects.get(username='jameslp@umich.edu')
+user = User.objects.get(username='${SUPERUSER_NAME}')
 course = Course.objects.get(pk=${course.pk})
 course.admins.add(user)
         `;
@@ -454,7 +455,7 @@ course.admins.add(*User.objects.all())
         expect(users.length).toEqual(4);
         let usernames = users.map(user => user.username);
         usernames.sort();
-        expect(usernames).toEqual(['admin1', 'admin2', 'admin3', 'jameslp@umich.edu']);
+        expect(usernames).toEqual(['admin1', 'admin2', 'admin3', SUPERUSER_NAME]);
     });
 
     test('Add admins', async () => {
@@ -463,7 +464,7 @@ course.admins.add(*User.objects.all())
         expect(admins.length).toEqual(3);
         let usernames = admins.map(user => user.username);
         usernames.sort();
-        expect(usernames).toEqual(['jameslp@umich.edu', 'new_admin1', 'new_admin2']);
+        expect(usernames).toEqual([SUPERUSER_NAME, 'new_admin1', 'new_admin2']);
     });
 
     test('Remove admins', async () => {
@@ -477,7 +478,7 @@ course.admins.add(*User.objects.all())
         expect(admins.length).toEqual(2);
         let usernames = admins.map(user => user.username);
         usernames.sort();
-        expect(usernames).toEqual(['admin2', 'jameslp@umich.edu']);
+        expect(usernames).toEqual(['admin2', SUPERUSER_NAME]);
     });
 });
 
@@ -504,7 +505,7 @@ User.objects.bulk_create([
 ])
 
 course = Course.objects.get(pk=${course.pk})
-course.staff.add(*User.objects.exclude(username='jameslp@umich.edu'))
+course.staff.add(*User.objects.exclude(username='${SUPERUSER_NAME}'))
         `;
 
         run_in_django_shell(create_users);
@@ -563,7 +564,7 @@ User.objects.bulk_create([
 ])
 
 course = Course.objects.get(pk=${course.pk})
-course.students.add(*User.objects.exclude(username='jameslp@umich.edu'))
+course.students.add(*User.objects.exclude(username='${SUPERUSER_NAME}'))
         `;
 
         run_in_django_shell(create_users);
@@ -635,7 +636,7 @@ User.objects.bulk_create([
 ])
 
 course = Course.objects.get(pk=${course.pk})
-course.handgraders.add(*User.objects.exclude(username='jameslp@umich.edu'))
+course.handgraders.add(*User.objects.exclude(username='${SUPERUSER_NAME}'))
         `;
 
         run_in_django_shell(create_users);

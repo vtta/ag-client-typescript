@@ -1,13 +1,13 @@
-import { Course, Semester, User } from "..";
+import { Course, Group, GroupInvitation, Project, Semester, User } from "..";
 
-import { global_setup, make_superuser, reset_db, run_in_django_shell } from "./utils";
+import { global_setup, make_superuser, reset_db, run_in_django_shell,
+         SUPERUSER_NAME } from "./utils";
 
+beforeAll(() => {
+    global_setup();
+});
 
 describe('User tests', () => {
-    beforeAll(() => {
-        global_setup();
-    });
-
     beforeEach(() => {
         reset_db();
     });
@@ -33,7 +33,7 @@ describe('User tests', () => {
 
     test('get current user', async () => {
         let current_user = await User.get_current();
-        expect(current_user.username).toEqual('jameslp@umich.edu');
+        expect(current_user.username).toEqual(SUPERUSER_NAME);
         expect(current_user.first_name).toEqual('');
         expect(current_user.last_name).toEqual('');
         expect(current_user.email).toEqual('');
@@ -45,7 +45,7 @@ User.objects.filter(pk=${current_user.pk}).update(is_superuser=True)`;
         run_in_django_shell(set_superuser);
 
         current_user = await User.get_current();
-        expect(current_user.username).toEqual('jameslp@umich.edu');
+        expect(current_user.username).toEqual(SUPERUSER_NAME);
         expect(current_user.first_name).toEqual('');
         expect(current_user.last_name).toEqual('');
         expect(current_user.email).toEqual('');
@@ -77,7 +77,7 @@ User.objects.filter(pk=${current_user.pk}).update(is_superuser=True)`;
 
     test('refresh user', async () => {
         let user = await User.get_current();
-        expect(user.username).toEqual('jameslp@umich.edu');
+        expect(user.username).toEqual(SUPERUSER_NAME);
         expect(user.first_name).toEqual('');
         expect(user.last_name).toEqual('');
         expect(user.email).toEqual('');
@@ -89,14 +89,14 @@ User.objects.filter(pk=${user.pk}).update(
     is_superuser=True,
     first_name='James',
     last_name='Perretta',
-    email='jameslp@umich.edu')`;
+    email='${SUPERUSER_NAME}')`;
         run_in_django_shell(set_fields);
 
         await user.refresh();
-        expect(user.username).toEqual('jameslp@umich.edu');
+        expect(user.username).toEqual(SUPERUSER_NAME);
         expect(user.first_name).toEqual('James');
         expect(user.last_name).toEqual('Perretta');
-        expect(user.email).toEqual('jameslp@umich.edu');
+        expect(user.email).toEqual(SUPERUSER_NAME);
         expect(user.is_superuser).toEqual(true);
     });
 
@@ -126,7 +126,7 @@ c = Course.objects.validate_and_create(name='course', semester=Semester.fall, ye
 from autograder.core.models import Course, Semester
 from django.contrib.auth.models import User
 c = Course.objects.validate_and_create(name='course', semester=Semester.fall, year=2020)
-user = User.objects.get(username='jameslp@umich.edu')
+user = User.objects.get(username='${SUPERUSER_NAME}')
 c.admins.add(user)
 c.staff.add(user)
 c.students.add(user)
@@ -147,7 +147,7 @@ c.handgraders.add(user)
     test('Current non-super user has can create courses permission', async () => {
         let make_user = `
 from django.contrib.auth.models import User, Permission
-user = User.objects.get_or_create(username='jameslp@umich.edu')[0]
+user = User.objects.get_or_create(username='${SUPERUSER_NAME}')[0]
 user.user_permissions.add(Permission.objects.get(codename='create_course'))
         `;
         run_in_django_shell(make_user);
@@ -187,7 +187,7 @@ Course.objects.bulk_create([
     Course(name='course3'),
 ])
 
-user = User.objects.get(username='jameslp@umich.edu')
+user = User.objects.get(username='${SUPERUSER_NAME}')
 for c in Course.objects.all():
     c.admins.add(user)
         `;
@@ -213,7 +213,7 @@ Course.objects.bulk_create([
     Course(name='course3'),
 ])
 
-user = User.objects.get(username='jameslp@umich.edu')
+user = User.objects.get(username='${SUPERUSER_NAME}')
 for c in Course.objects.all():
     c.staff.add(user)
         `;
@@ -239,7 +239,7 @@ Course.objects.bulk_create([
     Course(name='course3'),
 ])
 
-user = User.objects.get(username='jameslp@umich.edu')
+user = User.objects.get(username='${SUPERUSER_NAME}')
 for c in Course.objects.all():
     c.students.add(user)
         `;
@@ -265,7 +265,7 @@ Course.objects.bulk_create([
     Course(name='course3'),
 ])
 
-user = User.objects.get(username='jameslp@umich.edu')
+user = User.objects.get(username='${SUPERUSER_NAME}')
 for c in Course.objects.all():
     c.handgraders.add(user)
         `;
@@ -277,16 +277,91 @@ for c in Course.objects.all():
         expect(course_names).toEqual(['course1', 'course2', 'course3']);
     });
 
-    test.skip('group invitations received', async () => {
-        fail();
+    // ------------------------------------------------------------------------
+
+    test('Groups is member of', async () => {
+        make_superuser();
+        let add_groups = `
+from autograder.core.models import Course, Project, Group
+from django.contrib.auth.models import User
+
+user = User.objects.get(username='${SUPERUSER_NAME}')
+
+course = Course.objects.validate_and_create(name='Coursey')
+course.admins.add(user)
+p1 = Project.objects.validate_and_create(name='P1', course=course)
+p2 = Project.objects.validate_and_create(name='P2', course=course)
+
+Group.objects.validate_and_create(members=[user], project=p1)
+Group.objects.validate_and_create(members=[user], project=p2)
+        `;
+        run_in_django_shell(add_groups);
+
+        let user = await User.get_current();
+        let groups = await user.groups_is_member_of();
+        expect(groups.length).toEqual(2);
+        expect(groups[0].member_names).toEqual([SUPERUSER_NAME]);
+        expect(groups[1].member_names).toEqual([SUPERUSER_NAME]);
+
+        expect(groups[0].pk).not.toEqual(groups[1].pk);
+
+        groups.sort((a: Group, b: Group) => a.pk - b.pk);
+        expect((await Project.get_by_pk(groups[0].pk)).name).toEqual('P1');
+        expect((await Project.get_by_pk(groups[1].pk)).name).toEqual('P2');
+    });
+});
+
+describe('Group invitations sent and received tests', () => {
+    let user: User;
+    let project: Project;
+
+    beforeEach(async () => {
+        reset_db();
+        make_superuser();
+        user = await User.get_current();
+
+        let course = await Course.create({name: 'Coursey'});
+        project = await Project.create(course.pk, {name: 'Projy', max_group_size: 3});
+
+        let make_users = `
+from django.contrib.auth.models import User
+from autograder.core.models import Course
+
+User.objects.create(username='user1')
+User.objects.create(username='user2')
+
+Course.objects.get(pk=${course.pk}).admins.add(*User.objects.all())
+        `;
+        run_in_django_shell(make_users);
     });
 
-    test.skip('group invitations sent', async () => {
-        fail();
+    test('Group invitations sent', async () => {
+        let invitation = await GroupInvitation.send_invitation(project.pk, ['user1', 'user2']);
+        let invitations_sent = await user.group_invitations_sent();
+        expect(invitations_sent).toEqual([invitation]);
     });
 
-    test.skip('groups is member of', async () => {
-        fail();
-    });
+    test('Group invitations received', async () => {
+        let make_invitation = `
+from django.contrib.auth.models import User
+from autograder.core.models import GroupInvitation, Project
 
+invitor = User.objects.get(username='user1')
+invitee = User.objects.get(username='${SUPERUSER_NAME}')
+
+invitation = GroupInvitation.objects.validate_and_create(
+    project=Project.objects.get(pk=${project.pk}),
+    invitation_creator=invitor,
+    invited_users=[invitee]
+)
+
+print(invitation.pk)
+        `;
+
+        let result = run_in_django_shell(make_invitation);
+        let invitation = await GroupInvitation.get_by_pk(parseInt(result.stdout, 10));
+
+        let invitations_received = await user.group_invitations_received();
+        expect(invitations_received).toEqual([invitation]);
+    });
 });

@@ -10,7 +10,7 @@ import {
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell, sleep,
+    run_in_django_shell, sleep, SUPERUSER_NAME,
 } from './utils';
 
 beforeAll(() => {
@@ -129,7 +129,7 @@ Group.objects.validate_and_create(project=project, members=[member3, member4])
 
         expect(created).toEqual(actual);
 
-        expect(actual.member_names).toEqual(['jameslp@umich.edu']);
+        expect(actual.member_names).toEqual([SUPERUSER_NAME]);
         expect(actual.extended_due_date).toEqual(null);
         expect(actual.bonus_submissions_remaining).toEqual(0);
         expect(actual.late_days_used).toEqual({});

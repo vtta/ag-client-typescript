@@ -6,7 +6,7 @@ export function global_setup() {
     HttpClient.set_base_url('http://localhost:9000/api/');
     HttpClient.set_default_headers({
         // Note: Make sure the test server is using fake authentication.
-        Cookie: 'username=jameslp@umich.edu'
+        Cookie: `username=${SUPERUSER_NAME}`
     });
 
     child_process.spawnSync(
@@ -60,11 +60,13 @@ export function run_in_django_shell(python_str: string) {
     return {stdout: stdout, stderr: stderr, status: result.status};
 }
 
+export const SUPERUSER_NAME = 'jameslp@umich.edu';
+
 export function make_superuser() {
     let make_superuser_code = `
 from django.contrib.auth.models import User
 
-user = User.objects.get_or_create(username='jameslp@umich.edu')[0]
+user = User.objects.get_or_create(username='${SUPERUSER_NAME}')[0]
 user.is_superuser = True
 user.save()
         `;
