@@ -11,6 +11,7 @@ export { ExpectedStudentFile, ExpectedStudentFileObserver,
          NewExpectedStudentFileData } from './src/expected_student_file';
 export { Group, GroupObserver, NewGroupData } from './src/group';
 export { GroupInvitation } from './src/group_invitation';
+export { GradingStatus, Submission, SubmissionObserver } from './src/submission';
 
 export {
     AGTestCaseData,
