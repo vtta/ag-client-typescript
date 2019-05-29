@@ -31,6 +31,8 @@ export {
     ExpectedReturnCode,
 } from './src/ag_test_command';
 export {
+    get_sandbox_docker_images,
+
     AGTestSuiteCoreData,
     AGTestSuiteData,
     AGTestSuiteObserver,
