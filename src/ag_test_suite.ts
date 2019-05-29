@@ -12,6 +12,12 @@ export interface SandboxDockerImageData {
     display_name: string;
 }
 
+export async function get_sandbox_docker_images(): Promise<SandboxDockerImageData[]> {
+    let response
+        = await HttpClient.get_instance().get<SandboxDockerImageData[]>('/sandbox_docker_images/');
+    return response.data;
+}
+
 export class AGTestSuiteCoreData {
     pk: ID;
     name: string;

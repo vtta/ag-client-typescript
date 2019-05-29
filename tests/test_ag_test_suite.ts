@@ -13,6 +13,8 @@ import {
 
     SandboxDockerImageData
 } from "..";
+import { get_sandbox_docker_images } from "../src/ag_test_suite";
+import { filter_keys } from "../src/utils";
 
 import {
     get_expected_editable_fields,
@@ -25,6 +27,56 @@ import {
 
 beforeAll(() => {
     global_setup();
+});
+
+test('Get sandbox docker images', async () => {
+    let make_images = `
+from autograder.core.models import SandboxDockerImage
+
+# Get rid of the default image
+SandboxDockerImage.objects.all().delete()
+
+SandboxDockerImage.objects.validate_and_create(
+    name='image1',
+    tag='image1:1',
+    display_name='Image 1',
+)
+
+SandboxDockerImage.objects.validate_and_create(
+    name='image2',
+    tag='image2:1',
+    display_name='Image 2',
+)
+
+SandboxDockerImage.objects.validate_and_create(
+    name='image3',
+    tag='image3:1',
+    display_name='Image 3',
+)
+    `;
+    run_in_django_shell(make_images);
+
+    let expected = [
+        {
+            name: 'image1',
+            tag: 'image1:1',
+            display_name: 'Image 1',
+        },
+        {
+            name: 'image2',
+            tag: 'image2:1',
+            display_name: 'Image 2',
+        },
+        {
+            name: 'image3',
+            tag: 'image3:1',
+            display_name: 'Image 3',
+        }
+    ];
+
+    let images = await get_sandbox_docker_images();
+    let actual = images.map((image) => filter_keys(image, ['name', 'tag', 'display_name']));
+    expect(actual).toEqual(expected);
 });
 
 describe('AGTestSuite ctor tests', () => {
