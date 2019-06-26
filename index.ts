@@ -1,4 +1,4 @@
-export { HttpClient } from './src/http_client';
+export { HttpClient, HttpError, HttpResponse } from './src/http_client';
 
 export { AllCourses, Course, CourseObserver, NewCourseData, Semester } from './src/course';
 export { User, UserRoles } from './src/user';
