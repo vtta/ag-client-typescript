@@ -17,11 +17,6 @@ export function global_setup() {
 export function reset_db() {
     // If you add -it to the docker command, be sure to set
     // stdio to ['inherit', ...] for stdin.
-
-    // subprocess_check_call(
-    //     'docker exec typescript-cli-django python3.6 manage.py migrate core zero');
-    // subprocess_check_call(
-    //     'docker exec typescript-cli-django python3.6 manage.py migrate');
     subprocess_check_call(
         'docker exec typescript-cli-django python3.6 manage.py flush --no-input');
 

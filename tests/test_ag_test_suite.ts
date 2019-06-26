@@ -29,6 +29,11 @@ beforeAll(() => {
     global_setup();
 });
 
+beforeEach(() => {
+    reset_db();
+    make_superuser();
+});
+
 test('Get sandbox docker images', async () => {
     let make_images = `
 from autograder.core.models import SandboxDockerImage
@@ -280,8 +285,6 @@ describe('AGTestSuite API tests', () => {
     let observer: TestObserver;
 
     beforeEach(async () => {
-       reset_db();
-       make_superuser();
        let course = await Course.create({name: 'Coursey'});
        project = await Project.create(course.pk, {name: 'Projy'});
 
