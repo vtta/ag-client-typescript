@@ -70,7 +70,7 @@ User.objects.filter(pk=${current_user.pk}).update(is_superuser=True)`;
     test('user by pk not found', async () => {
         return expect(
             User.get_by_pk(10000)
-        ).rejects.toHaveProperty('response.status', 404);
+        ).rejects.toHaveProperty('status', 404);
     });
 
     // ------------------------------------------------------------------------

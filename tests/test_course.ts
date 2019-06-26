@@ -62,7 +62,7 @@ Course.objects.validate_and_create(name='Course', semester=Semester.spring, year
     test('get course by fields not found', async () => {
         return expect(
             Course.get_by_fields('Nope', Semester.fall, 2020)
-        ).rejects.toHaveProperty('response.status', 404);
+        ).rejects.toHaveProperty('status', 404);
     });
 
     test('Get course by pk', async () => {
@@ -84,7 +84,7 @@ Course.objects.validate_and_create(name='EECS 280', semester=Semester.summer, ye
     test('Get course by pk not found', async () => {
         return expect(
             Course.get_by_pk(9000)
-        ).rejects.toHaveProperty('response.status', 404);
+        ).rejects.toHaveProperty('status', 404);
     });
 });
 
