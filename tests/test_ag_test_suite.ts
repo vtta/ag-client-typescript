@@ -385,7 +385,7 @@ print(image.pk)
 
         expect(suite.ag_test_cases).toEqual([]);
 
-        expect(suite).toEqual(observer.suite);
+        expect(observer.suite).toEqual(suite);
         expect(observer.created_count).toEqual(1);
     });
 
@@ -451,6 +451,7 @@ AGTestSuite.objects.get(pk=${suite.pk}).validate_and_update(name='Renamed')
 
         suites = await AGTestSuite.get_all_from_project(project.pk);
         expect(suites.length).toEqual(1);
+        expect(observer.suite).toBeNull();
         expect(observer.deleted_count).toEqual(1);
     });
 
