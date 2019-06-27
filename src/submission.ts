@@ -75,6 +75,12 @@ export class Submission extends SubmissionData implements SaveableAPIObject {
         return response.data.map((data) => new Submission(data));
     }
 
+    static async get_final_graded_submission_from_group(group_pk: ID): Promise<Submission> {
+        let response = await HttpClient.get_instance().get<SubmissionData>(
+            `/groups/${group_pk}/ultimate_submission/`);
+        return new Submission(response.data);
+    }
+
     static async get_by_pk(submission_pk: ID): Promise<Submission> {
         let response = await HttpClient.get_instance().get<SubmissionData>(
             `/submissions/${submission_pk}/`);
