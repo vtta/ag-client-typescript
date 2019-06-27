@@ -282,7 +282,7 @@ StudentTestSuite.objects.all().delete()
         expect(suite.name).toEqual('MutationSuite1');
     });
 
-    test.only('Create MutationTestSuite all params', async () => {
+    test('Create MutationTestSuite all params', async () => {
         let instructor_file = await InstructorFile.create(project.pk, 'Filey', new Blob(['']));
         let expected_student_file = await ExpectedStudentFile.create(project.pk, {pattern: 'wee'});
 
