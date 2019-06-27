@@ -1,6 +1,6 @@
-export { HttpClient } from './src/http_client';
+export { HttpClient, HttpError, HttpResponse } from './src/http_client';
 
-export { Course, CourseObserver, NewCourseData, Semester } from './src/course';
+export { AllCourses, Course, CourseObserver, NewCourseData, Semester } from './src/course';
 export { User, UserRoles } from './src/user';
 
 export { NewProjectData, Project, ProjectObserver,
@@ -33,7 +33,6 @@ export {
 export {
     get_sandbox_docker_images,
 
-    AGTestSuiteCoreData,
     AGTestSuiteData,
     AGTestSuiteObserver,
     AGTestSuite,
@@ -42,6 +41,16 @@ export {
 
     SandboxDockerImageData,
 } from './src/ag_test_suite';
+
+export {
+    BugsExposedFeedbackLevel,
+    MutationTestSuiteData,
+    MutationTestSuiteObserver,
+    MutationTestSuite,
+    MutationTestSuiteFeedbackConfig,
+    NewMutationTestSuiteData,
+
+} from './src/mutation_test_suite';
 
 export { Annotation, AnnotationData, AnnotationObserver,
          NewAnnotationData } from './src/annotation';

@@ -29,6 +29,11 @@ beforeAll(() => {
     global_setup();
 });
 
+beforeEach(() => {
+    reset_db();
+    make_superuser();
+});
+
 test('Get sandbox docker images', async () => {
     let make_images = `
 from autograder.core.models import SandboxDockerImage
@@ -280,8 +285,6 @@ describe('AGTestSuite API tests', () => {
     let observer: TestObserver;
 
     beforeEach(async () => {
-       reset_db();
-       make_superuser();
        let course = await Course.create({name: 'Coursey'});
        project = await Project.create(course.pk, {name: 'Projy'});
 
@@ -385,7 +388,7 @@ print(image.pk)
 
         expect(suite.ag_test_cases).toEqual([]);
 
-        expect(suite).toEqual(observer.suite);
+        expect(observer.suite).toEqual(suite);
         expect(observer.created_count).toEqual(1);
     });
 
@@ -451,6 +454,7 @@ AGTestSuite.objects.get(pk=${suite.pk}).validate_and_update(name='Renamed')
 
         suites = await AGTestSuite.get_all_from_project(project.pk);
         expect(suites.length).toEqual(1);
+        expect(observer.suite).toBeNull();
         expect(observer.deleted_count).toEqual(1);
     });
 

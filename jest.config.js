@@ -20,6 +20,7 @@ module.exports = {
 
     collectCoverage: true,
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
+    coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/src/http_client.ts"],
     coverageThreshold: {
         global: {
             branches: 95,

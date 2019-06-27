@@ -3,15 +3,13 @@ import * as child_process from 'child_process';
 import { HttpClient } from "..";
 
 export function global_setup() {
-    HttpClient.set_base_url('http://localhost:9000/api/');
-    HttpClient.set_default_headers({
+    HttpClient.get_instance().set_base_url('http://localhost:9000/api/');
+    HttpClient.get_instance().set_default_headers({
         // Note: Make sure the test server is using fake authentication.
         Cookie: `username=${SUPERUSER_NAME}`
     });
 
-    child_process.spawnSync(
-        'docker exec typescript-cli-django python3.6 manage.py migrate',
-        {shell: true});
+    subprocess_check_call('docker exec typescript-cli-django python3.6 manage.py migrate');
 }
 
 // Flushes all data from the test database and deletes the
@@ -19,22 +17,17 @@ export function global_setup() {
 export function reset_db() {
     // If you add -it to the docker command, be sure to set
     // stdio to ['inherit', ...] for stdin.
-    child_process.spawnSync(
-        'docker exec typescript-cli-django python3.6 manage.py flush --no-input',
-        {shell: true});
+    subprocess_check_call(
+        'docker exec typescript-cli-django python3.6 manage.py flush --no-input');
 
-    child_process.spawnSync(
-        'docker exec typescript-cli-django rm -r /usr/src/app/media_root_dev',
-        {shell: true});
+    subprocess_check_call('docker exec typescript-cli-django rm -rf /usr/src/app/media_root_dev');
 
-    child_process.spawnSync(
+    subprocess_check_call(
         'docker exec typescript-cli-django python3.6 manage.py shell '
-        + '-c "from django.core.cache import cache; cache.clear()"',
-        {shell: true});
+        + '-c "from django.core.cache import cache; cache.clear()"');
 
-    // We can't drop and delete the database, and there's currently a problem with one
-    // of the migrations being irreversible (no reverse function was specified). Because of
-    // these things, we will just manually re-create it here.
+    // We can't drop and delete the database, and flushing is faster than
+    // reversing and re-applying migrations so we'll just manually re-create it here.
     let recreate_default_sandbox_image = `
 import autograder_sandbox
 from autograder.core.models import SandboxDockerImage
@@ -54,10 +47,19 @@ export function run_in_django_shell(python_str: string) {
     let stdout = result.stdout.toString();
     let stderr = result.stderr.toString();
     if (result.status !== 0) {
-        console.log(result.status);
-        console.log(stderr);
+        throw new Error('Running Django shell code failed:\n' + stdout + '\n' + stderr);
     }
     return {stdout: stdout, stderr: stderr, status: result.status};
+}
+
+// Runs the given command as a subprocess and throws an exception if the command fails.
+function subprocess_check_call(cmd: string) {
+    let result = child_process.spawnSync(cmd, {shell: true});
+    let stdout = result.stdout.toString();
+    let stderr = result.stderr.toString();
+    if (result.status !== 0) {
+        throw new Error(`Command "${cmd}" exited nonzero:\n${stdout}\n${stderr}`);
+    }
 }
 
 export const SUPERUSER_NAME = 'jameslp@umich.edu';

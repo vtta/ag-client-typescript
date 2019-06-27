@@ -6,7 +6,7 @@ import {
     Project, StdinSource,
     ValueFeedbackLevel
 } from "..";
-import { NewAGTestCommandData } from "../src/ag_test_command";
+import { AGTestCommandFeedbackConfig, NewAGTestCommandData } from "../src/ag_test_command";
 
 import {
     global_setup,
@@ -236,7 +236,7 @@ class TestObserver implements AGTestCommandObserver {
     }
 }
 
-function make_random_fdbk_config() {
+function make_random_fdbk_config(): AGTestCommandFeedbackConfig {
     return {
         visible: rand_bool(),
         return_code_fdbk_level: Object.values(ValueFeedbackLevel)[rand_int(2)],
