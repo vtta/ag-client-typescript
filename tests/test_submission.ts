@@ -5,7 +5,8 @@ import {
     Group,
     Project,
     Submission,
-    SubmissionObserver
+    SubmissionObserver,
+    UltimateSubmissionPolicy
 } from "..";
 
 import {
@@ -13,7 +14,8 @@ import {
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell, sleep,
+    run_in_django_shell,
+    sleep,
     SUPERUSER_NAME
 } from "./utils";
 
@@ -22,12 +24,13 @@ beforeAll(() => {
 });
 
 let group: Group;
+let project: Project;
 
 beforeEach(async () => {
     reset_db();
     make_superuser();
     let course = await Course.create({name: 'Course'});
-    let project = await Project.create(course.pk, {name: 'Project'});
+    project = await Project.create(course.pk, {name: 'Project'});
     await ExpectedStudentFile.create(project.pk, {pattern: '*', max_num_matches: 10});
     group = await Group.create_solo_group(project.pk);
 });
@@ -228,5 +231,67 @@ s.save()
 
     test('Editable fields', () => {
         do_editable_fields_test(Submission, 'Submission');
+    });
+});
+
+describe('Get final graded submission tests', () => {
+    let best: Submission;
+    let most_recent: Submission;
+
+    beforeEach(async () => {
+        let make_tests = `
+from autograder.core.models import Project
+import autograder.utils.testing.model_obj_builders as obj_build
+
+obj_build.make_full_ag_test_command(
+    obj_build.make_ag_test_case(
+        obj_build.make_ag_test_suite(
+            Project.objects.get(pk=${group.project})
+        )
+    )
+)
+       `;
+        run_in_django_shell(make_tests);
+
+        best = await Submission.create(group.pk, []);
+        let make_best_results = `
+from autograder.core.models import AGTestCommand, Submission
+import autograder.utils.testing.model_obj_builders as obj_build
+from autograder.core.submission_feedback import update_denormalized_ag_test_results
+
+submission = Submission.objects.get(pk=${best.pk})
+assert AGTestCommand.objects.count() == 1
+obj_build.make_correct_ag_test_command_result(AGTestCommand.objects.first(), submission=submission)
+submission.status = Submission.GradingStatus.finished_grading
+submission.save()
+update_denormalized_ag_test_results(submission.pk)
+       `;
+        run_in_django_shell(make_best_results);
+
+        most_recent = await Submission.create(group.pk, []);
+
+        let mark_finished = `
+from autograder.core.models import Submission
+submission = Submission.objects.get(pk=${most_recent.pk})
+submission.status = Submission.GradingStatus.finished_grading
+submission.save()
+        `;
+        run_in_django_shell(mark_finished);
+   });
+
+    test('Get final graded submission', async () => {
+        project.ultimate_submission_policy = UltimateSubmissionPolicy.most_recent;
+        await project.save();
+
+        let actual_most_recent = await Submission.get_final_graded_submission_from_group(group.pk);
+        await most_recent.refresh();
+        expect(actual_most_recent).toEqual(most_recent);
+
+        project.ultimate_submission_policy = UltimateSubmissionPolicy.best;
+        await project.save();
+
+        let actual_best = await Submission.get_final_graded_submission_from_group(group.pk);
+        await best.refresh();
+        expect(actual_best).toEqual(best);
     });
 });
