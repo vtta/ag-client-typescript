@@ -26,7 +26,7 @@ export class HttpClient {
 
     async get<T = unknown>(url: string): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.get(url));
+            return new HttpResponse(await this._axios_instance.get<T>(url));
         }
         catch (e) {
             let response = get_axios_response(e);
@@ -36,7 +36,7 @@ export class HttpClient {
 
     async post<T = unknown>(url: string, data?: unknown): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.post(url, data));
+            return new HttpResponse(await this._axios_instance.post<T>(url, data));
         }
         catch (e) {
             let response = get_axios_response(e);
@@ -46,7 +46,7 @@ export class HttpClient {
 
     async put<T = unknown>(url: string, data?: unknown): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.put(url, data));
+            return new HttpResponse(await this._axios_instance.put<T>(url, data));
         }
         catch (e) {
             let response = get_axios_response(e);
@@ -56,7 +56,7 @@ export class HttpClient {
 
     async patch<T = unknown>(url: string, data?: unknown): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.patch(url, data));
+            return new HttpResponse(await this._axios_instance.patch<T>(url, data));
         }
         catch (e) {
             let response = get_axios_response(e);
@@ -88,7 +88,7 @@ function get_axios_response(error: unknown): AxiosResponse {
     return response;
 }
 
-export class HttpResponse<T> {
+export class HttpResponse<T = unknown> {
     data: T;
     status: number;
     headers: unknown;
@@ -102,12 +102,12 @@ export class HttpResponse<T> {
 
 export class HttpError extends Error {
     status: number;
-    data: unknown;
+    data: object | string;
 
     // See https://github.com/Microsoft/TypeScript/issues/13965
     __proto__: Error; // tslint:disable-line
 
-    constructor(status: number, data: unknown) {
+    constructor(status: number, data: object | string) {
         const actual_proto = new.target.prototype;
         super('HTTP response error: ' + status);
         this.__proto__ = actual_proto;
