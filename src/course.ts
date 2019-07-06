@@ -1,5 +1,5 @@
 import { SaveableAPIObject } from "./base";
-import { HttpClient } from "./http_client";
+import { HttpClient, HttpResponse } from "./http_client";
 import { User, UserData } from "./user";
 import { filter_keys, safe_assign } from "./utils";
 
@@ -155,12 +155,12 @@ export class Course extends CourseData implements SaveableAPIObject {
         return response.data.map(user_data => new User(user_data));
     }
 
-    add_admins(usernames: string[]) {
+    add_admins(usernames: string[]): Promise<HttpResponse> {
         return HttpClient.get_instance().post(
             `/courses/${this.pk}/admins/`, {'new_admins': usernames});
     }
 
-    remove_admins(users: User[]) {
+    remove_admins(users: User[]): Promise<HttpResponse> {
         return HttpClient.get_instance().patch(
             `/courses/${this.pk}/admins/`, {'remove_admins': users});
     }
@@ -171,12 +171,12 @@ export class Course extends CourseData implements SaveableAPIObject {
         return response.data.map(user_data => new User(user_data));
     }
 
-    add_staff(usernames: string[]) {
+    add_staff(usernames: string[]): Promise<HttpResponse> {
         return HttpClient.get_instance().post(
             `/courses/${this.pk}/staff/`, {'new_staff': usernames});
     }
 
-    remove_staff(users: User[]) {
+    remove_staff(users: User[]): Promise<HttpResponse> {
         return HttpClient.get_instance().patch(
             `/courses/${this.pk}/staff/`, {'remove_staff': users});
     }
@@ -187,17 +187,17 @@ export class Course extends CourseData implements SaveableAPIObject {
         return response.data.map(user_data => new User(user_data));
     }
 
-    add_students(usernames: string[]) {
+    add_students(usernames: string[]): Promise<HttpResponse> {
         return HttpClient.get_instance().post(
             `/courses/${this.pk}/students/`, {'new_students': usernames});
     }
 
-    remove_students(users: User[]) {
+    remove_students(users: User[]): Promise<HttpResponse> {
         return HttpClient.get_instance().patch(
             `/courses/${this.pk}/students/`, {'remove_students': users});
     }
 
-    set_students(usernames: string[]) {
+    set_students(usernames: string[]): Promise<HttpResponse> {
         return HttpClient.get_instance().put(
             `/courses/${this.pk}/students/`, {'new_students': usernames});
     }
@@ -208,12 +208,12 @@ export class Course extends CourseData implements SaveableAPIObject {
         return response.data.map(user_data => new User(user_data));
     }
 
-    add_handgraders(usernames: string[]) {
+    add_handgraders(usernames: string[]): Promise<HttpResponse> {
         return HttpClient.get_instance().post(
             `/courses/${this.pk}/handgraders/`, {'new_handgraders': usernames});
     }
 
-    remove_handgraders(users: User[]) {
+    remove_handgraders(users: User[]): Promise<HttpResponse> {
         return HttpClient.get_instance().patch(
             `/courses/${this.pk}/handgraders/`, {'remove_handgraders': users});
     }
