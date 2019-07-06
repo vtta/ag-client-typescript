@@ -102,12 +102,12 @@ export class HttpResponse<T> {
 
 export class HttpError extends Error {
     status: number;
-    data: object;
+    data: unknown;
 
     // See https://github.com/Microsoft/TypeScript/issues/13965
     __proto__: Error; // tslint:disable-line
 
-    constructor(status: number, data: object) {
+    constructor(status: number, data: unknown) {
         const actual_proto = new.target.prototype;
         super('HTTP response error: ' + status);
         this.__proto__ = actual_proto;
