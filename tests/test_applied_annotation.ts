@@ -98,11 +98,9 @@ describe('List/create applied annotation result tests', () => {
         expect(expected_student_file.pk).toEqual(6);
         expect(expected_student_file.last_modified).toEqual(now);
         expect(expected_student_file.location).toEqual({
-            pk: 1,
             first_line: 1,
             last_line: 2,
             filename: "f1.txt",
-            last_modified: now
         });
         expect(expected_student_file.annotation).toEqual(annotation);
         expect(expected_student_file.handgrading_result).toEqual(handgrading_result.pk);
