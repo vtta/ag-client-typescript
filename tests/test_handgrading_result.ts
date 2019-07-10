@@ -148,11 +148,9 @@ describe('List/create handgrading result tests', () => {
                 pk: 2,
                 last_modified: now,
                 location: {
-                    pk: 2,
                     first_line: 2,
                     last_line: 3,
                     filename: 'file1.txt',
-                    last_modified: now,
                 },
                 annotation: annotations[1],
                 handgrading_result: 22,
@@ -197,7 +195,6 @@ describe('List/create handgrading result tests', () => {
                 pk: 2,
                 last_modified: now,
                 location: {
-                    pk: 2,
                     first_line: 3,
                     last_line: 4,
                     filename: 'file1.txt',

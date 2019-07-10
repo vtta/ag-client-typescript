@@ -82,18 +82,10 @@ export class AppliedAnnotation extends AppliedAnnotationData implements Deletabl
 
 export interface NewAppliedAnnotationData {
     annotation: number;
-    location: NewLocationData;
+    location: Location;
 }
 
 export interface Location {
-    pk: number;
-    first_line: number;
-    last_line: number;
-    filename: string;
-    last_modified: string;
-}
-
-export interface NewLocationData {
     first_line: number;
     last_line: number;
     filename: string;
