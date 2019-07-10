@@ -54,8 +54,13 @@ export {
 
 export { Annotation, AnnotationData, AnnotationObserver,
          NewAnnotationData } from './src/annotation';
-export { AppliedAnnotation, AppliedAnnotationData, AppliedAnnotationObserver,
-         NewAppliedAnnotationData } from './src/applied_annotation';
+export {
+    AppliedAnnotation,
+    AppliedAnnotationData,
+    AppliedAnnotationObserver,
+    NewAppliedAnnotationData,
+    Location
+} from './src/applied_annotation';
 export { Comment, CommentData, CommentObserver, NewCommentData } from './src/comment';
 export { Criterion, CriterionData, CriterionObserver, NewCriterionData } from './src/criterion';
 export { CriterionResult, CriterionResultData, CriterionResultObserver,

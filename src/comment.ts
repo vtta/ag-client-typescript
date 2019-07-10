@@ -1,4 +1,4 @@
-import { Location, NewLocationData } from "./applied_annotation";
+import { Location } from "./applied_annotation";
 import { Deletable, SaveableAPIObject } from "./base";
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
@@ -6,7 +6,7 @@ import { filter_keys, safe_assign } from './utils';
 export class CommentData {
     pk: number;
     last_modified: string;
-    location: Location | NewLocationData | null;
+    location: Location | null;
     text: string;
     handgrading_result: number;
 
@@ -115,7 +115,7 @@ export class Comment extends CommentData implements SaveableAPIObject, Deletable
 
 export class NewCommentData {
     text: string;
-    location?: NewLocationData;
+    location?: Location;
 
     constructor(args: NewCommentData) {
         this.text = args.text;
