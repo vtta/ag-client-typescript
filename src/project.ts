@@ -34,6 +34,8 @@ class ProjectCoreData {
     ultimate_submission_policy: UltimateSubmissionPolicy;
     hide_ultimate_submission_fdbk: boolean;
 
+    has_handgrading_rubric: boolean;
+
     constructor(args: ProjectCoreData) {
         this.pk = args.pk;
         this.name = args.name;
@@ -62,6 +64,8 @@ class ProjectCoreData {
 
         this.ultimate_submission_policy = args.ultimate_submission_policy;
         this.hide_ultimate_submission_fdbk = args.hide_ultimate_submission_fdbk;
+
+        this.has_handgrading_rubric = args.has_handgrading_rubric;
     }
 }
 
