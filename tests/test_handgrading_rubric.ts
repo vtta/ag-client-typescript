@@ -15,6 +15,7 @@ import {
     reset_db,
     run_in_django_shell, sleep,
 } from './utils';
+import { HttpError } from 'src/http_client';
 
 beforeAll(() => {
     global_setup();
@@ -413,6 +414,9 @@ handgrading_rubric.validate_and_update(show_grades_and_rubric_to_students=True)
     });
 
     test('Delete handgrading rubric', async () => {
+        await project.refresh();
+        expect(project.has_handgrading_rubric).toEqual(true);
+
         await handgrading_rubric.delete();
 
         expect(observer.handgrading_rubric).toBeNull();
@@ -420,6 +424,7 @@ handgrading_rubric.validate_and_update(show_grades_and_rubric_to_students=True)
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(1);
 
-        // TODO: Check that it is actually deleted somehow?
+        await project.refresh();
+        expect(project.has_handgrading_rubric).toEqual(false);
     });
 });
