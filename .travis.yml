@@ -35,7 +35,8 @@ install:
   - npm install
 
 script:
-  npm run lint && npm test -- tests/test_http_client/
+  npm test -- tests/test_http_client/
+  #npm run lint &&
 
 notifications:
   email: false

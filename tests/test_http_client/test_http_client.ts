@@ -16,7 +16,7 @@ beforeAll(async () => {
     axios.defaults.baseURL = base_url;
     server_process = child_process.spawn('python3', [`${__dirname}/http_response_server.py`]);
     server_process.on('exit', (code) => {
-        console.log('The server exited with status: ' + code)
+        console.log('The server exited with status: ' + code);
     });
     let ready = false;
     await sleep(1);
