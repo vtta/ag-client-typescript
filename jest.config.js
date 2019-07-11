@@ -14,9 +14,7 @@ module.exports = {
         "jsx"
     ],
     "moduleDirectories": ["node_modules", "."],
-    "testEnvironment": "jsdom",
     // The port should be the same as the one that the Django Docker container exposes.
-    // IMPORTANT: The http client test script servers must listen on this port too!!
     "testURL": "http://localhost:9000",
 
     collectCoverage: true,

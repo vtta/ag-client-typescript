@@ -1,13 +1,15 @@
+/**
+ * @jest-environment node
+ */
+
 import axios from "axios";
 import * as child_process from 'child_process';
 
 import { HttpClient, HttpError, HttpResponse } from "../../src/http_client";
 import { sleep } from "../utils";
 
-// IMPORTANT: The port in this url must match
-// the port of testURL in jest.config.js !!!!
-// It should also match the port used in http_response_server.py
-let base_url = 'http://localhost:9000/';
+// IMPORTANT: The port in this url must match the port used in http_response_server.py
+let base_url = 'http://localhost:9999/';
 
 beforeAll(async () => {
     axios.defaults.baseURL = base_url;
