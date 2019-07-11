@@ -17,10 +17,12 @@ beforeAll(async () => {
     server_process = child_process.spawn('python3', [`${__dirname}/http_response_server.py`]);
     server_process.on('exit', (code) => {
         console.log('The server exited with status: ' + code);
+        console.log(server_process!.stderr.toString());
     });
     let ready = false;
+    let num_attempts = 0;
     await sleep(1);
-    while (!ready) {
+    while (!ready && num_attempts < 3) {
         await sleep(1);
         try {
             let response = await axios.get('/', {timeout: 500});
@@ -28,17 +30,15 @@ beforeAll(async () => {
         }
         catch (e) {
             console.log('Unable to connect to response server, sleeping...');
+            num_attempts += 1;
         }
     }
-    console.log('ready');
+    console.log(ready ? 'Server ready' : 'Max attempts to start the server reached');
     HttpClient.get_instance().set_base_url(base_url);
 });
 
 afterAll(async () => {
-    await axios.post('/shutdown', {timeout: 1000});
-    if (server_process !== null) {
-        console.log(server_process.stderr.toString());
-    }
+    return axios.post('/shutdown', {timeout: 1000});
 });
 
 describe('HttpResponse tests', () => {
