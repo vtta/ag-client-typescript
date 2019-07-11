@@ -10,10 +10,14 @@ import { sleep } from "../utils";
 
 // IMPORTANT: The port in this url must match the port used in http_response_server.py
 let base_url = 'http://localhost:9999/';
+let server_process: child_process.ChildProcess | null = null;
 
 beforeAll(async () => {
     axios.defaults.baseURL = base_url;
-    child_process.spawn('python3', [`${__dirname}/http_response_server.py`]);
+    server_process = child_process.spawn('python3', [`${__dirname}/http_response_server.py`]);
+    server_process.on('exit', (code) => {
+        console.log('The server exited with status: ' + code)
+    });
     let ready = false;
     await sleep(1);
     while (!ready) {
@@ -30,8 +34,11 @@ beforeAll(async () => {
     HttpClient.get_instance().set_base_url(base_url);
 });
 
-afterAll(() => {
-    return axios.post('/shutdown');
+afterAll(async () => {
+    await axios.post('/shutdown', {timeout: 1000});
+    if (server_process !== null) {
+        console.log(server_process.stderr.toString());
+    }
 });
 
 describe('HttpResponse tests', () => {
