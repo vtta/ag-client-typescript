@@ -14,13 +14,11 @@ module.exports = {
         "jsx"
     ],
     "moduleDirectories": ["node_modules", "."],
-    "testEnvironment": "jsdom",
     // The port should be the same as the one that the Django Docker container exposes.
     "testURL": "http://localhost:9000",
 
     collectCoverage: true,
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
-    coveragePathIgnorePatterns: ["/node_modules/", "<rootDir>/src/http_client.ts"],
     coverageThreshold: {
         global: {
             branches: 95,

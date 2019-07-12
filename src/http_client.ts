@@ -74,15 +74,17 @@ export class HttpClient {
         }
     }
 
+    /* istanbul ignore next */
     authenticate(auth_token: string) {
         this._axios_instance.defaults.headers.common['Authorization']
-             = `Token ${auth_token}`;
+            = `Token ${auth_token}`;
     }
 }
 
 function get_axios_response(error: unknown): AxiosResponse {
     let response = (error as AxiosError).response;
     if (response === undefined) {
+        /* istanbul ignore next */
         throw error;
     }
     return response;
