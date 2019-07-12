@@ -15,9 +15,13 @@ let server_process: child_process.ChildProcess | null = null;
 beforeAll(async () => {
     axios.defaults.baseURL = base_url;
     server_process = child_process.spawn('python3', [`${__dirname}/http_response_server.py`]);
+    let stderr = '';
     server_process.on('exit', (code) => {
         console.log('The server exited with status: ' + code);
-        console.log(server_process!.stderr.toString());
+        console.log(stderr);
+    });
+    server_process.stderr.on('data', (chunk) => {
+        stderr += chunk.toString();
     });
     let ready = false;
     let num_attempts = 0;

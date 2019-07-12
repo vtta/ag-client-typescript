@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 # This script starts an http server listening on localhost:9999 that
-# returns the request body text as the response for 
+# returns the request body text as the response for
 # get, post, put, patch, and delete requests.
 
 from collections import Counter
@@ -11,7 +11,7 @@ import threading
 import socketserver
 from urllib.parse import parse_qs, urlparse
 
-# IMPORTANT: The port being listened on must be the same as the port 
+# IMPORTANT: The port being listened on must be the same as the port
 # used in ./test_http_client.ts HttpResponse tests. It must also match
 # the port of testURL in jest.config.js
 PORT = 9999
