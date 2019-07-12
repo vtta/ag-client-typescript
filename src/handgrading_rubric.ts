@@ -101,7 +101,6 @@ export class HandgradingRubric extends HandgradingRubricCoreData implements Save
             `/projects/${import_to_project_pk}`
             + `/import_handgrading_rubric_from/${import_from_project_pk}/`
         );
-        console.log(response);
         let result = new HandgradingRubric(response.data);
         HandgradingRubric.notify_handgrading_rubric_created(result);
         return result;
