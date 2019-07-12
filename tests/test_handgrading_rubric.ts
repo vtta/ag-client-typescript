@@ -13,9 +13,9 @@ import {
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell, sleep,
+    run_in_django_shell,
+    sleep,
 } from './utils';
-import { HttpError } from 'src/http_client';
 
 beforeAll(() => {
     global_setup();
