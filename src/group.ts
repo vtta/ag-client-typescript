@@ -70,14 +70,6 @@ export class Group extends GroupData implements SaveableAPIObject {
         return new Group(response.data);
     }
 
-    // TODO: This method requires "Submission" API to be built
-    // static async get_ultimate_submission(group_pk: number): Promise<Submission> {
-    //     let response = await HttpClient.get_instance().get<GroupData>(
-    //         `/groups/${group_pk}/ultimate_submission/`
-    //     );
-    //     return new Submission(response.data);
-    // }
-
     static async create(project_pk: number, data: NewGroupData): Promise<Group> {
         let response = await HttpClient.get_instance().post<GroupData>(
             `/projects/${project_pk}/groups/`,

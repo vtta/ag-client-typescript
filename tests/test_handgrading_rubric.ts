@@ -13,7 +13,8 @@ import {
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell, sleep,
+    run_in_django_shell,
+    sleep,
 } from './utils';
 
 beforeAll(() => {
@@ -209,6 +210,24 @@ HandgradingRubric.objects.validate_and_create(project=project, max_points=321)
         expect(observer.deleted_count).toEqual(0);
     });
 
+    test('Import handgrading rubric', async () => {
+        let other_course = await Course.create({name: 'Other course'});
+        let other_project = await Project.create(other_course.pk, {name: 'Other project'});
+        let original_rubric = await HandgradingRubric.create(other_project.pk, {max_points: 35});
+
+        let imported = await HandgradingRubric.import_from_project(project.pk, other_project.pk);
+        let loaded = await HandgradingRubric.get_from_project(project.pk);
+        expect(imported).toEqual(loaded);
+        expect(imported.project).toEqual(project.pk);
+        expect(imported.max_points).toEqual(35);
+
+        expect(original_rubric.pk).not.toEqual(imported.pk);
+        expect(original_rubric.max_points).toEqual(imported.max_points);
+
+        expect(observer.handgrading_rubric).toEqual(imported);
+        expect(observer.created_count).toEqual(2);
+    });
+
     test('Unsubscribe', async () => {
         let handgrading_rubric = await HandgradingRubric.create(
             project.pk, {});
@@ -395,6 +414,9 @@ handgrading_rubric.validate_and_update(show_grades_and_rubric_to_students=True)
     });
 
     test('Delete handgrading rubric', async () => {
+        await project.refresh();
+        expect(project.has_handgrading_rubric).toEqual(true);
+
         await handgrading_rubric.delete();
 
         expect(observer.handgrading_rubric).toBeNull();
@@ -402,6 +424,7 @@ handgrading_rubric.validate_and_update(show_grades_and_rubric_to_students=True)
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(1);
 
-        // TODO: Check that it is actually deleted somehow?
+        await project.refresh();
+        expect(project.has_handgrading_rubric).toEqual(false);
     });
 });

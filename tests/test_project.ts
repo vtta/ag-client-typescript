@@ -85,6 +85,8 @@ describe('Project ctor tests', () => {
 
             instructor_files: instructor_files,
             expected_student_files: expected_student_files,
+
+            has_handgrading_rubric: true
         });
 
         expect(project.pk).toEqual(42);
@@ -119,6 +121,8 @@ describe('Project ctor tests', () => {
             [new InstructorFile(instructor_files[0]), instructor_files[1]]);
         expect(project.expected_student_files).toEqual(
             [new ExpectedStudentFile(expected_student_files[0]), expected_student_files[1]]);
+
+        expect(project.has_handgrading_rubric).toEqual(true);
     });
 
     test('Construct project without closing time or instructor files', () => {
@@ -146,6 +150,7 @@ describe('Project ctor tests', () => {
             ultimate_submission_policy: UltimateSubmissionPolicy.best,
             hide_ultimate_submission_fdbk: true,
             expected_student_files: [],
+            has_handgrading_rubric: false,
         });
 
         expect(project.closing_time).toBeUndefined();

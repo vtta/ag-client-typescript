@@ -1,11 +1,11 @@
 import { Annotation, AnnotationData } from './annotation';
-import { Deletable, SaveableAPIObject } from "./base";
+import { Deletable, ID, SaveableAPIObject } from "./base";
 import { Criterion, CriterionData } from './criterion';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
 export class HandgradingRubricCoreData {
-    pk: number;
+    pk: ID;
     project: number;
     last_modified: string;
     points_style: PointsStyle;
@@ -70,26 +70,38 @@ export class HandgradingRubric extends HandgradingRubricCoreData implements Save
         HandgradingRubric._subscribers.delete(observer);
     }
 
-    static async get_from_project(project_pk: number): Promise<HandgradingRubric> {
+    static async get_from_project(project_pk: ID): Promise<HandgradingRubric> {
         let response = await HttpClient.get_instance().get<HandgradingRubricData>(
             `/projects/${project_pk}/handgrading_rubric/`
         );
         return new HandgradingRubric(response.data);
     }
 
-    static async get_by_pk(handgrading_rubric_pk: number): Promise<HandgradingRubric> {
+    static async get_by_pk(handgrading_rubric_pk: ID): Promise<HandgradingRubric> {
         let response = await HttpClient.get_instance().get<HandgradingRubricData>(
             `/handgrading_rubrics/${handgrading_rubric_pk}/`
         );
         return new HandgradingRubric(response.data);
     }
 
-    static async create(project_pk: number,
+    static async create(project_pk: ID,
                         data: NewHandgradingRubricData): Promise<HandgradingRubric> {
         let response = await HttpClient.get_instance().post<HandgradingRubricData>(
             `/projects/${project_pk}/handgrading_rubric/`,
             data
         );
+        let result = new HandgradingRubric(response.data);
+        HandgradingRubric.notify_handgrading_rubric_created(result);
+        return result;
+    }
+
+    static async import_from_project(import_to_project_pk: ID,
+                                     import_from_project_pk: ID): Promise<HandgradingRubric> {
+        let response = await HttpClient.get_instance().post<HandgradingRubricData>(
+            `/projects/${import_to_project_pk}`
+            + `/import_handgrading_rubric_from/${import_from_project_pk}/`
+        );
+        console.log(response);
         let result = new HandgradingRubric(response.data);
         HandgradingRubric.notify_handgrading_rubric_created(result);
         return result;
