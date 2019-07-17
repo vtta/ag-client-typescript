@@ -24,7 +24,7 @@ services:
 
   postgres:
     restart: unless-stopped
-    image: postgres:latest
+    image: postgres:9.5
     container_name: typescript-cli-postgres
     expose:
       - "5432"

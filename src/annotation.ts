@@ -150,7 +150,7 @@ export class NewAnnotationData {
     short_description?: string;
     long_description?: string;
     deduction?: number;
-    max_deduction?: number;
+    max_deduction?: number | null;
 
     constructor(args: NewAnnotationData) {
         this.short_description = args.short_description;
