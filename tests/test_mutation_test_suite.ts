@@ -181,6 +181,9 @@ describe('MutationTestSuite ctor tests', () => {
         expect(suite.staff_viewer_fdbk_config).toEqual(staff_viewer_fdbk);
 
         expect(suite.last_modified).toEqual(now);
+
+        suite.max_points = null;
+        expect(suite.max_points).toBeNull();
     });
 });
 

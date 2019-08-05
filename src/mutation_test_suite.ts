@@ -26,7 +26,7 @@ export class MutationTestSuiteCoreData {
     grade_buggy_impl_command: AGCommand;
 
     points_per_exposed_bug: string;
-    max_points: number;
+    max_points: number | null;
     deferred: boolean;
     sandbox_docker_image: SandboxDockerImageData;
     allow_network_access: boolean;
@@ -280,7 +280,7 @@ export class NewMutationTestSuiteData {
     grade_buggy_impl_command?: AGCommand;
 
     points_per_exposed_bug?: string;
-    max_points?: number;
+    max_points?: number | null;
     deferred?: boolean;
     sandbox_docker_image?: SandboxDockerImageData;
     allow_network_access?: boolean;
