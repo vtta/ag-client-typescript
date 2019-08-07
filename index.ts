@@ -13,6 +13,7 @@ export { Group, GroupObserver, NewGroupData } from './src/group';
 export { GroupInvitation } from './src/group_invitation';
 export { GradingStatus, Submission, SubmissionObserver } from './src/submission';
 
+export { AGCommand } from './src/ag_command';
 export {
     AGTestCaseData,
     AGTestCaseObserver,
