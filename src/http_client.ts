@@ -1,5 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
+type ProgressEventListener = (event: ProgressEvent) => void;
+
 export class HttpClient {
     private static _instance: HttpClient | null = null;
 
@@ -24,9 +26,14 @@ export class HttpClient {
         this._axios_instance.defaults.headers = headers;
     }
 
-    async get<T = unknown>(url: string): Promise<HttpResponse<T>> {
+    async get<T = unknown>(
+        url: string,
+        options: {on_download_progress?: ProgressEventListener} = {}
+    ): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.get<T>(url));
+            return new HttpResponse(
+                await this._axios_instance.get<T>(
+                    url, {onDownloadProgress: options.on_download_progress}));
         }
         catch (e) {
             let response = get_axios_response(e);
@@ -34,9 +41,14 @@ export class HttpClient {
         }
     }
 
-    async post<T = unknown>(url: string, data?: unknown): Promise<HttpResponse<T>> {
+    async post<T = unknown>(
+        url: string, data?: unknown,
+        options: {on_upload_progress?: ProgressEventListener} = {}
+    ): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.post<T>(url, data));
+            return new HttpResponse(
+                await this._axios_instance.post<T>(
+                    url, data, {onUploadProgress: options.on_upload_progress}));
         }
         catch (e) {
             let response = get_axios_response(e);
@@ -44,9 +56,14 @@ export class HttpClient {
         }
     }
 
-    async put<T = unknown>(url: string, data?: unknown): Promise<HttpResponse<T>> {
+    async put<T = unknown>(
+        url: string, data?: unknown,
+        options: {on_upload_progress?: ProgressEventListener} = {}
+    ): Promise<HttpResponse<T>> {
         try {
-            return new HttpResponse(await this._axios_instance.put<T>(url, data));
+            return new HttpResponse(
+                await this._axios_instance.put<T>(
+                    url, data, {onUploadProgress: options.on_upload_progress}));
         }
         catch (e) {
             let response = get_axios_response(e);
