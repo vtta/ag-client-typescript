@@ -28,6 +28,7 @@ export class HttpClient {
 
     async get<T = unknown>(
         url: string,
+        /* istanbul ignore next */
         options: {on_download_progress?: ProgressEventListener} = {}
     ): Promise<HttpResponse<T>> {
         try {
@@ -43,6 +44,7 @@ export class HttpClient {
 
     async post<T = unknown>(
         url: string, data?: unknown,
+        /* istanbul ignore next */
         options: {on_upload_progress?: ProgressEventListener} = {}
     ): Promise<HttpResponse<T>> {
         try {
@@ -58,6 +60,7 @@ export class HttpClient {
 
     async put<T = unknown>(
         url: string, data?: unknown,
+        /* istanbul ignore next */
         options: {on_upload_progress?: ProgressEventListener} = {}
     ): Promise<HttpResponse<T>> {
         try {
