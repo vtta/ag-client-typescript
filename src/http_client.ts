@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse } from "axios";
 
-type ProgressEventListener = (event: ProgressEvent) => void;
+export type ProgressEventListener = (event: ProgressEvent) => void;
 
 export class HttpClient {
     private static _instance: HttpClient | null = null;

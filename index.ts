@@ -50,8 +50,18 @@ export {
     MutationTestSuite,
     MutationTestSuiteFeedbackConfig,
     NewMutationTestSuiteData,
-
 } from './src/mutation_test_suite';
+
+export {
+    FeedbackCategory,
+    get_submission_result,
+    ResultOutput,
+    SubmissionResultFeedback,
+    AGTestSuiteResultFeedback,
+    AGTestCaseResultFeedback,
+    AGTestCommandResultFeedback,
+    MutationTestSuiteResultFeedback,
+} from './src/submission_result';
 
 export { Annotation, AnnotationData, AnnotationObserver,
          NewAnnotationData } from './src/annotation';
