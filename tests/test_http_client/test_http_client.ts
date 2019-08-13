@@ -80,6 +80,23 @@ describe('HttpResponse tests', () => {
         expect(response.data).toEqual('I am DELETE');
         expect(response).toBeInstanceOf(HttpResponse);
     });
+
+    test('Upload and download progress params', async () => {
+        let response = await HttpClient.get_instance().get(
+            '/?text="I am GET"', {on_download_progress: () => {}});
+        expect(response.status).toEqual(200);
+        expect(response.data).toEqual('I am GET');
+
+        response = await HttpClient.get_instance().post(
+            '/?status=201&text="I am POST"', {}, {on_upload_progress: () => {}});
+        expect(response.status).toEqual(201);
+        expect(response.data).toEqual('I am POST');
+
+        response = await HttpClient.get_instance().put(
+            '/?text="I am PUT"', {}, {on_upload_progress: () => {}});
+        expect(response.status).toEqual(200);
+        expect(response.data).toEqual('I am PUT');
+    });
 });
 
 describe('HttpError tests', () => {

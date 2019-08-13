@@ -1,5 +1,5 @@
 import { Deletable, Refreshable } from './base';
-import { HttpClient } from './http_client';
+import { HttpClient, ProgressEventListener } from './http_client';
 import { safe_assign, sort_by_name } from './utils';
 
 export class InstructorFileData {
@@ -59,19 +59,21 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
         return new InstructorFile(response.data);
     }
 
-    static async create(project_pk: number, name: string, content: Blob): Promise<InstructorFile> {
+    static async create(
+        project_pk: number, name: string, content: Blob,
+        on_upload_progress?: ProgressEventListener
+    ): Promise<InstructorFile> {
         let form_data = new FormData();
         form_data.append('file_obj', content, name);
 
         let response = await HttpClient.get_instance().post<InstructorFile>(
             `/projects/${project_pk}/instructor_files/`,
-            form_data
+            form_data,
+            {on_upload_progress: on_upload_progress}
         );
 
         let new_file = new InstructorFile(response.data);
-
         InstructorFile.notify_instructor_file_created(new_file);
-
         return new_file;
     }
 
@@ -88,13 +90,14 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
         return response.data;
     }
 
-    async set_content(content: Blob): Promise<void> {
+    async set_content(content: Blob, on_upload_progress?: ProgressEventListener): Promise<void> {
         let form_data = new FormData();
         form_data.append('file_obj', content, this.name);
 
         let response = await HttpClient.get_instance().put(
             `/instructor_files/${this.pk}/content/`,
-            form_data
+            form_data,
+            {on_upload_progress: on_upload_progress}
         );
 
         safe_assign(this, response.data);

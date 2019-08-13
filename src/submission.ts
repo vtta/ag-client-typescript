@@ -1,5 +1,5 @@
 import { ID, SaveableAPIObject } from "./base";
-import { HttpClient } from "./http_client";
+import { HttpClient, ProgressEventListener } from "./http_client";
 import { filter_keys, safe_assign } from "./utils";
 
 
@@ -87,13 +87,16 @@ export class Submission extends SubmissionData implements SaveableAPIObject {
         return new Submission(response.data);
     }
 
-    static async create(group_pk: ID, files: File[]): Promise<Submission> {
+    static async create(
+        group_pk: ID, files: File[], on_upload_progress?: ProgressEventListener
+    ): Promise<Submission> {
         let form_data = new FormData();
         for (let file of files) {
             form_data.append('submitted_files', file, file.name);
         }
         let response = await HttpClient.get_instance().post<SubmissionData>(
-            `/groups/${group_pk}/submissions/`, form_data);
+            `/groups/${group_pk}/submissions/`, form_data,
+            {on_upload_progress: on_upload_progress});
         let result = new Submission(response.data);
         Submission.notify_submission_created(result);
         return result;
