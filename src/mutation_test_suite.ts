@@ -1,5 +1,5 @@
 import { AGCommand } from "./ag_command";
-import { AGTestSuiteData, SandboxDockerImageData } from "./ag_test_suite";
+import { SandboxDockerImageData } from "./ag_test_suite";
 import { Deletable, ID, SaveableAPIObject } from "./base";
 import { ExpectedStudentFile, ExpectedStudentFileData } from "./expected_student_file";
 import { HttpClient } from "./http_client";
