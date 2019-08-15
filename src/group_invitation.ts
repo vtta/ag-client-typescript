@@ -33,13 +33,13 @@ export class GroupInvitation extends GroupInvitationData implements Refreshable 
         return new GroupInvitation(response.data);
     }
 
-    // TODO: if we're the last person to accept and a group is created, call
-    // Group.notify_group_created
     async accept(): Promise<Group | null> {
         let response = await HttpClient.get_instance().post<GroupData | GroupInvitationData>(
             `/group_invitations/${this.pk}/accept/`);
         if (response.status === 201) {
-            return new Group(<GroupData> response.data);
+            let group = new Group(<GroupData> response.data);
+            Group.notify_group_created(group);
+            return group;
         }
 
         safe_assign(this, new GroupInvitation(<GroupInvitation> response.data));

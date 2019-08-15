@@ -132,6 +132,7 @@ print(invitation.pk)
         Group.subscribe(observer);
         let new_group = await invitation.accept();
         expect(new_group).not.toBeNull();
+        expect(observer.group_created).toEqual(new_group);
 
         expect(new_group!.member_names).toEqual([SUPERUSER_NAME, 'user1']);
     });
