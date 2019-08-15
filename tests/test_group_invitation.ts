@@ -107,7 +107,7 @@ print(invitation.pk)
         expect(invitation.invitees_who_accepted).toEqual([SUPERUSER_NAME]);
     });
 
-    test.only('Accept group invitation group created', async () => {
+    test('Accept group invitation group created', async () => {
         let make_invitation = `
 from django.contrib.auth.models import User
 from autograder.core.models import GroupInvitation, Project
