@@ -7,11 +7,11 @@ beforeAll(() => {
     global_setup();
 });
 
-describe('User tests', () => {
-    beforeEach(() => {
-        reset_db();
-    });
+beforeEach(() => {
+    reset_db();
+});
 
+describe('User tests', () => {
     test('constructor', async () => {
         let user = new User({
             pk: 42,
@@ -171,10 +171,6 @@ user.user_permissions.add(Permission.objects.get(codename='create_course'))
 // ----------------------------------------------------------------------------
 
 describe('User reverse relation ship endpoint tests', () => {
-    beforeEach(() => {
-        reset_db();
-    });
-
     test('get courses is admin for', async () => {
         make_superuser();
         let add_admins = `
@@ -316,7 +312,6 @@ describe('Group invitations sent and received tests', () => {
     let project: Project;
 
     beforeEach(async () => {
-        reset_db();
         make_superuser();
         user = await User.get_current();
 
@@ -363,5 +358,26 @@ print(invitation.pk)
 
         let invitations_received = await user.group_invitations_received();
         expect(invitations_received).toEqual([invitation]);
+    });
+});
+
+describe('User late days tests', () => {
+    test('Get and edit user late days', async () => {
+        make_superuser();
+        let course = await Course.create({name: 'Coursey'});
+        let user = await User.get_current();
+
+        expect(await User.get_num_late_days(course.pk, user.pk)).toEqual({
+            late_days_remaining: 0});
+        expect(await User.set_num_late_days(course.pk, user.pk, 3)).toEqual({
+            late_days_remaining: 3});
+
+        expect(await User.get_num_late_days(course.pk, user.username)).toEqual({
+            late_days_remaining: 3});
+        expect(await User.set_num_late_days(course.pk, user.username, 1)).toEqual({
+            late_days_remaining: 1});
+
+        expect(await User.get_num_late_days(course.pk, user.pk)).toEqual({
+            late_days_remaining: 1});
     });
 });
