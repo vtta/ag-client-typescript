@@ -1,4 +1,4 @@
-import { Refreshable } from "./base";
+import { ID, Refreshable } from "./base";
 import { Course, CourseData } from "./course";
 import { Group, GroupData } from "./group";
 import { GroupInvitation, GroupInvitationData } from "./group_invitation";
@@ -97,6 +97,27 @@ export class User extends UserData implements Refreshable {
             `/users/${this.pk}/group_invitations_received/`);
         return response.data.map(data => new GroupInvitation(data));
     }
+
+    static async get_num_late_days(
+        course_pk: ID, username_or_pk: string | ID
+    ): Promise<LateDaysRemaining> {
+        let response = await HttpClient.get_instance().get<LateDaysRemaining>(
+            `/users/${username_or_pk}/late_days/?course_pk=${course_pk}`);
+        return response.data;
+    }
+
+    static async set_num_late_days(
+        course_pk: ID, username_or_pk: string | ID, num_late_days: number
+    ): Promise<LateDaysRemaining> {
+        let response = await HttpClient.get_instance().put<LateDaysRemaining>(
+            `/users/${username_or_pk}/late_days/?course_pk=${course_pk}`,
+            {late_days_remaining: num_late_days});
+        return response.data;
+    }
+}
+
+interface LateDaysRemaining {
+    late_days_remaining: number;
 }
 
 export class UserRoles {
