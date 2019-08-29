@@ -295,3 +295,30 @@ submission.save()
         expect(actual_best).toEqual(best);
     });
 });
+
+describe('List submissions with results tests', () => {
+    test('get_all_from_group_with_results', async () => {
+        let make_submissions = `
+from autograder.core.models import Group, Submission
+
+group = Group.objects.get(pk=${group.pk})
+
+for i in range(3):
+    s = Submission.objects.validate_and_create([], group)
+    s.status = Submission.GradingStatus.finished_grading
+    s.save()
+        `;
+        run_in_django_shell(make_submissions);
+
+        let submissions = await Submission.get_all_from_group_with_results(group.pk);
+        expect(submissions.length).toEqual(3);
+
+        console.log(submissions);
+        for (let submission of submissions) {
+            expect(submission.results.total_points).toEqual(0);
+            expect(submission.results.total_points_possible).toEqual(0);
+            expect(submission.results.ag_test_suite_results).toEqual([]);
+            expect(submission.results.student_test_suite_results).toEqual([]);
+        }
+    });
+});
