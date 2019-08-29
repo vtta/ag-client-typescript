@@ -99,8 +99,8 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
     }
 
     async copy(new_name: string): Promise<AGTestCase> {
-        let new_case = await AGTestCase.create(
-            this.ag_test_suite,
+        let new_case_response = await HttpClient.get_instance().post<AGTestCaseData>(
+            `/ag_test_suites/${this.ag_test_suite}/ag_test_cases/`,
             {
                 name: new_name,
                 normal_fdbk_config: this.normal_fdbk_config,
@@ -109,16 +109,19 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
                 staff_viewer_fdbk_config: this.staff_viewer_fdbk_config,
             }
         );
+        let new_case = new AGTestCase(new_case_response.data);
 
         for (let cmd of this.ag_test_commands) {
+            let cmd_response = await HttpClient.get_instance().post<AGTestCommandData>(
+                `/ag_test_cases/${new_case.pk}/ag_test_commands/`,
+                <NewAGTestCommandData> filter_keys(cmd, AGTestCommand.EDITABLE_FIELDS)
+            );
             new_case.ag_test_commands.push(
-                await AGTestCommand.create(
-                    new_case.pk,
-                    <NewAGTestCommandData> filter_keys(cmd, AGTestCommand.EDITABLE_FIELDS)
-                )
+                new AGTestCommand(cmd_response.data)
             );
         }
 
+        AGTestCase.notify_ag_test_case_created(new_case);
         return new_case;
     }
 

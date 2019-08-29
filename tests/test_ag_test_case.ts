@@ -2,13 +2,14 @@ import {
     AGTestCase,
     AGTestCaseObserver,
     AGTestCommand,
+    AGTestCommandObserver,
     AGTestSuite,
     Course,
     ExpectedOutputSource,
     ExpectedReturnCode, NewAGTestCaseData,
     Project,
     StdinSource,
-    ValueFeedbackLevel
+    ValueFeedbackLevel,
 } from "..";
 
 import {
@@ -216,6 +217,42 @@ class TestObserver implements AGTestCaseObserver {
     }
 }
 
+class CopyTestCaseObserver implements AGTestCaseObserver, AGTestCommandObserver {
+    created_count = 0;
+    ag_test_case: AGTestCase | null = null;
+
+    update_ag_test_case_created(ag_test_case: AGTestCase): void {
+        this.created_count += 1;
+        // Make a deep copy so that we can make sure that the commands have
+        // been copied before this method is called.
+        this.ag_test_case = new AGTestCase(JSON.parse(JSON.stringify(ag_test_case)));
+    }
+
+    update_ag_test_case_changed(ag_test_case: AGTestCase): void {
+    }
+
+    update_ag_test_case_deleted(ag_test_case: AGTestCase): void {
+    }
+
+    update_ag_test_cases_order_changed(
+        ag_test_suite_pk: number, ag_test_case_order: number[]): void {
+    }
+
+    update_ag_test_command_created(ag_test_command: AGTestCommand): void {
+        fail('Copying a test case should not call update_ag_test_command_created');
+    }
+
+    update_ag_test_command_changed(ag_test_command: AGTestCommand): void {
+    }
+
+    update_ag_test_command_deleted(ag_test_command: AGTestCommand): void {
+    }
+
+    update_ag_test_commands_order_changed(
+        ag_test_case_pk: number, ag_test_command_order: number[]): void {
+    }
+}
+
 function make_random_fdbk_config() {
     return {
         visible: rand_bool(),
@@ -314,6 +351,10 @@ AGTestCase.objects.all().delete()
         await ag_test_case.refresh();
         expect(ag_test_case.ag_test_commands.length).toEqual(2);
 
+        let copy_observer = new CopyTestCaseObserver();
+        AGTestCase.subscribe(copy_observer);
+        AGTestCommand.subscribe(copy_observer);
+
         let copied = await ag_test_case.copy('Copied');
 
         expect(copied.pk).not.toEqual(ag_test_case.pk);
@@ -324,8 +365,8 @@ AGTestCase.objects.all().delete()
         expect(copied.ag_test_commands[1].pk).not.toEqual(ag_test_case.ag_test_commands[1].pk);
         expect(copied.ag_test_commands[1].name).toEqual(ag_test_case.ag_test_commands[1].name);
 
-        expect(observer.ag_test_case).toEqual(copied);
-        expect(observer.created_count).toEqual(1);
+        expect(copy_observer.ag_test_case).toEqual(copied);
+        expect(copy_observer.created_count).toEqual(1);
     });
 
     test('Save AG test case', async () => {
