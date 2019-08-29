@@ -1,6 +1,6 @@
 import { ID, SaveableAPIObject } from "./base";
 import { HttpClient, ProgressEventListener } from "./http_client";
-import { SubmissionResultFeedback, FeedbackCategory } from './submission_result';
+import { FeedbackCategory, SubmissionResultFeedback } from './submission_result';
 import { filter_keys, safe_assign } from "./utils";
 
 
