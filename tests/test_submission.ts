@@ -1,13 +1,13 @@
 import {
     Course,
     ExpectedStudentFile,
+    FeedbackCategory,
     GradingStatus,
     Group,
     Project,
     Submission,
     SubmissionObserver,
     UltimateSubmissionPolicy,
-    FeedbackCategory
 } from "..";
 
 import {
