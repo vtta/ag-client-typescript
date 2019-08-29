@@ -1,12 +1,13 @@
 import {
     Course,
     ExpectedStudentFile,
+    FeedbackCategory,
     GradingStatus,
     Group,
     Project,
     Submission,
     SubmissionObserver,
-    UltimateSubmissionPolicy
+    UltimateSubmissionPolicy,
 } from "..";
 
 import {
@@ -293,5 +294,65 @@ submission.save()
         let actual_best = await Submission.get_final_graded_submission_from_group(group.pk);
         await best.refresh();
         expect(actual_best).toEqual(best);
+    });
+});
+
+describe('List submissions with results tests', () => {
+    beforeEach(() => {
+        let make_tests = `
+from autograder.core.models import Project
+import autograder.utils.testing.model_obj_builders as obj_build
+
+obj_build.make_full_ag_test_command(
+    obj_build.make_ag_test_case(
+        obj_build.make_ag_test_suite(
+            Project.objects.get(pk=${group.project})
+        )
+    )
+)
+       `;
+        run_in_django_shell(make_tests);
+    });
+
+    test('get_all_from_group_with_results', async () => {
+        let make_submissions = `
+from autograder.core.models import AGTestCommand, Group, Submission
+import autograder.utils.testing.model_obj_builders as obj_build
+from autograder.core.submission_feedback import update_denormalized_ag_test_results
+
+assert AGTestCommand.objects.count() == 1
+
+group = Group.objects.get(pk=${group.pk})
+for i in range(3):
+    submission = Submission.objects.validate_and_create([], group)
+    obj_build.make_correct_ag_test_command_result(
+        AGTestCommand.objects.first(), submission=submission)
+    submission.status = Submission.GradingStatus.finished_grading
+    submission.save()
+    update_denormalized_ag_test_results(submission.pk)
+        `;
+        run_in_django_shell(make_submissions);
+
+        let submissions = await Submission.get_all_from_group_with_results(group.pk);
+        expect(submissions.length).toEqual(3);
+
+        for (let submission of submissions) {
+            expect(submission.results.total_points).not.toEqual(0);
+            expect(submission.results.total_points_possible).not.toEqual(0);
+            expect(submission.results.ag_test_suite_results.length).toEqual(1);
+            expect(submission.results.student_test_suite_results).toEqual([]);
+        }
+
+        // Override feedback
+        submissions = await Submission.get_all_from_group_with_results(
+            group.pk, FeedbackCategory.past_limit_submission);
+        expect(submissions.length).toEqual(3);
+
+        for (let submission of submissions) {
+            expect(submission.results.total_points).toEqual(0);
+            expect(submission.results.total_points_possible).toEqual(0);
+            expect(submission.results.ag_test_suite_results.length).toEqual(1);
+            expect(submission.results.student_test_suite_results).toEqual([]);
+        }
     });
 });

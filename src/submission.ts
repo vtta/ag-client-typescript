@@ -1,5 +1,6 @@
 import { ID, SaveableAPIObject } from "./base";
 import { HttpClient, ProgressEventListener } from "./http_client";
+import { FeedbackCategory, SubmissionResultFeedback } from './submission_result';
 import { filter_keys, safe_assign } from "./utils";
 
 
@@ -79,6 +80,17 @@ export class Submission extends SubmissionData implements SaveableAPIObject {
         let response = await HttpClient.get_instance().get<SubmissionData>(
             `/groups/${group_pk}/ultimate_submission/`);
         return new Submission(response.data);
+    }
+
+    static async get_all_from_group_with_results(
+        group_pk: ID, feedback_category?: FeedbackCategory
+    ): Promise<SubmissionWithResults[]> {
+        let url = `/groups/${group_pk}/submissions_with_results/`;
+        if (feedback_category !== undefined) {
+            url += `?feedback_category=${feedback_category}`;
+        }
+        let response = await HttpClient.get_instance().get<SubmissionWithResults[]>(url);
+        return response.data;
     }
 
     static async get_by_pk(submission_pk: ID): Promise<Submission> {
@@ -173,4 +185,8 @@ export enum GradingStatus {
 
     // Something unexpected occurred during the grading process.
     error = 'error',
+}
+
+export interface SubmissionWithResults extends SubmissionData {
+    results: SubmissionResultFeedback;
 }
