@@ -14,6 +14,7 @@ export { GroupInvitation } from './src/group_invitation';
 export {
     GradingStatus,
     Submission,
+    SubmissionData,
     SubmissionObserver,
     SubmissionWithResults
 } from './src/submission';
