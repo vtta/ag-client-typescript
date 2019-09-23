@@ -279,7 +279,7 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         await group.refresh();
         await group2.refresh();
         let loaded_handgrading_results_info =
-            await HandgradingResult.get_all_summary_from_project(project.pk);
+            await HandgradingResult.get_all_from_project(project.pk);
 
         expect(loaded_handgrading_results_info.count).toEqual(2);
         expect(loaded_handgrading_results_info.next).toBeNull();
@@ -352,7 +352,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         run_in_django_shell(create_handgrading_results);
         let loaded_second_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', true, 2, 1);
+            await HandgradingResult.get_all_from_project(project.pk, '', true, 2, 1);
 
         expect(loaded_second_handgrading_results_page.count).toEqual(3);
 
@@ -394,7 +394,7 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         run_in_django_shell(create_handgrading_results);
         await sleep(2);
         let loaded_handgrading_results_info =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', false);
+            await HandgradingResult.get_all_from_project(project.pk, '', false);
 
         expect(loaded_handgrading_results_info.count).toEqual(1);
         expect(loaded_handgrading_results_info.next).toBeNull();
@@ -438,10 +438,10 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         run_in_django_shell(create_handgrading_results);
         let loaded_second_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', true, 2, 1);
+            await HandgradingResult.get_all_from_project(project.pk, '', true, 2, 1);
         let next_url = loaded_second_handgrading_results_page.next;
         let loaded_third_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, next_url);
+            await HandgradingResult.get_all_from_project(project.pk, next_url);
 
         expect(loaded_third_handgrading_results_page.count).toEqual(3);
 
@@ -460,7 +460,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         let created = await HandgradingResult.get_or_create(group.pk);
 
         // First check if result from summary matches
-        let loaded_summary = await HandgradingResult.get_all_summary_from_project(project.pk);
+        let loaded_summary = await HandgradingResult.get_all_from_project(project.pk);
         expect(loaded_summary.count).toEqual(2);
         let sorted_results = loaded_summary.results.sort((a, b) => b.pk - a.pk);
         // Highest pk will be one that was just created
