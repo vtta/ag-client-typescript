@@ -83,11 +83,19 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
         HandgradingResult._subscribers.delete(observer);
     }
 
-    static async get_all_from_project(project_pk: number,
-                                      page_url: string = '',
-                                      include_staff: boolean = true,
-                                      page_num: number = 1,
-                                      page_size: number = 1000
+    static async get_all_summaries_from_project(
+        project_pk: number,
+        {
+            page_url = '',
+            include_staff = true,
+            page_num = 1,
+            page_size = 1000,
+        }: {
+            page_url?: string,
+            include_staff?: boolean,
+            page_num?: number,
+            page_size?: number,
+        } = {}
     ): Promise<HandgradingResultPage> {
         const queries = `?page_size=${page_size}&page=${page_num}&include_staff=${include_staff}`;
         const url = page_url !== '' ? page_url :
