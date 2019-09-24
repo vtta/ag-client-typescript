@@ -83,18 +83,26 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
         HandgradingResult._subscribers.delete(observer);
     }
 
-    static async get_all_summary_from_project(project_pk: number,
-                                              page_url: string = '',
-                                              include_staff: boolean = true,
-                                              page_num: number = 1,
-                                              page_size: number = 1000
-    ): Promise<SubmissionGroupHandgradingInfo> {
+    static async get_all_summaries_from_project(
+        project_pk: number,
+        {
+            page_url = '',
+            include_staff = true,
+            page_num = 1,
+            page_size = 1000,
+        }: {
+            page_url?: string,
+            include_staff?: boolean,
+            page_num?: number,
+            page_size?: number,
+        } = {}
+    ): Promise<HandgradingResultPage> {
         const queries = `?page_size=${page_size}&page=${page_num}&include_staff=${include_staff}`;
         const url = page_url !== '' ? page_url :
             `/projects/${project_pk}/handgrading_results/${queries}`;
 
-        let response = await HttpClient.get_instance().get<SubmissionGroupHandgradingInfo>(url);
-        return new SubmissionGroupHandgradingInfo(response.data);
+        let response = await HttpClient.get_instance().get<HandgradingResultPage>(url);
+        return new HandgradingResultPage(response.data);
     }
 
     static async get_by_group_pk(group_pk: number): Promise<HandgradingResult> {
@@ -167,7 +175,7 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
     ];
 }
 
-export interface GroupHandgradingResultSummary {
+export interface GroupWithHandgradingResultSummary {
     pk: number;
     project: number;
     extended_due_date: string;
@@ -181,16 +189,16 @@ export interface GroupHandgradingResultSummary {
         finished_grading: boolean;
         total_points: number;
         total_points_possible: number;
-    };
+    } | null;
 }
 
-export class SubmissionGroupHandgradingInfo {
+export class HandgradingResultPage {
     count: number;
     next: string;
     previous: string;
-    results: GroupHandgradingResultSummary[];
+    results: GroupWithHandgradingResultSummary[];
 
-    constructor(args: SubmissionGroupHandgradingInfo) {
+    constructor(args: HandgradingResultPage) {
         this.count = args.count;
         this.next = args.next;
         this.previous = args.previous;

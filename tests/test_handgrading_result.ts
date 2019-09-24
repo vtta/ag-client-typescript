@@ -279,7 +279,7 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         await group.refresh();
         await group2.refresh();
         let loaded_handgrading_results_info =
-            await HandgradingResult.get_all_summary_from_project(project.pk);
+            await HandgradingResult.get_all_summaries_from_project(project.pk);
 
         expect(loaded_handgrading_results_info.count).toEqual(2);
         expect(loaded_handgrading_results_info.next).toBeNull();
@@ -299,9 +299,9 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         expect(sorted_results[0].num_submissions).toEqual(group.num_submissions);
         expect(sorted_results[0].num_submits_towards_limit).toEqual(
             group.num_submits_towards_limit);
-        expect(sorted_results[0].handgrading_result.finished_grading).toEqual(false);
-        expect(sorted_results[0].handgrading_result.total_points).toEqual(2);
-        expect(sorted_results[0].handgrading_result.total_points_possible).toEqual(0);
+        expect(sorted_results[0].handgrading_result!.finished_grading).toEqual(false);
+        expect(sorted_results[0].handgrading_result!.total_points).toEqual(2);
+        expect(sorted_results[0].handgrading_result!.total_points_possible).toEqual(0);
 
         // Check second result info
         expect(sorted_results[1].pk).toEqual(2);
@@ -314,9 +314,9 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         expect(sorted_results[1].num_submissions).toEqual(group2.num_submissions);
         expect(sorted_results[1].num_submits_towards_limit).toEqual(
             group2.num_submits_towards_limit);
-        expect(sorted_results[1].handgrading_result.finished_grading).toEqual(false);
-        expect(sorted_results[1].handgrading_result.total_points).toEqual(5);
-        expect(sorted_results[1].handgrading_result.total_points_possible).toEqual(0);
+        expect(sorted_results[1].handgrading_result!.finished_grading).toEqual(false);
+        expect(sorted_results[1].handgrading_result!.total_points).toEqual(5);
+        expect(sorted_results[1].handgrading_result!.total_points_possible).toEqual(0);
     });
 
 
@@ -352,7 +352,8 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         run_in_django_shell(create_handgrading_results);
         let loaded_second_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', true, 2, 1);
+            await HandgradingResult.get_all_summaries_from_project(
+                project.pk, {page_num: 2, page_size: 1});
 
         expect(loaded_second_handgrading_results_page.count).toEqual(3);
 
@@ -394,14 +395,15 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         run_in_django_shell(create_handgrading_results);
         await sleep(2);
         let loaded_handgrading_results_info =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', false);
+            await HandgradingResult.get_all_summaries_from_project(
+                project.pk, {include_staff: false});
 
         expect(loaded_handgrading_results_info.count).toEqual(1);
         expect(loaded_handgrading_results_info.next).toBeNull();
         expect(loaded_handgrading_results_info.previous).toBeNull();
 
         let actual_total_points = loaded_handgrading_results_info.results.map(
-            result => result.handgrading_result.total_points);
+            result => result.handgrading_result!.total_points);
         expect(actual_total_points).toEqual([5]);
     });
 
@@ -438,10 +440,12 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         run_in_django_shell(create_handgrading_results);
         let loaded_second_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, '', true, 2, 1);
+            await HandgradingResult.get_all_summaries_from_project(
+                project.pk, {page_num: 2, page_size: 1});
         let next_url = loaded_second_handgrading_results_page.next;
         let loaded_third_handgrading_results_page =
-            await HandgradingResult.get_all_summary_from_project(project.pk, next_url);
+            await HandgradingResult.get_all_summaries_from_project(
+                project.pk, {page_url: next_url});
 
         expect(loaded_third_handgrading_results_page.count).toEqual(3);
 
@@ -460,7 +464,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         let created = await HandgradingResult.get_or_create(group.pk);
 
         // First check if result from summary matches
-        let loaded_summary = await HandgradingResult.get_all_summary_from_project(project.pk);
+        let loaded_summary = await HandgradingResult.get_all_summaries_from_project(project.pk);
         expect(loaded_summary.count).toEqual(2);
         let sorted_results = loaded_summary.results.sort((a, b) => b.pk - a.pk);
         // Highest pk will be one that was just created
@@ -468,14 +472,12 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         expect(created.pk).toEqual(actual_result_summary.pk);
 
-        expect(actual_result_summary.handgrading_result.finished_grading).toEqual(false);
-        expect(actual_result_summary.handgrading_result.total_points).toEqual(0);
-        expect(actual_result_summary.handgrading_result.total_points_possible).toEqual(0);
+        expect(actual_result_summary.handgrading_result!.finished_grading).toEqual(false);
+        expect(actual_result_summary.handgrading_result!.total_points).toEqual(0);
+        expect(actual_result_summary.handgrading_result!.total_points_possible).toEqual(0);
 
-        // If statement included to suppress tslint "object could be null" error
-        if (observer.handgrading_result !== null) {
-            expect(observer.handgrading_result.pk).toEqual(actual_result_summary.pk);
-        }
+        expect(observer.handgrading_result!.pk).toEqual(actual_result_summary.pk);
+
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);

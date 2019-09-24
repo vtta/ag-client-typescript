@@ -38,10 +38,10 @@ export namespace ResultOutput {
     }
 
     export interface AGTestCommandResultOutputSize {
-        stdout: number | null;
-        stderr: number | null;
-        stdout_diff: number | null;
-        stderr_diff: number | null;
+        stdout_size: number | null;
+        stderr_size: number | null;
+        stdout_diff_size: number | null;
+        stderr_diff_size: number | null;
     }
 
     export async function get_ag_test_cmd_result_stdout(
