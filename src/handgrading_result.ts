@@ -189,7 +189,7 @@ export interface GroupWithHandgradingResultSummary {
         finished_grading: boolean;
         total_points: number;
         total_points_possible: number;
-    };
+    } | null;
 }
 
 export class HandgradingResultPage {

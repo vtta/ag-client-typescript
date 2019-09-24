@@ -299,9 +299,9 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         expect(sorted_results[0].num_submissions).toEqual(group.num_submissions);
         expect(sorted_results[0].num_submits_towards_limit).toEqual(
             group.num_submits_towards_limit);
-        expect(sorted_results[0].handgrading_result.finished_grading).toEqual(false);
-        expect(sorted_results[0].handgrading_result.total_points).toEqual(2);
-        expect(sorted_results[0].handgrading_result.total_points_possible).toEqual(0);
+        expect(sorted_results[0].handgrading_result!.finished_grading).toEqual(false);
+        expect(sorted_results[0].handgrading_result!.total_points).toEqual(2);
+        expect(sorted_results[0].handgrading_result!.total_points_possible).toEqual(0);
 
         // Check second result info
         expect(sorted_results[1].pk).toEqual(2);
@@ -314,9 +314,9 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         expect(sorted_results[1].num_submissions).toEqual(group2.num_submissions);
         expect(sorted_results[1].num_submits_towards_limit).toEqual(
             group2.num_submits_towards_limit);
-        expect(sorted_results[1].handgrading_result.finished_grading).toEqual(false);
-        expect(sorted_results[1].handgrading_result.total_points).toEqual(5);
-        expect(sorted_results[1].handgrading_result.total_points_possible).toEqual(0);
+        expect(sorted_results[1].handgrading_result!.finished_grading).toEqual(false);
+        expect(sorted_results[1].handgrading_result!.total_points).toEqual(5);
+        expect(sorted_results[1].handgrading_result!.total_points_possible).toEqual(0);
     });
 
 
@@ -403,7 +403,7 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         expect(loaded_handgrading_results_info.previous).toBeNull();
 
         let actual_total_points = loaded_handgrading_results_info.results.map(
-            result => result.handgrading_result.total_points);
+            result => result.handgrading_result!.total_points);
         expect(actual_total_points).toEqual([5]);
     });
 
@@ -472,14 +472,12 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         expect(created.pk).toEqual(actual_result_summary.pk);
 
-        expect(actual_result_summary.handgrading_result.finished_grading).toEqual(false);
-        expect(actual_result_summary.handgrading_result.total_points).toEqual(0);
-        expect(actual_result_summary.handgrading_result.total_points_possible).toEqual(0);
+        expect(actual_result_summary.handgrading_result!.finished_grading).toEqual(false);
+        expect(actual_result_summary.handgrading_result!.total_points).toEqual(0);
+        expect(actual_result_summary.handgrading_result!.total_points_possible).toEqual(0);
 
-        // If statement included to suppress tslint "object could be null" error
-        if (observer.handgrading_result !== null) {
-            expect(observer.handgrading_result.pk).toEqual(actual_result_summary.pk);
-        }
+        expect(observer.handgrading_result!.pk).toEqual(actual_result_summary.pk);
+
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
         expect(observer.deleted_count).toEqual(0);
