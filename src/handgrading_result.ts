@@ -2,6 +2,7 @@ import { AppliedAnnotation, AppliedAnnotationData } from './applied_annotation';
 import { SaveableAPIObject } from "./base";
 import { Comment, CommentData } from "./comment";
 import { CriterionResult, CriterionResultCtorArgs } from './criterion_result';
+import { GroupData } from './group';
 import { HandgradingRubric, HandgradingRubricCtorArgs } from './handgrading_rubric';
 import { HttpClient } from './http_client';
 import { filter_keys, safe_assign } from './utils';
@@ -152,13 +153,19 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
     }
 
     async refresh(): Promise<void> {
-        let last_modified = this.last_modified;
+        let original_data = {
+            last_modified: this.last_modified,
+            total_points: this.total_points,
+            total_points_possible: this.total_points_possible,
+        };
         let response = await HttpClient.get_instance().get<HandgradingResultData>(
             `/groups/${this.group}/handgrading_result/`
         );
 
         safe_assign(this, new HandgradingResult(response.data));
-        if (last_modified !== this.last_modified) {
+        if (original_data.last_modified !== this.last_modified
+                || original_data.total_points !== this.total_points
+                || original_data.total_points_possible !== this.total_points_possible) {
             HandgradingResult.notify_handgrading_result_changed(this);
         }
     }
@@ -175,16 +182,17 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
     ];
 }
 
-export interface GroupWithHandgradingResultSummary {
+export interface GroupWithHandgradingResultSummary extends GroupData {
     pk: number;
     project: number;
     extended_due_date: string;
     member_names: string[];
     bonus_submissions_remaining: number;
-    late_days_used: number;
+    late_days_used: {[username: string]: number};
     num_submissions: number;
     num_submits_towards_limit: number;
     created_at: string;
+    last_modified: string;
     handgrading_result: {
         finished_grading: boolean;
         total_points: number;
