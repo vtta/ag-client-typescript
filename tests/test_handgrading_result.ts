@@ -586,6 +586,21 @@ handgrading_result.validate_and_update(finished_grading=True)
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(1);
         expect(observer.deleted_count).toEqual(0);
+
+        await Criterion.create(handgrading_rubric.pk, {points: 2});
+
+        await handgrading_result.refresh();
+        expect(handgrading_result.criterion_results.length).toEqual(1);
+        expect(handgrading_result.total_points).toEqual(0);
+        expect(handgrading_result.total_points_possible).toEqual(2);
+        expect(observer.changed_count).toEqual(2);
+
+        handgrading_result.criterion_results[0].selected = true;
+        await handgrading_result.criterion_results[0].save();
+        await handgrading_result.refresh();
+        expect(handgrading_result.total_points).toEqual(2);
+        expect(handgrading_result.total_points_possible).toEqual(2);
+        expect(observer.changed_count).toEqual(3);
     });
 
     test('Get file from handgrading result', async () => {
