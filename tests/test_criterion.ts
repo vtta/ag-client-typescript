@@ -295,7 +295,7 @@ describe('Order criterion list tests', () => {
 
         let loaded_changed_list = await Criterion.update_order(
             handgrading_rubric.pk,
-            changed_ordered_list.map(String)    // Convert to string array
+            changed_ordered_list
         );
 
         expect(loaded_changed_list).not.toEqual(loaded_ordered_list);
