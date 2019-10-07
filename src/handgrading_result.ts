@@ -202,8 +202,8 @@ export interface GroupWithHandgradingResultSummary extends GroupData {
 
 export class HandgradingResultPage {
     count: number;
-    next: string;
-    previous: string;
+    next: string | null;
+    previous: string | null;
     results: GroupWithHandgradingResultSummary[];
 
     constructor(args: HandgradingResultPage) {
