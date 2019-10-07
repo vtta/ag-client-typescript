@@ -185,7 +185,7 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
 export interface GroupWithHandgradingResultSummary extends GroupData {
     pk: number;
     project: number;
-    extended_due_date: string;
+    extended_due_date: string | null;
     member_names: string[];
     bonus_submissions_remaining: number;
     late_days_used: {[username: string]: number};
