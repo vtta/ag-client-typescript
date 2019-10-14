@@ -357,9 +357,9 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         expect(loaded_second_handgrading_results_page.count).toEqual(3);
 
-        let next_url_without_base = remove_base_url(loaded_second_handgrading_results_page.next);
+        let next_url_without_base = remove_base_url(loaded_second_handgrading_results_page.next!);
         let previous_url_without_base = remove_base_url(
-            loaded_second_handgrading_results_page.previous);
+            loaded_second_handgrading_results_page.previous!);
 
         expect(next_url_without_base).toBe(
             "/api/projects/1/handgrading_results/?include_staff=true&page=3&page_size=1");
@@ -442,16 +442,16 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         let loaded_second_handgrading_results_page =
             await HandgradingResult.get_all_summaries_from_project(
                 project.pk, {page_num: 2, page_size: 1});
-        let next_url = loaded_second_handgrading_results_page.next;
+        let next_url = loaded_second_handgrading_results_page.next!;
         let loaded_third_handgrading_results_page =
             await HandgradingResult.get_all_summaries_from_project(
                 project.pk, {page_url: next_url});
 
         expect(loaded_third_handgrading_results_page.count).toEqual(3);
 
-        let next_url_without_base = remove_base_url(loaded_third_handgrading_results_page.next);
+        let next_url_without_base = remove_base_url(loaded_third_handgrading_results_page.next!);
         let previous_url_without_base = remove_base_url(
-            loaded_third_handgrading_results_page.previous);
+            loaded_third_handgrading_results_page.previous!);
 
         expect(next_url_without_base).toBeNull();
         expect(previous_url_without_base).toEqual(
