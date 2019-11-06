@@ -4,7 +4,7 @@ import { Comment, CommentData } from "./comment";
 import { CriterionResult, CriterionResultCtorArgs } from './criterion_result';
 import { GroupData } from './group';
 import { HandgradingRubric, HandgradingRubricCtorArgs } from './handgrading_rubric';
-import { HttpClient } from './http_client';
+import { HttpClient, ProgressEventListener } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
 export class HandgradingResultCoreData {
@@ -134,9 +134,13 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
         }
     }
 
-    static async get_file_from_handgrading_result(group_pk: number, file: string): Promise<string> {
+    static async get_file_from_handgrading_result(
+        group_pk: number, file: string,
+        on_download_progress?: ProgressEventListener,
+    ): Promise<string> {
         let response = await HttpClient.get_instance().get<string>(
-            `/groups/${group_pk}/handgrading_result/?filename=${file}`
+            `/groups/${group_pk}/handgrading_result/?filename=${file}`,
+            {on_download_progress: on_download_progress}
         );
 
         return response.data;
