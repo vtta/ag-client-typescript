@@ -118,7 +118,7 @@ Annotation.objects.validate_and_create(handgrading_rubric=handgrading_rubric, de
     test('Create annotation only required fields', async () => {
         let created = await Annotation.create(handgrading_rubric.pk, {});
 
-        let loaded = await Annotation.get_all_from_handgrading_rubric(project.pk);
+        let loaded = await Annotation.get_all_from_handgrading_rubric(handgrading_rubric.pk);
         expect(loaded.length).toEqual(1);
         let actual = loaded[0];
 
@@ -147,7 +147,7 @@ Annotation.objects.validate_and_create(handgrading_rubric=handgrading_rubric, de
             })
         );
 
-        let loaded = await Annotation.get_all_from_handgrading_rubric(project.pk);
+        let loaded = await Annotation.get_all_from_handgrading_rubric(handgrading_rubric.pk);
         expect(loaded.length).toEqual(1);
         let actual = loaded[0];
 
@@ -184,7 +184,7 @@ describe('Get/update/delete annotation tests', () => {
     let annotation!: Annotation;
 
     beforeEach(async () => {
-        annotation = await Annotation.create(project.pk, {});
+        annotation = await Annotation.create(handgrading_rubric.pk, {});
     });
 
     test('Get annotation', async () => {

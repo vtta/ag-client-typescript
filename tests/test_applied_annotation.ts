@@ -215,7 +215,8 @@ describe('Get/delete applied annotation tests', () => {
         expect(observer.created_count).toEqual(1);
         expect(observer.deleted_count).toEqual(1);
 
-        let loaded_list = await AppliedAnnotation.get_all_from_handgrading_result(project.pk);
+        let loaded_list = await AppliedAnnotation.get_all_from_handgrading_result(
+            handgrading_result.pk);
         expect(loaded_list.length).toEqual(0);
     });
 });

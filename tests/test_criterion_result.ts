@@ -74,7 +74,7 @@ submission.save()
     run_in_django_shell(create_submission);
 
     handgrading_result = await HandgradingResult.get_or_create(group.pk);
-    criterion = await Criterion.create(handgrading_rubric.pk, {});
+    criterion = await Criterion.create(handgrading_rubric.pk, {short_description: 'Criterion1'});
 
     // A CriterionResult is automatically created for each HandgradingResult when a Criterion is
     // created. We want to get the pk of this CriterionResult for later use
@@ -120,8 +120,10 @@ from autograder.handgrading.models import (
 rubric = HandgradingRubric.objects.get(pk=${handgrading_rubric.pk})
 result = HandgradingResult.objects.get(pk=${handgrading_result.pk})
 
-c2 = Criterion.objects.validate_and_create(handgrading_rubric=rubric)
-c3 = Criterion.objects.validate_and_create(handgrading_rubric=rubric)
+c2 = Criterion.objects.validate_and_create(
+    handgrading_rubric=rubric, short_description='Criterion2')
+c3 = Criterion.objects.validate_and_create(
+    handgrading_rubric=rubric, short_description='Criterion3')
 
 CriterionResult.objects.validate_and_create(handgrading_result=result, selected=True, criterion=c2)
 CriterionResult.objects.validate_and_create(handgrading_result=result, selected=True, criterion=c3)
@@ -133,18 +135,19 @@ CriterionResult.objects.validate_and_create(handgrading_result=result, selected=
 
         let sorted_criterion_results = loaded_criterion_results.sort((a, b) => a.pk - b.pk);
         expect(sorted_criterion_results.length).toEqual(3);
-        expect(sorted_criterion_results[0].pk).toEqual(1);
+        expect(sorted_criterion_results[0].pk).toEqual(criterion_result_pk);
         expect(sorted_criterion_results[0].selected).toEqual(false);
         expect(sorted_criterion_results[0].handgrading_result).toEqual(handgrading_result.pk);
         expect(sorted_criterion_results[0].criterion).toEqual(criterion);
 
-        expect(sorted_criterion_results[1].pk).toEqual(2);
         expect(sorted_criterion_results[1].selected).toEqual(true);
         expect(sorted_criterion_results[1].handgrading_result).toEqual(handgrading_result.pk);
+        expect(sorted_criterion_results[1].criterion.short_description).toEqual('Criterion2');
 
-        expect(sorted_criterion_results[2].pk).toEqual(3);
+        // expect(sorted_criterion_results[2].pk).toEqual(3);
         expect(sorted_criterion_results[2].selected).toEqual(true);
         expect(sorted_criterion_results[2].handgrading_result).toEqual(handgrading_result.pk);
+        expect(sorted_criterion_results[2].criterion.short_description).toEqual('Criterion3');
     });
 });
 

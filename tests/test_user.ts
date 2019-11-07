@@ -302,8 +302,8 @@ Group.objects.validate_and_create(members=[user], project=p2)
         expect(groups[0].pk).not.toEqual(groups[1].pk);
 
         groups.sort((a: Group, b: Group) => a.pk - b.pk);
-        expect((await Project.get_by_pk(groups[0].pk)).name).toEqual('P1');
-        expect((await Project.get_by_pk(groups[1].pk)).name).toEqual('P2');
+        expect((await Project.get_by_pk(groups[0].project)).name).toEqual('P1');
+        expect((await Project.get_by_pk(groups[1].project)).name).toEqual('P2');
     });
 });
 

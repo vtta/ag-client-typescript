@@ -12,6 +12,7 @@ let ag_test_cmd: cli.AGTestCommand;
 let mutation_test_suite: cli.MutationTestSuite;
 
 let ag_test_suite_result_pk: ID;
+let ag_test_case_result_pk: ID;
 let ag_test_cmd_result_pk: ID;
 let mutation_test_suite_result_pk: ID;
 
@@ -178,11 +179,12 @@ with open(cmd_result.stdout_filename, 'w') as f:
 with open(cmd_result.stderr_filename, 'w') as f:
     f.write('${ag_test_cmd_actual_stderr}')
 
-print(cmd_result.pk)
+print(f'{case_result.pk} {cmd_result.pk}')
     `;
 
     result = run_in_django_shell(make_ag_test_cmd_result);
-    ag_test_cmd_result_pk = parseInt(result.stdout, 10);
+    [ag_test_case_result_pk, ag_test_cmd_result_pk]
+        = result.stdout.split(' ').map(id => parseInt(id, 10));
 
     let make_mutation_test_suite_result = `
 from autograder.core.models import StudentTestSuiteResult, AGCommandResult
@@ -262,7 +264,7 @@ describe('get_submission_result tests', () => {
                     ag_test_case_name: ag_test_case.name,
                     ag_test_case_pk: ag_test_case.pk,
                     fdbk_settings: ag_test_case.staff_viewer_fdbk_config, // should be same as max
-                    pk: ag_test_case.pk,
+                    pk: ag_test_case_result_pk,
 
                     total_points: 1,
                     total_points_possible: 7,
@@ -337,7 +339,7 @@ describe('get_submission_result tests', () => {
                     ag_test_case_name: ag_test_case.name,
                     ag_test_case_pk: ag_test_case.pk,
                     fdbk_settings: ag_test_case.normal_fdbk_config, // should be same as max
-                    pk: ag_test_case.pk,
+                    pk: ag_test_case_result_pk,
 
                     total_points: 0,
                     total_points_possible: 0,

@@ -116,7 +116,7 @@ Criterion.objects.validate_and_create(handgrading_rubric=handgrading_rubric, poi
     test('Create criterion only required fields', async () => {
         let created = await Criterion.create(handgrading_rubric.pk, {});
 
-        let loaded = await Criterion.get_all_from_handgrading_rubric(project.pk);
+        let loaded = await Criterion.get_all_from_handgrading_rubric(handgrading_rubric.pk);
         expect(loaded.length).toEqual(1);
         let actual = loaded[0];
 
@@ -143,7 +143,7 @@ Criterion.objects.validate_and_create(handgrading_rubric=handgrading_rubric, poi
             })
         );
 
-        let loaded = await Criterion.get_all_from_handgrading_rubric(project.pk);
+        let loaded = await Criterion.get_all_from_handgrading_rubric(handgrading_rubric.pk);
         expect(loaded.length).toEqual(1);
         let actual = loaded[0];
 
@@ -179,7 +179,7 @@ describe('Get/update/delete criterion tests', () => {
     let criterion!: Criterion;
 
     beforeEach(async () => {
-        criterion = await Criterion.create(project.pk, {});
+        criterion = await Criterion.create(handgrading_rubric.pk, {});
     });
 
     test('Get criterion', async () => {

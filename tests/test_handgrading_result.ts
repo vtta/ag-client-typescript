@@ -26,6 +26,7 @@ let project!: Project;
 let handgrading_rubric!: HandgradingRubric;
 let group!: Group;
 let group2!: Group;
+let finished_submission_pk: number;
 
 class TestObserver implements HandgradingResultObserver {
     handgrading_result: HandgradingResult | null = null;
@@ -74,8 +75,10 @@ submission = Submission.objects.validate_and_create(group=group,
 
 submission.status = Submission.GradingStatus.finished_grading
 submission.save()
+print(submission.pk)
 `;
-    run_in_django_shell(create_submission);
+    let result = run_in_django_shell(create_submission);
+    finished_submission_pk = parseInt(result.stdout, 10);
 
     observer = new TestObserver();
     HandgradingResult.subscribe(observer);
@@ -288,8 +291,9 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
 
         let sorted_results = loaded_handgrading_results_info.results.sort((a, b) => a.pk - b.pk);
 
+        expect(sorted_results[0].pk).not.toEqual(sorted_results[1].pk);
+
         // Check first result info
-        expect(sorted_results[0].pk).toEqual(1);
         expect(sorted_results[0].project).toEqual(project.pk);
         expect(sorted_results[0].extended_due_date).toEqual(group.extended_due_date);
         expect(sorted_results[0].member_names).toEqual(group.member_names);
@@ -304,7 +308,6 @@ HandgradingResult.objects.validate_and_create(group=group2, handgrading_rubric=h
         expect(sorted_results[0].handgrading_result!.total_points_possible).toEqual(0);
 
         // Check second result info
-        expect(sorted_results[1].pk).toEqual(2);
         expect(sorted_results[1].project).toEqual(project.pk);
         expect(sorted_results[1].extended_due_date).toEqual(group2.extended_due_date);
         expect(sorted_results[1].member_names).toEqual(group2.member_names);
@@ -362,9 +365,10 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
             loaded_second_handgrading_results_page.previous!);
 
         expect(next_url_without_base).toBe(
-            "/api/projects/1/handgrading_results/?include_staff=true&page=3&page_size=1");
+            `/api/projects/${project.pk}/handgrading_results/`
+            + `?include_staff=true&page=3&page_size=1`);
         expect(previous_url_without_base).toBe(
-            "/api/projects/1/handgrading_results/?include_staff=true&page_size=1"
+            `/api/projects/${project.pk}/handgrading_results/?include_staff=true&page_size=1`
         );
         expect(loaded_second_handgrading_results_page.results.length).toEqual(1);
     });
@@ -455,7 +459,8 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         expect(next_url_without_base).toBeNull();
         expect(previous_url_without_base).toEqual(
-            "/api/projects/1/handgrading_results/?include_staff=true&page=2&page_size=1"
+            `/api/projects/${project.pk}/handgrading_results/`
+            + `?include_staff=true&page=2&page_size=1`
         );
         expect(loaded_third_handgrading_results_page.results.length).toEqual(1);
     });
@@ -470,13 +475,13 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         // Highest pk will be one that was just created
         let actual_result_summary = sorted_results[sorted_results.length - 1];
 
-        expect(created.pk).toEqual(actual_result_summary.pk);
+        expect(created.group).toEqual(actual_result_summary.pk);
 
         expect(actual_result_summary.handgrading_result!.finished_grading).toEqual(false);
         expect(actual_result_summary.handgrading_result!.total_points).toEqual(0);
         expect(actual_result_summary.handgrading_result!.total_points_possible).toEqual(0);
 
-        expect(observer.handgrading_result!.pk).toEqual(actual_result_summary.pk);
+        expect(observer.handgrading_result!.group).toEqual(actual_result_summary.pk);
 
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
@@ -487,7 +492,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         expect(created).toEqual(actual_result);
 
-        expect(actual_result.submission).toEqual(1);
+        expect(actual_result.submission).toEqual(finished_submission_pk);
         expect(actual_result.handgrading_rubric).toEqual(handgrading_rubric);
         expect(actual_result.group).toEqual(group.pk);
         expect(actual_result.applied_annotations).toEqual([]);
