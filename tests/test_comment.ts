@@ -119,7 +119,8 @@ Comment.objects.validate_and_create(handgrading_result=result, text='comment 3')
     });
 
     test('Create comment only required fields', async () => {
-        let created = await Comment.create(project.pk, new NewCommentData({text: 'comment text'}));
+        let created = await Comment.create(
+            handgrading_result.pk, new NewCommentData({text: 'comment text'}));
 
         let loaded = await Comment.get_all_from_handgrading_result(handgrading_result.pk);
         expect(loaded.length).toEqual(1);
@@ -138,7 +139,7 @@ Comment.objects.validate_and_create(handgrading_result=result, text='comment 3')
 
     test('Create comment all fields', async () => {
         let created = await Comment.create(
-            project.pk,
+            handgrading_result.pk,
             new NewCommentData({
                 text: 'some other text',
                 location: {
@@ -191,7 +192,7 @@ describe('Get/update/delete comment tests', () => {
     let comment!: Comment;
 
     beforeEach(async () => {
-        comment = await Comment.create(project.pk, {text: 'text here'});
+        comment = await Comment.create(handgrading_result.pk, {text: 'text here'});
     });
 
     test('Get comment file', async () => {

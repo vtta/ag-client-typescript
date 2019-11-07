@@ -7,7 +7,9 @@ import {
     reset_db,
     run_in_django_shell,
     sleep,
-    SUPERUSER_NAME
+    SUPERUSER_NAME,
+    timeit,
+    timeit_async
 } from './utils';
 
 beforeAll(() => {

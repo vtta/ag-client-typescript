@@ -38,9 +38,6 @@ test('Get sandbox docker images', async () => {
     let make_images = `
 from autograder.core.models import SandboxDockerImage
 
-# Get rid of the default image
-SandboxDockerImage.objects.all().delete()
-
 SandboxDockerImage.objects.validate_and_create(
     name='image1',
     tag='image1:1',
@@ -79,7 +76,7 @@ SandboxDockerImage.objects.validate_and_create(
         }
     ];
 
-    let images = await get_sandbox_docker_images();
+    let images = (await get_sandbox_docker_images()).filter(image => image.name !== 'default');
     let actual = images.map((image) => filter_keys(image, ['name', 'tag', 'display_name']));
     expect(actual).toEqual(expected);
 });

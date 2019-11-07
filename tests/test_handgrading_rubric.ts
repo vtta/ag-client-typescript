@@ -142,14 +142,16 @@ from autograder.core.models import Project
 from autograder.handgrading.models import HandgradingRubric
 project = Project.objects.get(pk=${project.pk})
 
-HandgradingRubric.objects.validate_and_create(project=project, max_points=321)
+rubric = HandgradingRubric.objects.validate_and_create(project=project, max_points=321)
+print(rubric.pk)
         `;
 
-        run_in_django_shell(create_handgrading_rubric);
+        let result = run_in_django_shell(create_handgrading_rubric);
+        let expected_pk = parseInt(result.stdout, 10);
         let loaded_handgrading_rubric = await HandgradingRubric.get_from_project(project.pk);
 
         // Make sure the loaded HandgradingRubric is the correct one
-        expect(loaded_handgrading_rubric.pk).toEqual(1);
+        expect(loaded_handgrading_rubric.pk).toEqual(expected_pk);
         expect(loaded_handgrading_rubric.project).toEqual(project.pk);
         expect(loaded_handgrading_rubric.points_style).toEqual(PointsStyle.start_at_zero_and_add);
         expect(loaded_handgrading_rubric.max_points).toEqual(321);

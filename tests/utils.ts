@@ -15,32 +15,26 @@ export function global_setup() {
 // Flushes all data from the test database and deletes the
 // test media_root filesystem.
 export function reset_db() {
-    // If you add -it to the docker command, be sure to set
-    // stdio to ['inherit', ...] for stdin.
-    subprocess_check_call(
-        'docker exec typescript-cli-django python3.6 manage.py flush --no-input');
+    // Because of the overhead in flushing the database using manage.py flush,
+    // we'll instead delete all objects in the "top-level" tables that all
+    // the other data depends on.
+    let delete_data = `import shutil
+from django.core.cache import cache;
+from django.contrib.auth.models import User
+from autograder.core.models import Course, SandboxDockerImage
+Course.objects.all().delete()
+User.objects.all().delete()
+SandboxDockerImage.objects.exclude(name='default').delete()
 
-    subprocess_check_call('docker exec typescript-cli-django rm -rf /usr/src/app/media_root_dev');
-
-    subprocess_check_call(
-        'docker exec typescript-cli-django python3.6 manage.py shell '
-        + '-c "from django.core.cache import cache; cache.clear()"');
-
-    // We can't drop and delete the database, and flushing is faster than
-    // reversing and re-applying migrations so we'll just manually re-create it here.
-    let recreate_default_sandbox_image = `
-import autograder_sandbox
-from autograder.core.models import SandboxDockerImage
-SandboxDockerImage.objects.create(
-    name='default',
-    display_name='Default',
-    tag=f'jameslp/autograder-sandbox:{autograder_sandbox.VERSION}'
-)
-    `;
-    run_in_django_shell(recreate_default_sandbox_image);
+shutil.rmtree('/usr/src/app/media_root_dev/', ignore_errors=True)
+cache.clear()
+`;
+    run_in_django_shell(delete_data);
 }
 
 export function run_in_django_shell(python_str: string) {
+    // If you add -it to the docker command, be sure to set
+    // stdio to ['inherit', ...] for stdin.
     let result = child_process.spawnSync(
         'docker', ['exec', 'typescript-cli-django', 'python3.6', 'manage.py', 'shell',
                    '-c', python_str]);
@@ -125,4 +119,18 @@ export function rand_bool() {
 
 export function rand_int(max: number) {
     return Math.floor(Math.random() * max);
+}
+
+export function timeit(func: () => void, label: string) {
+    let start = Date.now();
+    func();
+    let end = Date.now();
+    console.log(`${label}: ${(end - start) / 1000}`);
+}
+
+export async function timeit_async(func: () => Promise<void>, label: string) {
+    let start = Date.now();
+    await func();
+    let end = Date.now();
+    console.log(`${label}: ${(end - start) / 1000}`);
 }
