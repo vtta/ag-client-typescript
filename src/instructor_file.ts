@@ -83,9 +83,10 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
         }
     }
 
-    async get_content(): Promise<string> {
+    async get_content(on_download_progress?: ProgressEventListener): Promise<string> {
         let response = await HttpClient.get_instance().get<string>(
-            `/instructor_files/${this.pk}/content/`
+            `/instructor_files/${this.pk}/content/`,
+            {on_download_progress: on_download_progress}
         );
         return response.data;
     }
