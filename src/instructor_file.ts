@@ -26,7 +26,7 @@ export class InstructorFileData {
 
 export interface InstructorFileObserver {
     update_instructor_file_created(instructor_file: InstructorFile): void;
-    update_instructor_file_renamed(instructor_file: InstructorFile): void;
+    update_instructor_file_renamed(instructor_file: InstructorFile, old_name: string): void;
     update_instructor_file_content_changed(instructor_file: InstructorFile,
                                            new_content: string): void;
     update_instructor_file_deleted(instructor_file: InstructorFile): void;
@@ -114,6 +114,7 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
     }
 
     async rename(new_name: string): Promise<void> {
+        let old_name = this.name;
         let response = await HttpClient.get_instance().put(
             `/instructor_files/${this.pk}/name/`,
             {name: new_name}
@@ -121,12 +122,12 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
 
         safe_assign(this, response.data);
 
-        InstructorFile.notify_instructor_file_renamed(this);
+        InstructorFile.notify_instructor_file_renamed(this, old_name);
     }
 
-    static notify_instructor_file_renamed(instructor_file: InstructorFile) {
+    static notify_instructor_file_renamed(instructor_file: InstructorFile, old_name: string) {
         for (let subscriber of InstructorFile._subscribers) {
-            subscriber.update_instructor_file_renamed(instructor_file);
+            subscriber.update_instructor_file_renamed(instructor_file, old_name);
         }
     }
 
@@ -139,7 +140,7 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
         safe_assign(this, response.data);
 
         if (this.name !== original_name) {
-            InstructorFile.notify_instructor_file_renamed(this);
+            InstructorFile.notify_instructor_file_renamed(this, original_name);
         }
     }
 

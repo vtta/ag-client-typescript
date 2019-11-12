@@ -22,6 +22,7 @@ let project!: Project;
 
 class TestObserver implements InstructorFileObserver {
     instructor_file: InstructorFile | null = null;
+    old_name: string | null = null;
 
     content: string = "";
 
@@ -31,17 +32,18 @@ class TestObserver implements InstructorFileObserver {
     deleted_count = 0;
 
     update_instructor_file_created(file: InstructorFile) {
-        this.instructor_file = file;
+        this.instructor_file = new InstructorFile(file);
         this.created_count += 1;
     }
 
-    update_instructor_file_renamed(file: InstructorFile) {
-        this.instructor_file = file;
+    update_instructor_file_renamed(file: InstructorFile, old_name: string) {
+        this.old_name = old_name;
+        this.instructor_file = new InstructorFile(file);
         this.renamed_count += 1;
     }
 
     update_instructor_file_content_changed(file: InstructorFile, new_content: string) {
-        this.instructor_file = file;
+        this.instructor_file = new InstructorFile(file);
         this.content_changed_count += 1;
         this.content = new_content;
     }
@@ -224,6 +226,7 @@ with file_.open() as f:
     });
 
     test('Refresh instructor file name changed', async () => {
+        let old_name = instructor_file.name;
         let new_name = 'a_new_name';
         let rename = `
 from autograder.core.models import InstructorFile
@@ -235,6 +238,7 @@ file_.rename('${new_name}')
         await instructor_file.refresh();
 
         expect(observer.instructor_file!.name).toEqual(new_name);
+        expect(observer.old_name).toEqual(old_name);
         expect(observer.renamed_count).toEqual(1);
     });
 
