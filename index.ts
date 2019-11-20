@@ -69,6 +69,12 @@ export {
     MutationTestSuiteResultFeedback,
 } from './src/submission_result';
 
+export {
+    RerunSubmissionTaskData,
+    RerunSubmissionTask,
+    NewRerunSubmissionTaskData,
+} from './src/rerun_submission_task';
+
 export { Annotation, AnnotationData, AnnotationObserver,
          NewAnnotationData } from './src/annotation';
 export {
