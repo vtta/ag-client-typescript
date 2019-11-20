@@ -1,6 +1,6 @@
 import { Course } from '../src/course';
 import { Project } from '../src/project';
-import { RerunSubmissionTask, NewRerunSubmissionTaskData } from '../src/rerun_submission_task';
+import { NewRerunSubmissionTaskData, RerunSubmissionTask } from '../src/rerun_submission_task';
 
 import { global_setup, make_superuser, reset_db } from './utils';
 
