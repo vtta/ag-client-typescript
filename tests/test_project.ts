@@ -352,6 +352,9 @@ project.validate_and_update(name='projy')
 
         let projects = await Project.get_all_from_course(course.pk);
         expect(projects.length).toEqual(4);
+
+        expect(observer.project).toEqual(new_project);
+        expect(observer.created_count).toEqual(2);
     });
 
     test('Copy project to new course', async () => {
@@ -365,6 +368,9 @@ project.validate_and_update(name='projy')
 
         expect((await Project.get_all_from_course(course.pk)).length).toEqual(3);
         expect((await Project.get_all_from_course(new_course.pk)).length).toEqual(1);
+
+        expect(observer.project).toEqual(new_project);
+        expect(observer.created_count).toEqual(2);
     });
 
     test('Num queued submissions', async () => {
