@@ -207,7 +207,9 @@ export class Project extends ProjectCoreData implements SaveableAPIObject {
         let response = await HttpClient.get_instance().post<ProjectData>(
             `/projects/${this.pk}/copy_to_course/${course_pk}/?new_project_name=${new_name}`
         );
-        return new Project(response.data);
+        let new_project = new Project(response.data);
+        Project.notify_project_created(new_project);
+        return new_project;
     }
 }
 
