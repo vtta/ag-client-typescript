@@ -38,7 +38,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data);
+            throw new HttpError(response.status, response.data, url);
         }
     }
 
@@ -53,7 +53,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data);
+            throw new HttpError(response.status, response.data, url);
         }
     }
 
@@ -68,7 +68,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data);
+            throw new HttpError(response.status, response.data, url);
         }
     }
 
@@ -78,7 +78,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data);
+            throw new HttpError(response.status, response.data, url);
         }
     }
 
@@ -88,7 +88,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data);
+            throw new HttpError(response.status, response.data, url);
         }
     }
 
@@ -123,17 +123,19 @@ export class HttpResponse<T = unknown> {
 export class HttpError extends Error {
     status: number;
     data: object | string;
+    url: string;
 
     // See https://github.com/Microsoft/TypeScript/issues/13965
     __proto__: Error; // tslint:disable-line
 
-    constructor(status: number, data: object | string) {
+    constructor(status: number, data: object | string, url: string = '') {
         const actual_proto = new.target.prototype;
         super('HTTP response error: ' + status);
         this.__proto__ = actual_proto;
 
         this.status = status;
         this.data = data;
+        this.url = url;
     }
 
     // tslint:disable-next-line:naming-convention
