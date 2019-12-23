@@ -38,7 +38,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data, url);
+            throw new HttpError(response.status, response.data, url, response.headers);
         }
     }
 
@@ -53,7 +53,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data, url);
+            throw new HttpError(response.status, response.data, url, response.headers);
         }
     }
 
@@ -68,7 +68,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data, url);
+            throw new HttpError(response.status, response.data, url, response.headers);
         }
     }
 
@@ -78,7 +78,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data, url);
+            throw new HttpError(response.status, response.data, url, response.headers);
         }
     }
 
@@ -88,7 +88,7 @@ export class HttpClient {
         }
         catch (e) {
             let response = get_axios_response(e);
-            throw new HttpError(response.status, response.data, url);
+            throw new HttpError(response.status, response.data, url, response.headers);
         }
     }
 
@@ -124,11 +124,12 @@ export class HttpError extends Error {
     status: number;
     data: object | string;
     url: string;
+    headers: {[key: string]: string};
 
     // See https://github.com/Microsoft/TypeScript/issues/13965
     __proto__: Error; // tslint:disable-line
 
-    constructor(status: number, data: object | string, url: string = '') {
+    constructor(status: number, data: object | string, url: string = '', headers = {}) {
         const actual_proto = new.target.prototype;
         super('HTTP response error: ' + status);
         this.__proto__ = actual_proto;
@@ -136,6 +137,7 @@ export class HttpError extends Error {
         this.status = status;
         this.data = data;
         this.url = url;
+        this.headers = headers;
     }
 
     // tslint:disable-next-line:naming-convention
