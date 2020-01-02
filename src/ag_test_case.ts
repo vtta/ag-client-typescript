@@ -173,10 +173,10 @@ export class AGTestCase extends AGTestCaseCoreData implements SaveableAPIObject,
         return response.data;
     }
 
-    static notify_ag_test_case_order_updated(ag_test_case_pk: ID, ag_test_case_order: ID[]) {
+    static notify_ag_test_case_order_updated(ag_test_suite_pk: ID, ag_test_case_order: ID[]) {
         for (let subscriber of AGTestCase._subscribers) {
             subscriber.update_ag_test_cases_order_changed(
-                ag_test_case_pk, ag_test_case_order);
+                ag_test_suite_pk, ag_test_case_order);
         }
     }
 
