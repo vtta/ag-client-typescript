@@ -112,6 +112,18 @@ describe('HttpError tests', () => {
         });
     });
 
+    test('Error thrown from get_file()', async () => {
+        await expect_http_error(400, async () => {
+            await HttpClient.get_instance().get_file('/?status=400');
+        });
+        await expect_http_error(403, async () => {
+            await HttpClient.get_instance().get_file('/?status=403');
+        });
+        return expect_http_error(404, async () => {
+            await HttpClient.get_instance().get_file('/?status=404');
+        });
+    });
+
     test('Error thrown from post()', async () => {
         await expect_http_error(400, async () => {
             await HttpClient.get_instance().post('/?status=400');

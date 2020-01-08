@@ -6,11 +6,14 @@ import {
 } from '..';
 
 import {
+    blob_to_string,
+    check_tar_file,
     expect_dates_not_equal,
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell, sleep,
+    run_in_django_shell,
+    sleep,
 } from './utils';
 
 beforeAll(() => {
@@ -24,7 +27,7 @@ class TestObserver implements InstructorFileObserver {
     instructor_file: InstructorFile | null = null;
     old_name: string | null = null;
 
-    content: string = "";
+    content: Blob = new Blob([]);
 
     created_count = 0;
     renamed_count = 0;
@@ -42,7 +45,7 @@ class TestObserver implements InstructorFileObserver {
         this.renamed_count += 1;
     }
 
-    update_instructor_file_content_changed(file: InstructorFile, new_content: string) {
+    update_instructor_file_content_changed(file: InstructorFile, new_content: Blob) {
         this.instructor_file = new InstructorFile(file);
         this.content_changed_count += 1;
         this.content = new_content;
@@ -170,7 +173,7 @@ describe('Get/update/delete instructor file tests', () => {
 
     test('Get instructor file content', async () => {
         let loaded_content = await instructor_file.get_content();
-        expect(loaded_content).toEqual(file_content);
+        expect(await blob_to_string(loaded_content)).toEqual(file_content);
     });
 
     test('Update instructor file content and refresh', async () => {
@@ -200,7 +203,41 @@ with file_.open() as f:
 
         expect(observer.instructor_file).toEqual(instructor_file);
         expect(observer.content_changed_count).toEqual(1);
-        expect(observer.content).toEqual(new_content);
+        expect(await blob_to_string(observer.content)).toEqual(new_content);
+    });
+
+    test('Tarball content', async () => {
+        let make_tarball = `
+import tarfile
+import tempfile
+
+from autograder.core.models import InstructorFile
+
+file_ = InstructorFile.objects.get(pk=${instructor_file.pk})
+
+with file_.open('wb') as to_overwrite:
+    with tarfile.open(fileobj=to_overwrite, mode='w|gz') as tar:
+        with tempfile.TemporaryFile() as f:
+            f.write(b'I am file')
+            f.seek(0)
+
+            tar.addfile(tarfile.TarInfo('tar_file1'), f)
+
+        with tempfile.TemporaryFile() as f:
+            f.write(b'I am also file')
+            f.seek(0)
+
+            tar.addfile(tarfile.TarInfo('tar_file2'), f)
+        `;
+
+        run_in_django_shell(make_tarball);
+
+        let response = await instructor_file.get_content();
+        await check_tar_file(response, ['tar_file1', 'tar_file2']);
+
+        let new_instructor_file = await InstructorFile.create(project.pk, 'An new file', response);
+        let loaded = await new_instructor_file.get_content();
+        await check_tar_file(response, ['tar_file1', 'tar_file2']);
     });
 
     test('Rename and refresh instructor file', async () => {

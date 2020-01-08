@@ -11,13 +11,15 @@ import {
 } from "..";
 
 import {
+    blob_to_string,
+    check_tar_file,
     do_editable_fields_test,
     global_setup,
     make_superuser,
     reset_db,
     run_in_django_shell,
     sleep,
-    SUPERUSER_NAME
+    SUPERUSER_NAME,
 } from "./utils";
 
 beforeAll(() => {
@@ -196,7 +198,37 @@ describe('Submission detail endpoint tests', () => {
 
     test('Get submitted file content', async () => {
         let content = await submission.get_file_content('file2');
-        expect(content).toEqual('content2');
+        expect(await blob_to_string(content)).toEqual('content2');
+    });
+
+    test('Get submitted file tarball', async () => {
+        let make_tarball = `
+import tarfile
+import tempfile
+
+from autograder.core.models import Submission
+
+s = Submission.objects.get(pk=${submission.pk})
+
+with s.get_file('file1', 'wb') as to_overwrite:
+    with tarfile.open(fileobj=to_overwrite, mode='w|gz') as tar:
+        with tempfile.TemporaryFile() as f:
+            f.write(b'I am file')
+            f.seek(0)
+
+            tar.addfile(tarfile.TarInfo('tar_file1'), f)
+
+        with tempfile.TemporaryFile() as f:
+            f.write(b'I am also file')
+            f.seek(0)
+
+            tar.addfile(tarfile.TarInfo('tar_file2'), f)
+        `;
+
+        run_in_django_shell(make_tarball);
+
+        let response = await submission.get_file_content('file1');
+        return check_tar_file(response, ['tar_file1', 'tar_file2']);
     });
 
     test('Refresh', async () => {
