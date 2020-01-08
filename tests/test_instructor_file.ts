@@ -173,7 +173,7 @@ describe('Get/update/delete instructor file tests', () => {
 
     test('Get instructor file content', async () => {
         let loaded_content = await instructor_file.get_content();
-        expect(loaded_content).toEqual(file_content);
+        expect(await blob_to_string(loaded_content)).toEqual(file_content);
     });
 
     test('Update instructor file content and refresh', async () => {
