@@ -1,4 +1,5 @@
 import * as child_process from 'child_process';
+import { writeFileSync } from 'fs';
 
 import { HttpClient } from "..";
 
@@ -133,4 +134,57 @@ export async function timeit_async(func: () => Promise<void>, label: string) {
     await func();
     let end = Date.now();
     console.log(`${label}: ${(end - start) / 1000}`);
+}
+
+export function blob_to_string(blob: Blob): Promise<string> {
+    let reader = new FileReader();
+    return new Promise((resolve, reject) => {
+        reader.onload = () => {
+            resolve(<string> reader.result);
+        };
+
+        /* istanbul ignore next */
+        reader.onerror = () => {
+            reader.abort();
+            reject(new DOMException("Error converting blob to string."));
+        };
+
+        reader.readAsText(blob);
+    });
+}
+
+export function blob_to_buffer(blob: Blob): Promise<Buffer> {
+    let reader = new FileReader();
+    return new Promise((resolve, reject) => {
+        reader.onload = () => {
+            resolve(Buffer.from(<ArrayBuffer> reader.result));
+        };
+
+        /* istanbul ignore next */
+        reader.onerror = () => {
+            reader.abort();
+            reject(new DOMException("Error converting blob to buffer."));
+        };
+
+        reader.readAsArrayBuffer(blob);
+    });
+}
+
+let tar_name_counter = 0;
+
+export async function check_tar_file(blob: Blob, expected_archive_member_names: string[]) {
+    let filename = `/tmp/instr_tarry${tar_name_counter}.tgz`;
+    tar_name_counter += 1;
+
+    writeFileSync(filename, await blob_to_buffer(blob));
+
+    let result = child_process.spawnSync(`tar -tzf ${filename}`, {shell: true});
+
+    let stdout = result.stdout.toString();
+    expect(stdout).toEqual(expected_archive_member_names.join('\n') + '\n');
+    let stderr = result.stderr.toString();
+    if (result.status !== 0) {
+        console.log(stderr);
+    }
+    expect(result.status).toEqual(0);
 }

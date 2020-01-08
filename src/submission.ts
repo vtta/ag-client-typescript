@@ -122,8 +122,8 @@ export class Submission extends SubmissionData implements SaveableAPIObject {
 
     async get_file_content(
         filename: string, on_download_progress?: ProgressEventListener
-    ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+    ): Promise<Blob> {
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${this.pk}/file/?filename=${filename}`,
             {on_download_progress: on_download_progress}
         );

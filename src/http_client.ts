@@ -42,6 +42,22 @@ export class HttpClient {
         }
     }
 
+    async get_file(
+        url: string,
+        options: {on_download_progress?: ProgressEventListener} = {}
+    ): Promise<HttpResponse<Blob>> {
+        try {
+            return new HttpResponse(
+                await this._axios_instance.get(
+                    url,
+                    {responseType: "blob", onDownloadProgress: options.on_download_progress}));
+        }
+        catch (e) {
+            let response = get_axios_response(e);
+            throw new HttpError(response.status, response.data, url, response.headers);
+        }
+    }
+
     async post<T = unknown>(
         url: string, data?: unknown,
         options: {on_upload_progress?: ProgressEventListener} = {}

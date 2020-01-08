@@ -28,7 +28,7 @@ export interface InstructorFileObserver {
     update_instructor_file_created(instructor_file: InstructorFile): void;
     update_instructor_file_renamed(instructor_file: InstructorFile, old_name: string): void;
     update_instructor_file_content_changed(instructor_file: InstructorFile,
-                                           new_content: string): void;
+                                           new_content: Blob): void;
     update_instructor_file_deleted(instructor_file: InstructorFile): void;
 }
 
@@ -83,8 +83,8 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
         }
     }
 
-    async get_content(on_download_progress?: ProgressEventListener): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+    async get_content(on_download_progress?: ProgressEventListener): Promise<Blob> {
+        let response = await HttpClient.get_instance().get_file(
             `/instructor_files/${this.pk}/content/`,
             {on_download_progress: on_download_progress}
         );
@@ -103,11 +103,11 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
 
         safe_assign(this, response.data);
 
-        InstructorFile.notify_instructor_file_content_changed(this, await blob_to_string(content));
+        InstructorFile.notify_instructor_file_content_changed(this, content);
     }
 
     static notify_instructor_file_content_changed(instructor_file: InstructorFile,
-                                                  new_content: string) {
+                                                  new_content: Blob) {
         for (let subscriber of InstructorFile._subscribers) {
             subscriber.update_instructor_file_content_changed(instructor_file, new_content);
         }
@@ -154,21 +154,4 @@ export class InstructorFile extends InstructorFileData implements Refreshable, D
             subscriber.update_instructor_file_deleted(instructor_file);
         }
     }
-}
-
-function blob_to_string(blob: Blob): Promise<string> {
-    let reader = new FileReader();
-    return new Promise((resolve, reject) => {
-        reader.onload = () => {
-            resolve(<string> reader.result);
-        };
-
-        /* istanbul ignore next */
-        reader.onerror = () => {
-            reader.abort();
-            reject(new DOMException("Error converting blob to string."));
-        };
-
-        reader.readAsText(blob);
-    });
 }
