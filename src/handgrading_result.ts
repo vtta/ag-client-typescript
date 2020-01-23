@@ -1,5 +1,5 @@
 import { AppliedAnnotation, AppliedAnnotationData } from './applied_annotation';
-import { SaveableAPIObject } from "./base";
+import { ID, SaveableAPIObject } from "./base";
 import { Comment, CommentData } from "./comment";
 import { CriterionResult, CriterionResultCtorArgs } from './criterion_result';
 import { GroupData } from './group';
@@ -50,7 +50,6 @@ export interface HandgradingResultData extends HandgradingResultCtorArgs {
 export interface HandgradingResultObserver {
     update_handgrading_result_created(handgrading_result: HandgradingResult): void;
     update_handgrading_result_changed(handgrading_result: HandgradingResult): void;
-    update_handgrading_result_deleted(handgrading_result: HandgradingResult): void;
 }
 
 export class HandgradingResult extends HandgradingResultCoreData implements SaveableAPIObject {
@@ -178,6 +177,23 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
         for (let subscriber of HandgradingResult._subscribers) {
             subscriber.update_handgrading_result_changed(handgrading_result);
         }
+    }
+
+    static async reset(group_pk: ID): Promise<HandgradingResult> {
+        await HttpClient.get_instance().delete(`/groups/${group_pk}/handgrading_result/`);
+        let response = await HttpClient.get_instance().post<HandgradingResultData>(
+            `/groups/${group_pk}/handgrading_result/`, {}
+        );
+        let result = new HandgradingResult(response.data);
+
+        HandgradingResult.notify_handgrading_result_changed(result);
+        return result;
+    }
+
+    async has_correct_submission(): Promise<boolean> {
+        let response = await HttpClient.get_instance().get<boolean>(
+            `/groups/${this.group}/handgrading_result/has_correct_submission/`);
+        return response.data;
     }
 
     static readonly EDITABLE_FIELDS: (keyof HandgradingResultCoreData)[] = [
