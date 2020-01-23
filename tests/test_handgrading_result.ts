@@ -4,7 +4,8 @@ import {
     Course, Criterion, CriterionResult, ExpectedStudentFile, Group,
     HandgradingResult, HandgradingResultObserver,
     HandgradingRubric, PointsStyle,
-    Project
+    Project,
+    UltimateSubmissionPolicy,
 } from '..';
 
 import {
@@ -33,7 +34,6 @@ class TestObserver implements HandgradingResultObserver {
 
     created_count = 0;
     changed_count = 0;
-    deleted_count = 0;
 
     update_handgrading_result_changed(handgrading_result: HandgradingResult): void {
         this.changed_count += 1;
@@ -43,11 +43,6 @@ class TestObserver implements HandgradingResultObserver {
     update_handgrading_result_created(handgrading_result: HandgradingResult): void {
         this.created_count += 1;
         this.handgrading_result = handgrading_result;
-    }
-
-    update_handgrading_result_deleted(handgrading_result: HandgradingResult): void {
-        this.deleted_count += 1;
-        this.handgrading_result = null;
     }
 }
 
@@ -485,7 +480,6 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
-        expect(observer.deleted_count).toEqual(0);
 
         // Now get handgrading result with pk and check if it matches
         let actual_result = await HandgradingResult.get_by_group_pk(group.pk);
@@ -507,7 +501,6 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
         expect(observer.handgrading_result).toEqual(actual_result);
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
-        expect(observer.deleted_count).toEqual(0);
     });
 
     test('Unsubscribe', async () => {
@@ -525,7 +518,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
     });
 });
 
-describe('Get/update/delete handgrading result tests', () => {
+describe('Get/update/reset handgrading result tests', () => {
     let handgrading_result!: HandgradingResult;
 
     beforeEach(async () => {
@@ -555,7 +548,6 @@ describe('Get/update/delete handgrading result tests', () => {
         expect(observer.handgrading_result).toEqual(loaded);
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(1);
-        expect(observer.deleted_count).toEqual(0);
     });
 
     test('Editable fields', () => {
@@ -572,7 +564,6 @@ describe('Get/update/delete handgrading result tests', () => {
         expect(observer.handgrading_result).toEqual(handgrading_result);
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
-        expect(observer.deleted_count).toEqual(0);
 
         let change_handgrading_result = `
 from autograder.handgrading.models import HandgradingResult
@@ -590,7 +581,6 @@ handgrading_result.validate_and_update(finished_grading=True)
         expect(observer.handgrading_result).toEqual(handgrading_result);
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(1);
-        expect(observer.deleted_count).toEqual(0);
 
         await Criterion.create(handgrading_rubric.pk, {points: 2});
 
@@ -608,6 +598,32 @@ handgrading_result.validate_and_update(finished_grading=True)
         expect(observer.changed_count).toEqual(3);
     });
 
+    test('Reset handgrading result', async () => {
+        let original = handgrading_result;
+        let new_result = await HandgradingResult.reset(group.pk);
+        expect(new_result.group).toEqual(group.pk);
+        expect(new_result.pk).not.toEqual(original.pk);
+        expect(observer.changed_count).toEqual(1);
+    });
+
+    test('has_correct_submission', async () => {
+        expect(await handgrading_result.has_correct_submission()).toBe(true);
+
+        expect(project.ultimate_submission_policy).toEqual(UltimateSubmissionPolicy.most_recent);
+        let add_submission = `
+from autograder.core.models import Group, Submission
+
+group = Group.objects.get(pk=${group.pk})
+
+new_submission = Submission.objects.validate_and_create(group=group, submitted_files=[])
+new_submission.status = Submission.GradingStatus.finished_grading
+new_submission.save()
+        `;
+        run_in_django_shell(add_submission);
+
+        expect(await handgrading_result.has_correct_submission()).toBe(false);
+    });
+
     test('Get file from handgrading result', async () => {
         let loaded_file = await HandgradingResult.get_file_from_handgrading_result(
             group.pk, "f1.txt");
@@ -617,7 +633,6 @@ handgrading_result.validate_and_update(finished_grading=True)
         expect(observer.handgrading_result).toEqual(handgrading_result);
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
-        expect(observer.deleted_count).toEqual(0);
     });
 
     test('Get instead of create from project', async () => {
@@ -628,7 +643,6 @@ handgrading_result.validate_and_update(finished_grading=True)
         // Created count shouldn't increase
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
-        expect(observer.deleted_count).toEqual(0);
     });
 });
 
