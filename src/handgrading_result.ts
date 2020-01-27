@@ -1,11 +1,11 @@
 import { AppliedAnnotation, AppliedAnnotationData } from './applied_annotation';
-import { ID, SaveableAPIObject } from "./base";
+import { ID, Refreshable } from "./base";
 import { Comment, CommentData } from "./comment";
 import { CriterionResult, CriterionResultCtorArgs } from './criterion_result';
 import { GroupData } from './group';
 import { HandgradingRubric, HandgradingRubricCtorArgs } from './handgrading_rubric';
 import { HttpClient, ProgressEventListener } from './http_client';
-import { filter_keys, safe_assign } from './utils';
+import { safe_assign } from './utils';
 
 export class HandgradingResultCoreData {
     pk: number;
@@ -52,7 +52,7 @@ export interface HandgradingResultObserver {
     update_handgrading_result_changed(handgrading_result: HandgradingResult): void;
 }
 
-export class HandgradingResult extends HandgradingResultCoreData implements SaveableAPIObject {
+export class HandgradingResult extends HandgradingResultCoreData implements Refreshable {
     // Typescript hack for nominal typing.
     // See https://github.com/Microsoft/Typescript/issues/202
     // and https://michalzalecki.com/nominal-typing-in-typescript/
@@ -145,10 +145,20 @@ export class HandgradingResult extends HandgradingResultCoreData implements Save
         return response.data;
     }
 
-    async save(): Promise<void> {
+    async save_finished_grading(): Promise<void> {
         let response = await HttpClient.get_instance().patch<HandgradingResultData>(
             `/groups/${this.group}/handgrading_result/`,
-            filter_keys(this, HandgradingResult.EDITABLE_FIELDS)
+            {finished_grading: this.finished_grading}
+        );
+
+        safe_assign(this, new HandgradingResult(response.data));
+        HandgradingResult.notify_handgrading_result_changed(this);
+    }
+
+    async save_points_adjustment(): Promise<void> {
+        let response = await HttpClient.get_instance().patch<HandgradingResultData>(
+            `/groups/${this.group}/handgrading_result/`,
+            {points_adjustment: this.points_adjustment}
         );
 
         safe_assign(this, new HandgradingResult(response.data));

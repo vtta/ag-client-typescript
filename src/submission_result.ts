@@ -40,6 +40,8 @@ export namespace ResultOutput {
     export interface AGTestCommandResultOutputSize {
         stdout_size: number | null;
         stderr_size: number | null;
+        stdout_truncated: number | null;
+        stderr_truncated: number | null;
         stdout_diff_size: number | null;
         stderr_diff_size: number | null;
     }
@@ -118,6 +120,8 @@ export namespace ResultOutput {
     export interface AGTestSuiteResultOutputSize {
         setup_stdout_size: number | null;
         setup_stderr_size: number | null;
+        setup_stdout_truncated: number | null;
+        setup_stderr_truncated: number | null;
     }
 
     export async function get_ag_test_suite_result_setup_stdout(
