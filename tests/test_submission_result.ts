@@ -402,6 +402,8 @@ describe('AG test suite result output tests', () => {
         let expected = {
             setup_stdout_size: ag_test_suite_setup_stdout.length,
             setup_stderr_size: ag_test_suite_setup_stderr.length,
+            setup_stdout_truncated: false,
+            setup_stderr_truncated: false,
         };
         expect(actual).toEqual(expected);
     });
@@ -412,6 +414,8 @@ describe('AG test suite result output tests', () => {
         let expected = {
             setup_stdout_size: null,
             setup_stderr_size: null,
+            setup_stdout_truncated: null,
+            setup_stderr_truncated: null,
         };
         expect(actual).toEqual(expected);
     });
@@ -436,6 +440,8 @@ describe('AG test cmd result output tests', () => {
         expect(actual).toEqual({
             stdout_size: ag_test_cmd_actual_stdout.length,
             stderr_size: ag_test_cmd_actual_stderr.length,
+            stdout_truncated: false,
+            stderr_truncated: false,
             // The + 4 is from the sentinal characters added to the diff lines
             stdout_diff_size: (ag_test_cmd_actual_stdout.length
                                + ag_test_cmd_expected_stdout.length + 4),
@@ -451,6 +457,8 @@ describe('AG test cmd result output tests', () => {
         expect(actual).toEqual({
             stdout_size: null,
             stderr_size: null,
+            stdout_truncated: null,
+            stderr_truncated: null,
             stdout_diff_size: null,
             stderr_diff_size: null,
         });
