@@ -56,7 +56,7 @@ beforeEach(async () => {
     handgrading_rubric = await HandgradingRubric.create(project.pk, {});
     await ExpectedStudentFile.create(project.pk, {pattern: 'f1.txt'});      // for submission
     group = await Group.create_solo_group(project.pk);
-    group2 = await Group.create(project.pk, { member_names: ['ffuxa@umich.edu'] });
+    group2 = await Group.create(project.pk, {member_names: ['ffuxa@umich.edu']});
 
     // Create submission (using django shell since Submission API hasn't been created yet
     let create_submission = `
@@ -512,7 +512,7 @@ HandgradingResult.objects.validate_and_create(group=group3, handgrading_rubric=h
 
         HandgradingResult.unsubscribe(observer);
 
-        await handgrading_result.save();
+        await handgrading_result.save_finished_grading();
         expect(observer.created_count).toEqual(1);
         expect(observer.changed_count).toEqual(0);
     });
@@ -531,14 +531,40 @@ describe('Get/update/reset handgrading result tests', () => {
     });
 
     test('Update handgrading result', async () => {
+        handgrading_rubric.handgraders_can_adjust_points = true;
+        await handgrading_rubric.save();
+
+        let change_to_handgrader = `
+from autograder.core.models import Course
+course = Course.objects.get(pk=${course.pk})
+course.handgraders.add(*course.admins.all())
+course.admins.clear()
+        `;
+        run_in_django_shell(change_to_handgrader);
+
         let old_timestamp = handgrading_result.last_modified;
         handgrading_result.finished_grading = true;
+
+        await sleep(1);
+        await handgrading_result.save_finished_grading();
+
+        let loaded = await HandgradingResult.get_by_group_pk(group.pk);
+        expect(loaded.finished_grading).toEqual(true);
+        expect_dates_not_equal(loaded.last_modified, old_timestamp);
+
+        expect(handgrading_result).toEqual(loaded);
+
+        expect(observer.handgrading_result).toEqual(loaded);
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(1);
+
+        old_timestamp = handgrading_result.last_modified;
         handgrading_result.points_adjustment = 2;
 
         await sleep(1);
-        await handgrading_result.save();
+        await handgrading_result.save_points_adjustment();
 
-        let loaded = await HandgradingResult.get_by_group_pk(group.pk);
+        loaded = await HandgradingResult.get_by_group_pk(group.pk);
         expect(loaded.finished_grading).toEqual(true);
         expect(loaded.points_adjustment).toEqual(2);
         expect_dates_not_equal(loaded.last_modified, old_timestamp);
@@ -547,7 +573,7 @@ describe('Get/update/reset handgrading result tests', () => {
 
         expect(observer.handgrading_result).toEqual(loaded);
         expect(observer.created_count).toEqual(1);
-        expect(observer.changed_count).toEqual(1);
+        expect(observer.changed_count).toEqual(2);
     });
 
     test('Editable fields', () => {
