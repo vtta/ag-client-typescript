@@ -189,6 +189,8 @@ export async function check_tar_file(blob: Blob, expected_archive_member_names: 
     expect(result.status).toEqual(0);
 }
 
+type IterableType<T> = Iterable<T> | IterableIterator<T>;
+
 // Given two iterables, returns an iterable iterator that produces
 // pairs of items from the input iterables.
 export function* zip<T1, T2>(iterable1: IterableType<T1>,
