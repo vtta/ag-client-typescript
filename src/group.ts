@@ -113,6 +113,14 @@ export class Group extends GroupData implements SaveableAPIObject {
         }
     }
 
+    // Sends a DELETE request for this group and then refreshes it.
+    // Note that the server just changes the group members rather than
+    // truly deleting the group.
+    async pseudo_delete() {
+        await HttpClient.get_instance().delete(`/groups/${this.pk}/`);
+        return this.refresh();
+    }
+
     // When group_pk is not provided, this method will add
     // bonus submissions to all groups in the project.
     // If provided, this method will only modify the number of
@@ -153,9 +161,7 @@ export class Group extends GroupData implements SaveableAPIObject {
 
     async refresh(): Promise<void> {
         let last_modified = this.last_modified;
-        let response = await HttpClient.get_instance().get<GroupData>(
-            `/groups/${this.pk}/`
-        );
+        let response = await HttpClient.get_instance().get<GroupData>(`/groups/${this.pk}/`);
 
         safe_assign(this, response.data);
         if (last_modified !== this.last_modified) {

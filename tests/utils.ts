@@ -188,3 +188,22 @@ export async function check_tar_file(blob: Blob, expected_archive_member_names: 
     }
     expect(result.status).toEqual(0);
 }
+
+// Given two iterables, returns an iterable iterator that produces
+// pairs of items from the input iterables.
+export function* zip<T1, T2>(iterable1: IterableType<T1>,
+                             iterable2: IterableType<T2>): IterableIterator<[T1, T2]> {
+    let iterator1 = iterable1[Symbol.iterator]();
+    let iterator2 = iterable2[Symbol.iterator]();
+
+    let stop = false;
+    while (!stop) {
+        let item1 = iterator1.next();
+        let item2 = iterator2.next();
+
+        stop = item1.done || item2.done;
+        if (!stop) {
+            yield [item1.value, item2.value];
+        }
+    }
+}

@@ -10,7 +10,10 @@ import {
     global_setup,
     make_superuser,
     reset_db,
-    run_in_django_shell, sleep, SUPERUSER_NAME,
+    run_in_django_shell,
+    sleep,
+    SUPERUSER_NAME,
+    zip,
 } from './utils';
 
 beforeAll(() => {
@@ -275,6 +278,21 @@ group.validate_and_update(bonus_submissions_remaining=12)
         expect(observer.created_count).toEqual(3);
         expect(observer.changed_count).toEqual(0);
         expect(observer.merged_count).toEqual(1);
+    });
+
+    test('Pseudo-delete group', async () => {
+        let original_members = group.member_names.slice();
+        await group.pseudo_delete();
+
+        expect(group.member_names).not.toEqual(original_members);
+        for (let [original_name, new_name] of zip(original_members, group.member_names)) {
+            expect(new_name).not.toEqual(original_name);
+            expect(new_name).toContain(original_name);
+        }
+
+        expect(observer.created_count).toEqual(1);
+        expect(observer.changed_count).toEqual(1);
+        expect(observer.merged_count).toEqual(0);
     });
 
     test('Edit bonus submissions', async () => {
