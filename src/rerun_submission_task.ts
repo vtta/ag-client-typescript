@@ -1,4 +1,4 @@
-import { ID, Refreshable } from './base';
+import { ID } from './base';
 import { HttpClient } from './http_client';
 import { safe_assign } from './utils';
 
@@ -7,6 +7,7 @@ export class RerunSubmissionTaskData {
     project: ID;
 
     progress: number;
+    is_cancelled: boolean;
     error_msg: string;
     // creator: ID;  // We'll add this member once we fix its type in the API
     created_at: string;
@@ -26,6 +27,7 @@ export class RerunSubmissionTaskData {
         this.project = args.project;
 
         this.progress = args.progress;
+        this.is_cancelled = args.is_cancelled;
         this.error_msg = args.error_msg;
         this.created_at = args.created_at;
         this.has_error = args.has_error;
@@ -59,6 +61,12 @@ export class RerunSubmissionTask extends RerunSubmissionTaskData {
         let response = await HttpClient.get_instance().get<RerunSubmissionTaskData>(
             `/rerun_submissions_tasks/${rerun_submission_task_pk}/`);
         return new RerunSubmissionTask(response.data);
+    }
+
+    async cancel() {
+        let response = await HttpClient.get_instance().post<RerunSubmissionTaskData>(
+            `/rerun_submissions_tasks/${this.pk}/cancel/`);
+        safe_assign(this, response.data);
     }
 }
 

@@ -24,6 +24,7 @@ test('Task ctor', () => {
         project: 8,
 
         progress: 58,
+        is_cancelled: true,
         error_msg: 'WAAAAA',
 
         created_at: now,
@@ -41,6 +42,7 @@ test('Task ctor', () => {
     expect(task.project).toEqual(8);
 
     expect(task.progress).toEqual(58);
+    expect(task.is_cancelled).toBe(true);
     expect(task.error_msg).toEqual('WAAAAA');
 
     expect(task.created_at).toEqual(now);
@@ -100,6 +102,22 @@ test('Create and get task', async () => {
 
     let loaded = await RerunSubmissionTask.get_by_pk(task.pk);
     expect(loaded).toEqual(task);
+});
+
+test('Cancel task', async () => {
+    let task = await RerunSubmissionTask.create(project.pk, {
+        rerun_all_submissions: false,
+        submission_pks: [],
+        rerun_all_ag_test_suites: false,
+        ag_test_suite_data: {},
+        rerun_all_student_test_suites: false,
+        student_suite_pks: [],
+    });
+    expect(task.is_cancelled).toBe(false);
+
+    await task.cancel();
+    task = await RerunSubmissionTask.get_by_pk(task.pk);
+    expect(task.is_cancelled).toBe(true);
 });
 
 test('Get all from project', async () => {
