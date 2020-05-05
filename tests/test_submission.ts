@@ -372,7 +372,7 @@ for i in range(3):
             expect(submission.results.total_points).not.toEqual(0);
             expect(submission.results.total_points_possible).not.toEqual(0);
             expect(submission.results.ag_test_suite_results.length).toEqual(1);
-            expect(submission.results.student_test_suite_results).toEqual([]);
+            expect(submission.results.mutation_test_suite_results).toEqual([]);
         }
 
         // Override feedback
@@ -384,7 +384,7 @@ for i in range(3):
             expect(submission.results.total_points).toEqual(0);
             expect(submission.results.total_points_possible).toEqual(0);
             expect(submission.results.ag_test_suite_results.length).toEqual(1);
-            expect(submission.results.student_test_suite_results).toEqual([]);
+            expect(submission.results.mutation_test_suite_results).toEqual([]);
         }
     });
 });
