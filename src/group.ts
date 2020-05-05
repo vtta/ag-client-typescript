@@ -99,7 +99,7 @@ export class Group extends GroupData implements SaveableAPIObject {
 
     async merge_groups(other_group_pk: number): Promise<Group> {
         let response = await HttpClient.get_instance().post<GroupData>(
-            `/groups/${this.pk}/merge_with/?other_group_pk=${other_group_pk}`
+            `/groups/${this.pk}/merge_with/${other_group_pk}/`
         );
 
         let result = new Group(response.data);
