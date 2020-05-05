@@ -252,9 +252,9 @@ describe('MutationTestSuite API tests', () => {
         project = await Project.create(course.pk, {name: 'Projy'});
 
         let make_suites = `
-from autograder.core.models import StudentTestSuite
-StudentTestSuite.objects.validate_and_create(project=${project.pk}, name='MutationSuite1')
-StudentTestSuite.objects.validate_and_create(project=${project.pk}, name='MutationSuite2')
+from autograder.core.models import MutationTestSuite
+MutationTestSuite.objects.validate_and_create(project=${project.pk}, name='MutationSuite1')
+MutationTestSuite.objects.validate_and_create(project=${project.pk}, name='MutationSuite2')
         `;
         run_in_django_shell(make_suites);
 
@@ -270,8 +270,8 @@ StudentTestSuite.objects.validate_and_create(project=${project.pk}, name='Mutati
 
     test('Get MutationTestSuites from project none exist', async () => {
         let delete_suites = `
-from autograder.core.models import StudentTestSuite
-StudentTestSuite.objects.all().delete()
+from autograder.core.models import MutationTestSuite
+MutationTestSuite.objects.all().delete()
         `;
         run_in_django_shell(delete_suites);
 
@@ -403,7 +403,7 @@ print(image.pk)
     });
 
     test('Check editable flields', async () => {
-        let expected = get_expected_editable_fields('StudentTestSuite');
+        let expected = get_expected_editable_fields('MutationTestSuite');
         expected =  expected.filter((value) => value !== 'docker_image_to_use');
         expected.sort();
 
@@ -419,8 +419,8 @@ print(image.pk)
         await sleep(1);
 
         let rename_suite = `
-from autograder.core.models import StudentTestSuite
-StudentTestSuite.objects.get(pk=${suite.pk}).validate_and_update(name='Renamed')
+from autograder.core.models import MutationTestSuite
+MutationTestSuite.objects.get(pk=${suite.pk}).validate_and_update(name='Renamed')
         `;
         run_in_django_shell(rename_suite);
 

@@ -187,8 +187,8 @@ print(f'{case_result.pk} {cmd_result.pk}')
         = result.stdout.split(' ').map(id => parseInt(id, 10));
 
     let make_mutation_test_suite_result = `
-from autograder.core.models import StudentTestSuiteResult, AGCommandResult
-suite_result = StudentTestSuiteResult.objects.validate_and_create(
+from autograder.core.models import MutationTestSuiteResult, AGCommandResult
+suite_result = MutationTestSuiteResult.objects.validate_and_create(
     mutation_test_suite=${mutation_test_suite.pk},
     submission=${submission_pk},
 

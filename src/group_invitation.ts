@@ -26,9 +26,10 @@ export class GroupInvitationData {
 
 export class GroupInvitation extends GroupInvitationData implements Refreshable {
     static async send_invitation(project_pk: ID,
-                                 invited_usernames: string[]): Promise<GroupInvitation> {
+                                 recipient_usernames: string[]): Promise<GroupInvitation> {
         let response = await HttpClient.get_instance().post<GroupInvitationData>(
-            `/projects/${project_pk}/group_invitations/`, {invited_usernames: invited_usernames});
+            `/projects/${project_pk}/group_invitations/`,
+            {recipient_usernames: recipient_usernames});
         return new GroupInvitation(response.data);
     }
 

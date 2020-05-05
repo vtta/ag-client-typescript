@@ -104,8 +104,8 @@ invitees = User.objects.exclude(pk=invitor.pk)
 
 invitation = GroupInvitation.objects.validate_and_create(
     project=Project.objects.get(pk=${project.pk}),
-    invitation_creator=invitor,
-    invited_users=invitees
+    sender=invitor,
+    recipients=invitees
 )
 
 print(invitation.pk)
@@ -134,8 +134,8 @@ invitee = User.objects.get(username='${SUPERUSER_NAME}')
 
 invitation = GroupInvitation.objects.validate_and_create(
     project=Project.objects.get(pk=${project.pk}),
-    invitation_creator=invitor,
-    invited_users=[invitee]
+    sender=invitor,
+    recipients=[invitee]
 )
 
 print(invitation.pk)
@@ -182,8 +182,8 @@ invitees = User.objects.exclude(pk=invitor.pk)
 
 invitation = GroupInvitation.objects.validate_and_create(
     project=Project.objects.get(pk=${project.pk}),
-    invitation_creator=invitor,
-    invited_users=invitees
+    sender=invitor,
+    recipients=invitees
 )
 
 print(invitation.pk)

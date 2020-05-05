@@ -17,7 +17,6 @@ export class SubmissionData {
 
     status: string;
 
-    count_towards_daily_limit: boolean;
     is_past_daily_limit: boolean;
     is_bonus_submission: boolean;
     count_towards_total_limit: boolean;
@@ -41,7 +40,6 @@ export class SubmissionData {
 
         this.status = args.status;
 
-        this.count_towards_daily_limit = args.count_towards_daily_limit;
         this.is_past_daily_limit = args.is_past_daily_limit;
         this.is_bonus_submission = args.is_bonus_submission;
         this.count_towards_total_limit = args.count_towards_total_limit;
@@ -163,7 +161,6 @@ export class Submission extends SubmissionData implements SaveableAPIObject {
     }
 
     static readonly EDITABLE_FIELDS: ReadonlyArray<(keyof Submission)> = [
-        'count_towards_daily_limit',
         'count_towards_total_limit'
     ];
 }
