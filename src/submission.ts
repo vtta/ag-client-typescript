@@ -150,8 +150,9 @@ export class Submission extends SubmissionData implements SaveableAPIObject {
     }
 
     async remove_from_queue(): Promise<void> {
-        await HttpClient.get_instance().post(`/submissions/${this.pk}/remove_from_queue/`);
-        this.status = GradingStatus.removed_from_queue;
+        let response = await HttpClient.get_instance().post<SubmissionData>(
+            `/submissions/${this.pk}/remove_from_queue/`);
+        safe_assign(this, response.data);
         Submission.notify_submission_changed(this);
     }
 
