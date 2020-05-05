@@ -1,7 +1,8 @@
 import {
     Course,
     Group, GroupObserver, NewGroupData,
-    Project
+    Project,
+    User
 } from '..';
 
 import {
@@ -69,11 +70,26 @@ afterEach(() => {
 describe('List/create group tests', () => {
     test('Group ctor', () => {
         let now = (new Date()).toISOString();
+
+        let members = [
+            new User({
+                pk: 2, username: 'john@umich.edu',
+                first_name: 'joHn', last_name: 'umich',
+                is_superuser: false
+            }),
+            new User({
+                pk: 1, username: 'doe@umich.edu',
+                first_name: 'doe', last_name: 'edu',
+                is_superuser: true
+            }),
+        ];
+
         let group = new Group({
             pk: 6,
             project: project.pk,
             extended_due_date: now,
-            member_names: ['john@umich.edu', 'doe@umich.edu'],
+            members: members,
+            member_names: members.map(member => member.username),
             bonus_submissions_remaining: 0,
             late_days_used: {'john@umich.edu': 0, 'doe@umich.edu': 0},
             num_submissions: 1,
@@ -85,6 +101,7 @@ describe('List/create group tests', () => {
         expect(group.pk).toEqual(6);
         expect(group.project).toEqual(project.pk);
         expect(group.extended_due_date).toEqual(now);
+        expect(group.members).toEqual(members);
         expect(group.member_names).toEqual(['john@umich.edu', 'doe@umich.edu']);
         expect(group.bonus_submissions_remaining).toEqual(0);
         expect(group.late_days_used).toEqual({'john@umich.edu': 0, 'doe@umich.edu': 0});

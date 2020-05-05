@@ -1,11 +1,13 @@
 import { ID, SaveableAPIObject } from "./base";
 import { HttpClient, HttpResponse } from './http_client';
+import { User } from './user';
 import { filter_keys, safe_assign } from './utils';
 
 export class GroupData {
     pk: number;
     project: number;
     extended_due_date: string | null;
+    readonly members: Readonly<Readonly<User>[]>;
     member_names: string[];
     bonus_submissions_remaining: number;
     late_days_used: {[username: string]: number};
@@ -18,6 +20,7 @@ export class GroupData {
         pk,
         project,
         extended_due_date,
+        members,
         member_names,
         bonus_submissions_remaining,
         late_days_used,
@@ -29,6 +32,7 @@ export class GroupData {
         this.pk = pk;
         this.project = project;
         this.extended_due_date = extended_due_date;
+        this.members = members;
         this.member_names = member_names;
         this.bonus_submissions_remaining = bonus_submissions_remaining;
         this.late_days_used = late_days_used;
