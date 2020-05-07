@@ -163,7 +163,7 @@ from autograder.core.models import GroupInvitation
 invitation = GroupInvitation.objects.get(pk=${invitation.pk})
 accepter = User.objects.get(username='user1')
 
-invitation.invitee_accept(accepter)
+invitation.recipient_accept(accepter)
         `;
         run_in_django_shell(user_accept);
 
