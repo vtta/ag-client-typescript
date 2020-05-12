@@ -8,8 +8,6 @@ import {
     run_in_django_shell,
     sleep,
     SUPERUSER_NAME,
-    timeit,
-    timeit_async
 } from './utils';
 
 beforeAll(() => {

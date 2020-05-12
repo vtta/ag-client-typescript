@@ -24,10 +24,11 @@ export function reset_db() {
     let delete_data = `import shutil
 from django.core.cache import cache;
 from django.contrib.auth.models import User
-from autograder.core.models import Course, SandboxDockerImage
+from autograder.core.models import Course, SandboxDockerImage, BuildSandboxDockerImageTask
 Course.objects.all().delete()
 User.objects.all().delete()
 SandboxDockerImage.objects.exclude(name='default').delete()
+BuildSandboxDockerImageTask.objects.all().delete()
 
 shutil.rmtree('/usr/src/app/media_root_dev/', ignore_errors=True)
 cache.clear()

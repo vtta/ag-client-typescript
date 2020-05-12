@@ -1,9 +1,9 @@
 import { AGCommand } from "./ag_command";
-import { SandboxDockerImageData } from "./ag_test_suite";
 import { Deletable, ID, SaveableAPIObject } from "./base";
 import { ExpectedStudentFile, ExpectedStudentFileData } from "./expected_student_file";
 import { HttpClient } from "./http_client";
 import { InstructorFile, InstructorFileData } from "./instructor_file";
+import { SandboxDockerImageData } from "./sandbox_docker_image";
 import { filter_keys, safe_assign } from "./utils";
 
 export class MutationTestSuiteCoreData {

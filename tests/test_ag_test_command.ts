@@ -26,7 +26,6 @@ describe('AGTestCommand ctor tests', () => {
         let now = (new Date()).toISOString();
 
         let normal_fdbk = make_random_fdbk_config();
-        let first_failure_fdbk = make_random_fdbk_config();
         let ultimate_submission_fdbk = make_random_fdbk_config();
         let past_limit_submission_fdbk = make_random_fdbk_config();
         let staff_viewer_fdbk = make_random_fdbk_config();

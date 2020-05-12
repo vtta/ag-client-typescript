@@ -31,6 +31,7 @@ let setup_command = {
     cmd: 'seeetup',
     time_limit: 9,
     stack_size_limit: 40040,
+    use_virtual_memory_limit: true,
     virtual_memory_limit: 100000008,
     process_spawn_limit: 7,
 };
@@ -39,6 +40,7 @@ let get_student_test_names_command = {
     cmd: 'ls test*',
     time_limit: 10,
     stack_size_limit: 42000,
+    use_virtual_memory_limit: true,
     virtual_memory_limit: 100090000,
     process_spawn_limit: 2,
 };
@@ -47,6 +49,7 @@ let student_test_validity_check_command = {
     cmd: 'valid.sh ${student_test_name}',
     time_limit: 11,
     stack_size_limit: 40010,
+    use_virtual_memory_limit: true,
     virtual_memory_limit: 100100000,
     process_spawn_limit: 6,
 };
@@ -55,6 +58,7 @@ let grade_buggy_impl_command = {
     cmd: 'grade.py ${student_test_name} ${buggy_impl_name}',
     time_limit: 8,
     stack_size_limit: 50000,
+    use_virtual_memory_limit: true,
     virtual_memory_limit: 200000000,
     process_spawn_limit: 3,
 };
