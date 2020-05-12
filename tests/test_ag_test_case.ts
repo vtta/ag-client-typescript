@@ -89,6 +89,7 @@ describe('AGTestCase ctor tests', () => {
 
                 time_limit: 10,
                 stack_size_limit: 10000,
+                use_virtual_memory_limit: true,
                 virtual_memory_limit: 500000,
                 process_spawn_limit: 0,
             },
@@ -138,6 +139,7 @@ describe('AGTestCase ctor tests', () => {
 
                 time_limit: 10,
                 stack_size_limit: 10000,
+                use_virtual_memory_limit: true,
                 virtual_memory_limit: 500000,
                 process_spawn_limit: 0,
             })

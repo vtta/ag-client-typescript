@@ -102,6 +102,7 @@ beforeAll(async () => {
             process_spawn_limit: 0,
             stack_size_limit: 10000,
             time_limit: 10,
+            use_virtual_memory_limit: true,
             virtual_memory_limit: 500000000
         },
 

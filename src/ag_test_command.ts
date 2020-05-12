@@ -49,6 +49,7 @@ export class AGTestCommandData {
 
     time_limit: number;
     stack_size_limit: number;
+    use_virtual_memory_limit: boolean;
     virtual_memory_limit: number;
     process_spawn_limit: number;
 
@@ -92,6 +93,7 @@ export class AGTestCommandData {
 
         this.time_limit = args.time_limit;
         this.stack_size_limit = args.stack_size_limit;
+        this.use_virtual_memory_limit = args.use_virtual_memory_limit;
         this.virtual_memory_limit = args.virtual_memory_limit;
         this.process_spawn_limit = args.process_spawn_limit;
     }

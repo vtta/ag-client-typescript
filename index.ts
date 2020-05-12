@@ -1,5 +1,7 @@
 export { HttpClient, HttpError, HttpResponse } from './src/http_client';
 
+export { ID } from './src/base';
+
 export { AllCourses, Course, CourseObserver, NewCourseData, Semester } from './src/course';
 export { User, UserRoles } from './src/user';
 

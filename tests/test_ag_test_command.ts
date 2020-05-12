@@ -76,6 +76,7 @@ describe('AGTestCommand ctor tests', () => {
 
             time_limit: 3,
             stack_size_limit: 10000,
+            use_virtual_memory_limit: true,
             virtual_memory_limit: 40000,
             process_spawn_limit: 2,
         });
@@ -194,6 +195,7 @@ describe('AGTestCommand ctor tests', () => {
 
             time_limit: 3,
             stack_size_limit: 10000,
+            use_virtual_memory_limit: true,
             virtual_memory_limit: 40000,
             process_spawn_limit: 2,
         });

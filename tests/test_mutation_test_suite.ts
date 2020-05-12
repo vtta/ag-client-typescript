@@ -1,18 +1,17 @@
 import {
+    AGCommand,
     BugsExposedFeedbackLevel,
     Course,
     ExpectedStudentFile,
+    ID,
     InstructorFile,
     MutationTestSuite,
-    Project,
-    SandboxDockerImageData
-} from "..";
-import { ID } from "../src/base";
-import {
     MutationTestSuiteFeedbackConfig,
     MutationTestSuiteObserver,
-    NewMutationTestSuiteData
-} from "../src/mutation_test_suite";
+    NewMutationTestSuiteData,
+    Project,
+    SandboxDockerImageData,
+} from "..";
 
 import {
     get_expected_editable_fields,
@@ -26,7 +25,7 @@ beforeAll(() => {
     global_setup();
 });
 
-let setup_command = {
+let setup_command: AGCommand = {
     name: "",
     cmd: 'seeetup',
     time_limit: 9,
@@ -107,9 +106,9 @@ describe('MutationTestSuite ctor tests', () => {
 
         let sandbox_image: SandboxDockerImageData = {
             pk: 1,
-            name: 'image',
-            tag: 'jameslp/wee',
-            display_name: 'Image'
+            display_name: 'Image',
+            last_modified: (new Date()).toISOString(),
+            course: null
         };
 
         let normal_fdbk = make_random_fdbk_config();
@@ -303,9 +302,10 @@ print(image.pk)
         let result = run_in_django_shell(make_sandbox_image);
         let image = {
             pk: parseInt(result.stdout, 10),
-            tag: 'jameslp/custom',
-            name: 'custom',
-            display_name: 'Custom'
+            display_name: 'Custom',
+            last_modified: (new Date()).toISOString(),
+            course: null
+
         };
 
         let normal_fdbk = make_random_fdbk_config();
