@@ -11,6 +11,7 @@ import {
     InstructorFile,
     NewAGTestSuiteData,
     Project,
+    SandboxDockerImage,
     SandboxDockerImageData,
 } from "..";
 
@@ -282,12 +283,7 @@ image = SandboxDockerImage.objects.validate_and_create(
 print(image.pk)
         `;
         let result = run_in_django_shell(make_sandbox_image);
-        let image: SandboxDockerImageData = {
-            pk: parseInt(result.stdout, 10),
-            display_name: 'Custom',
-            last_modified: (new Date()).toISOString(),
-            course: null,
-        };
+        let image = await SandboxDockerImage.get_by_pk(parseInt(result.stdout, 10));
 
         let normal_fdbk = make_random_feedback_config();
         let ultimate_submission_fdbk = make_random_feedback_config();
