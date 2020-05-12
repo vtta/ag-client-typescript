@@ -13,7 +13,7 @@ services:
       - ./autograder-server:/usr/src/app
     command: >-
       /usr/local/bin/uwsgi --module=autograder.wsgi:application
-                           --http=:9000 --master --processes=2 --vacuum --die-on-term
+                           --http=:9000 --master --processes=1 --vacuum --die-on-term
     env_file:
       - ./autograder-server/_dev.env
     environment:
