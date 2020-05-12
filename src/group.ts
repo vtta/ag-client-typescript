@@ -125,34 +125,6 @@ export class Group extends GroupData implements SaveableAPIObject {
         return this.refresh();
     }
 
-    // When group_pk is not provided, this method will add
-    // bonus submissions to all groups in the project.
-    // If provided, this method will only modify the number of
-    // bonus submissions for that group.
-    static add_bonus_submissions(
-        project_pk: ID, num_to_add: number, group_pk?: ID
-    ): Promise<HttpResponse> {
-        let url = `/projects/${project_pk}/groups/bonus_submissions/`;
-        if (group_pk !== undefined) {
-            url += `?group_pk=${group_pk}`;
-        }
-        return HttpClient.get_instance().patch(url, {add: num_to_add});
-    }
-
-    // When group_pk is not provided, this method will subtract
-    // bonus submissions from all groups in the project.
-    // If provided, this method will only modify the number of
-    // bonus submissions for that group.
-    static subtract_bonus_submissions(
-        project_pk: ID, num_to_subtract: number, group_pk?: ID
-    ): Promise<HttpResponse> {
-        let url = `/projects/${project_pk}/groups/bonus_submissions/`;
-        if (group_pk !== undefined) {
-            url += `?group_pk=${group_pk}`;
-        }
-        return HttpClient.get_instance().patch(url, {subtract: num_to_subtract});
-    }
-
     async save(): Promise<void> {
         let response = await HttpClient.get_instance().patch<GroupData>(
             `/groups/${this.pk}/`,
