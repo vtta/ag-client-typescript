@@ -103,7 +103,8 @@ beforeAll(async () => {
             stack_size_limit: 10000,
             time_limit: 10,
             use_virtual_memory_limit: true,
-            virtual_memory_limit: 500000000
+            virtual_memory_limit: 500000000,
+            block_process_spawn: true,
         },
 
         normal_fdbk_config: {

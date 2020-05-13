@@ -75,10 +75,9 @@ describe('AGTestCommand ctor tests', () => {
             staff_viewer_fdbk_config: staff_viewer_fdbk,
 
             time_limit: 3,
-            stack_size_limit: 10000,
             use_virtual_memory_limit: true,
             virtual_memory_limit: 40000,
-            process_spawn_limit: 2,
+            block_process_spawn: true,
         });
 
         expect(cmd.pk).toEqual(42);
@@ -125,9 +124,9 @@ describe('AGTestCommand ctor tests', () => {
         expect(cmd.staff_viewer_fdbk_config).toEqual(staff_viewer_fdbk);
 
         expect(cmd.time_limit).toEqual(3);
-        expect(cmd.stack_size_limit).toEqual(10000);
+        expect(cmd.use_virtual_memory_limit).toBe(true);
         expect(cmd.virtual_memory_limit).toEqual(40000);
-        expect(cmd.process_spawn_limit).toEqual(2);
+        expect(cmd.block_process_spawn).toBe(true);
     });
 
     test('Construct AGTestCommand nullable fields non-null', () => {
@@ -194,10 +193,9 @@ describe('AGTestCommand ctor tests', () => {
             staff_viewer_fdbk_config: staff_viewer_fdbk,
 
             time_limit: 3,
-            stack_size_limit: 10000,
             use_virtual_memory_limit: true,
             virtual_memory_limit: 40000,
-            process_spawn_limit: 2,
+            block_process_spawn: true,
         });
 
         expect(cmd.stdin_instructor_file).toEqual(stdin_instructor_file);
@@ -348,9 +346,9 @@ AGTestCommand.objects.all().delete()
                 staff_viewer_fdbk_config: staff_viewer_fdbk,
 
                 time_limit: 3,
-                stack_size_limit: 10000,
+                use_virtual_memory_limit: false,
                 virtual_memory_limit: 40000,
-                process_spawn_limit: 2,
+                block_process_spawn: true,
             })
         );
 
@@ -393,9 +391,9 @@ AGTestCommand.objects.all().delete()
         expect(cmd.staff_viewer_fdbk_config).toEqual(staff_viewer_fdbk);
 
         expect(cmd.time_limit).toEqual(3);
-        expect(cmd.stack_size_limit).toEqual(10000);
+        expect(cmd.use_virtual_memory_limit).toBe(false);
         expect(cmd.virtual_memory_limit).toEqual(40000);
-        expect(cmd.process_spawn_limit).toEqual(2);
+        expect(cmd.block_process_spawn).toBe(true);
 
         expect(observer.ag_test_command).toEqual(cmd);
         expect(observer.created_count).toEqual(1);
