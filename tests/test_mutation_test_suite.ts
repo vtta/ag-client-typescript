@@ -34,6 +34,7 @@ let setup_command: AGCommand = {
     use_virtual_memory_limit: true,
     virtual_memory_limit: 100000008,
     process_spawn_limit: 7,
+    block_process_spawn: false,
 };
 let get_student_test_names_command = {
     name: "",
@@ -43,6 +44,7 @@ let get_student_test_names_command = {
     use_virtual_memory_limit: true,
     virtual_memory_limit: 100090000,
     process_spawn_limit: 2,
+    block_process_spawn: true,
 };
 let student_test_validity_check_command = {
     name: "",
@@ -52,6 +54,7 @@ let student_test_validity_check_command = {
     use_virtual_memory_limit: true,
     virtual_memory_limit: 100100000,
     process_spawn_limit: 6,
+    block_process_spawn: true,
 };
 let grade_buggy_impl_command = {
     name: "",
@@ -61,6 +64,7 @@ let grade_buggy_impl_command = {
     use_virtual_memory_limit: true,
     virtual_memory_limit: 200000000,
     process_spawn_limit: 3,
+    block_process_spawn: false,
 };
 
 describe('MutationTestSuite ctor tests', () => {

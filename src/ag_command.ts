@@ -6,4 +6,5 @@ export interface AGCommand {
     use_virtual_memory_limit: boolean;
     virtual_memory_limit: number;
     process_spawn_limit: number;
+    block_process_spawn: boolean;
 }
