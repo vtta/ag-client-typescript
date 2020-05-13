@@ -26,7 +26,6 @@ describe('AGTestCommand ctor tests', () => {
         let now = (new Date()).toISOString();
 
         let normal_fdbk = make_random_fdbk_config();
-        let first_failure_fdbk = make_random_fdbk_config();
         let ultimate_submission_fdbk = make_random_fdbk_config();
         let past_limit_submission_fdbk = make_random_fdbk_config();
         let staff_viewer_fdbk = make_random_fdbk_config();
@@ -77,6 +76,7 @@ describe('AGTestCommand ctor tests', () => {
 
             time_limit: 3,
             stack_size_limit: 10000,
+            use_virtual_memory_limit: true,
             virtual_memory_limit: 40000,
             process_spawn_limit: 2,
         });
@@ -195,6 +195,7 @@ describe('AGTestCommand ctor tests', () => {
 
             time_limit: 3,
             stack_size_limit: 10000,
+            use_virtual_memory_limit: true,
             virtual_memory_limit: 40000,
             process_spawn_limit: 2,
         });

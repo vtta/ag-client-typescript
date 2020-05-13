@@ -205,7 +205,8 @@ export class Project extends ProjectCoreData implements SaveableAPIObject {
 
     async copy_to_course(course_pk: number, new_name: string): Promise<Project> {
         let response = await HttpClient.get_instance().post<ProjectData>(
-            `/projects/${this.pk}/copy_to_course/${course_pk}/?new_project_name=${new_name}`
+            `/projects/${this.pk}/copy_to_course/${course_pk}/`,
+            {new_project_name: new_name}
         );
         let new_project = new Project(response.data);
         Project.notify_project_created(new_project);
