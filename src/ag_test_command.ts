@@ -238,6 +238,7 @@ export class AGTestCommand extends AGTestCommandData implements SaveableAPIObjec
         'staff_viewer_fdbk_config',
 
         'time_limit',
+        'use_virtual_memory_limit',
         'virtual_memory_limit',
         'block_process_spawn',
     ];
