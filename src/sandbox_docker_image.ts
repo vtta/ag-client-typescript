@@ -1,5 +1,5 @@
 import { ID } from './base';
-import { HttpClient, ProgressEventListener } from './http_client';
+import { HttpClient, ProgressEventListener, HttpResponse } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
 export class SandboxDockerImageData {
@@ -76,6 +76,10 @@ export class SandboxDockerImage extends SandboxDockerImageData {
         );
         return new BuildSandboxDockerImageTask(response.data);
     }
+
+    delete(): Promise<HttpResponse> {
+        return HttpClient.get_instance().delete(`/sandbox_docker_images/${this.pk}/`);
+    }
 }
 
 export class BuildSandboxDockerImageTaskData {
@@ -85,7 +89,7 @@ export class BuildSandboxDockerImageTaskData {
     timed_out: boolean;
     filenames: string[];
     course_id: ID | null;
-    image_to_update: SandboxDockerImageData | null;
+    image: SandboxDockerImageData | null;
 
     constructor(args: BuildSandboxDockerImageTaskData) {
         this.pk = args.pk;
@@ -94,7 +98,7 @@ export class BuildSandboxDockerImageTaskData {
         this.timed_out = args.timed_out;
         this.filenames = args.filenames;
         this.course_id = args.course_id;
-        this.image_to_update = args.image_to_update;
+        this.image = args.image;
     }
 }
 

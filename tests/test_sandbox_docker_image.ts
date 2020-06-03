@@ -8,6 +8,7 @@ import {
     reset_db,
     run_in_django_shell,
 } from './utils';
+import { HttpError } from '../src/http_client';
 
 beforeAll(() => {
     global_setup();
@@ -67,7 +68,7 @@ SandboxDockerImage.objects.validate_and_create(
             [new File(['noseta'], 'Dockerfile')], null);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toBeNull();
-        expect(task.image_to_update).toBeNull();
+        expect(task.image).toBeNull();
     });
 });
 
@@ -114,7 +115,7 @@ SandboxDockerImage.objects.validate_and_create(
             [new File(['tarsioen'], 'Dockerfile')], course.pk);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toEqual(course.pk);
-        expect(task.image_to_update).toBeNull();
+        expect(task.image).toBeNull();
     });
 });
 
@@ -153,12 +154,22 @@ SandboxDockerImage.objects.validate_and_create(
         expect(loaded.display_name).toEqual(new_name);
     });
 
+    test('Delete image', async () => {
+        let image = (await SandboxDockerImage.get_images(null))[1];
+        expect(image.display_name).toEqual(image_name);
+        await image.delete();
+
+        return expect(async () => {
+            await SandboxDockerImage.get_by_pk(image.pk);
+        }).toThrow(HttpError);
+    });
+
     test('Rebuild global image', async () => {
         let image = (await SandboxDockerImage.get_images(null))[1];
         let task = await image.rebuild([new File(['noseta'], 'Dockerfile')]);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toBeNull();
-        expect(task.image_to_update).toEqual(image);
+        expect(task.image).toEqual(image);
     });
 
     test('Rebuild course image', async () => {
@@ -179,7 +190,7 @@ SandboxDockerImage.objects.validate_and_create(
         let task = await image.rebuild([new File(['noseta'], 'Dockerfile')]);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toEqual(course.pk);
-        expect(task.image_to_update).toEqual(image);
+        expect(task.image).toEqual(image);
     });
 
     test('Check editable fields', async () => {
@@ -195,7 +206,7 @@ test('BuildSandboxDockerImageTask ctor', () => {
         timed_out: true,
         filenames: ['Dockerfile', 'file1'],
         course_id: 23,
-        image_to_update: null,
+        image: null,
     });
     expect(task.pk).toEqual(89);
     expect(task.status).toEqual(BuildImageStatus.image_invalid);
@@ -203,7 +214,7 @@ test('BuildSandboxDockerImageTask ctor', () => {
     expect(task.timed_out).toBe(true);
     expect(task.filenames).toEqual(['Dockerfile', 'file1']);
     expect(task.course_id).toEqual(23);
-    expect(task.image_to_update).toBeNull();
+    expect(task.image).toBeNull();
 });
 
 describe('Global BuildSandboxDockerImageTask tests', () => {
