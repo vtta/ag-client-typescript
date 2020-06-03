@@ -135,8 +135,6 @@ SandboxDockerImage.objects.validate_and_create(
 
     test('Get image', async () => {
         let images = await SandboxDockerImage.get_images(null);
-        console.log(images);
-        console.log(typeof images[1].pk);
         let retrieved = await SandboxDockerImage.get_by_pk(images[1].pk);
         expect(retrieved).toEqual(images[1]);
     });
@@ -158,9 +156,14 @@ SandboxDockerImage.objects.validate_and_create(
         expect(image.display_name).toEqual(image_name);
         await image.delete();
 
-        return expect(async () => {
+        try {
             await SandboxDockerImage.get_by_pk(image.pk);
-        }).toThrow(HttpError);
+            fail('Exception not thrown');
+        }
+        catch (e) {
+            expect(e instanceof HttpError).toBe(true);
+            expect((<HttpError> e).status).toEqual(404);
+        }
     });
 
     test('Rebuild global image', async () => {
