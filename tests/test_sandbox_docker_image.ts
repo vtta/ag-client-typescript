@@ -1,4 +1,4 @@
-import { BuildImageStatus, BuildSandboxDockerImageTask, Course, SandboxDockerImage } from '..';
+import { BuildImageStatus, BuildSandboxDockerImageTask, Course, HttpError, SandboxDockerImage } from '..';
 
 import {
     blob_to_string,
@@ -67,7 +67,7 @@ SandboxDockerImage.objects.validate_and_create(
             [new File(['noseta'], 'Dockerfile')], null);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toBeNull();
-        expect(task.image_to_update).toBeNull();
+        expect(task.image).toBeNull();
     });
 });
 
@@ -114,7 +114,7 @@ SandboxDockerImage.objects.validate_and_create(
             [new File(['tarsioen'], 'Dockerfile')], course.pk);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toEqual(course.pk);
-        expect(task.image_to_update).toBeNull();
+        expect(task.image).toBeNull();
     });
 });
 
@@ -135,8 +135,6 @@ SandboxDockerImage.objects.validate_and_create(
 
     test('Get image', async () => {
         let images = await SandboxDockerImage.get_images(null);
-        console.log(images);
-        console.log(typeof images[1].pk);
         let retrieved = await SandboxDockerImage.get_by_pk(images[1].pk);
         expect(retrieved).toEqual(images[1]);
     });
@@ -153,12 +151,27 @@ SandboxDockerImage.objects.validate_and_create(
         expect(loaded.display_name).toEqual(new_name);
     });
 
+    test('Delete image', async () => {
+        let image = (await SandboxDockerImage.get_images(null))[1];
+        expect(image.display_name).toEqual(image_name);
+        await image.delete();
+
+        try {
+            await SandboxDockerImage.get_by_pk(image.pk);
+            fail('Exception not thrown');
+        }
+        catch (e) {
+            expect(e instanceof HttpError).toBe(true);
+            expect((<HttpError> e).status).toEqual(404);
+        }
+    });
+
     test('Rebuild global image', async () => {
         let image = (await SandboxDockerImage.get_images(null))[1];
         let task = await image.rebuild([new File(['noseta'], 'Dockerfile')]);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toBeNull();
-        expect(task.image_to_update).toEqual(image);
+        expect(task.image).toEqual(image);
     });
 
     test('Rebuild course image', async () => {
@@ -179,7 +192,7 @@ SandboxDockerImage.objects.validate_and_create(
         let task = await image.rebuild([new File(['noseta'], 'Dockerfile')]);
         expect(task.status).toEqual(BuildImageStatus.queued);
         expect(task.course_id).toEqual(course.pk);
-        expect(task.image_to_update).toEqual(image);
+        expect(task.image).toEqual(image);
     });
 
     test('Check editable fields', async () => {
@@ -195,7 +208,7 @@ test('BuildSandboxDockerImageTask ctor', () => {
         timed_out: true,
         filenames: ['Dockerfile', 'file1'],
         course_id: 23,
-        image_to_update: null,
+        image: null,
     });
     expect(task.pk).toEqual(89);
     expect(task.status).toEqual(BuildImageStatus.image_invalid);
@@ -203,7 +216,7 @@ test('BuildSandboxDockerImageTask ctor', () => {
     expect(task.timed_out).toBe(true);
     expect(task.filenames).toEqual(['Dockerfile', 'file1']);
     expect(task.course_id).toEqual(23);
-    expect(task.image_to_update).toBeNull();
+    expect(task.image).toBeNull();
 });
 
 describe('Global BuildSandboxDockerImageTask tests', () => {
