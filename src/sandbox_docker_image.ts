@@ -1,5 +1,5 @@
 import { ID } from './base';
-import { HttpClient, ProgressEventListener, HttpResponse } from './http_client';
+import { HttpClient, HttpResponse, ProgressEventListener } from './http_client';
 import { filter_keys, safe_assign } from './utils';
 
 export class SandboxDockerImageData {

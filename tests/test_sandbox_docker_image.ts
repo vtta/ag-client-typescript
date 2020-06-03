@@ -1,4 +1,4 @@
-import { BuildImageStatus, BuildSandboxDockerImageTask, Course, SandboxDockerImage } from '..';
+import { BuildImageStatus, BuildSandboxDockerImageTask, Course, HttpError, SandboxDockerImage } from '..';
 
 import {
     blob_to_string,
@@ -8,7 +8,6 @@ import {
     reset_db,
     run_in_django_shell,
 } from './utils';
-import { HttpError } from '../src/http_client';
 
 beforeAll(() => {
     global_setup();
