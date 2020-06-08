@@ -203,6 +203,7 @@ SandboxDockerImage.objects.validate_and_create(
 test('BuildSandboxDockerImageTask ctor', () => {
     let task = new BuildSandboxDockerImageTask({
         pk: 89,
+        created_at: (new Date()).toISOString(),
         status: BuildImageStatus.image_invalid,
         return_code: null,
         timed_out: true,
