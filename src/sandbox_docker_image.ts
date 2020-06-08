@@ -84,6 +84,7 @@ export class SandboxDockerImage extends SandboxDockerImageData {
 
 export class BuildSandboxDockerImageTaskData {
     pk: ID;
+    created_at: string;
     status: BuildImageStatus;
     return_code: number | null;
     timed_out: boolean;
@@ -93,6 +94,7 @@ export class BuildSandboxDockerImageTaskData {
 
     constructor(args: BuildSandboxDockerImageTaskData) {
         this.pk = args.pk;
+        this.created_at = args.created_at;
         this.status = args.status;
         this.return_code = args.return_code;
         this.timed_out = args.timed_out;
@@ -140,6 +142,7 @@ export enum BuildImageStatus {
     queued = 'queued',
     in_progress = 'in_progress',
     done = 'done',
+    failed = 'failed',
     image_invalid = 'image_invalid',
     cancelled = 'cancelled',
     internal_error = 'internal_error',
