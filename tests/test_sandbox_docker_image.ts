@@ -210,6 +210,8 @@ test('BuildSandboxDockerImageTask ctor', () => {
         filenames: ['Dockerfile', 'file1'],
         course_id: 23,
         image: null,
+        validation_error_msg: '',
+        internal_error_msg: '',
     });
     expect(task.pk).toEqual(89);
     expect(task.status).toEqual(BuildImageStatus.image_invalid);
