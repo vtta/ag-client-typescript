@@ -91,6 +91,8 @@ export class BuildSandboxDockerImageTaskData {
     filenames: string[];
     course_id: ID | null;
     image: SandboxDockerImageData | null;
+    validation_error_msg: string;
+    internal_error_msg: string;
 
     constructor(args: BuildSandboxDockerImageTaskData) {
         this.pk = args.pk;
@@ -101,6 +103,8 @@ export class BuildSandboxDockerImageTaskData {
         this.filenames = args.filenames;
         this.course_id = args.course_id;
         this.image = args.image;
+        this.validation_error_msg = args.validation_error_msg;
+        this.internal_error_msg = args.internal_error_msg;
     }
 }
 
