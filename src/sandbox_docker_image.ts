@@ -140,6 +140,14 @@ export class BuildSandboxDockerImageTask extends BuildSandboxDockerImageTaskData
         );
         safe_assign(this, response.data);
     }
+
+    async get_files(on_download_progress?: ProgressEventListener): Promise<Blob> {
+        let response = await HttpClient.get_instance().get_file(
+            `/image_build_tasks/${this.pk}/files/`,
+            {on_download_progress: on_download_progress}
+        );
+        return response.data;
+    }
 }
 
 export enum BuildImageStatus {
