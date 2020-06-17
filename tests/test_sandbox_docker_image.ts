@@ -1,6 +1,10 @@
+import * as child_process from 'child_process';
+import { writeFileSync } from 'fs';
+
 import { BuildImageStatus, BuildSandboxDockerImageTask, Course, HttpError, SandboxDockerImage } from '..';
 
 import {
+    blob_to_buffer,
     blob_to_string,
     do_editable_fields_test,
     global_setup,
@@ -284,6 +288,21 @@ with open(task.output_filename, 'w') as f:
 
         let loaded_output = await task.get_output();
         expect(await blob_to_string(loaded_output)).toEqual(output);
+    });
+
+    test('Get build task files', async () => {
+        let task = await SandboxDockerImage.create_image(
+            [new File([''], 'Dockerfile'), new File([''], 'file2')], null
+        );
+
+        let files_zip = await task.get_files();
+        let filename = `/tmp/build_task_files${Math.floor(Math.random() * 1000)}`;
+
+        writeFileSync(filename, await blob_to_buffer(files_zip));
+
+        let result = child_process.spawnSync(`unzip -Z1 ${filename}`, {shell: true});
+        let stdout = result.stdout.toString();
+        expect(stdout).toEqual('Dockerfile\nfile2\n');
     });
 
     test('Cancel build task', async () => {
