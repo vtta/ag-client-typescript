@@ -163,6 +163,10 @@ export class Project extends ProjectCoreData implements SaveableAPIObject {
         }
     }
 
+    delete() {
+        return HttpClient.get_instance().delete(`/projects/${this.pk}/`);
+    }
+
     static notify_project_changed(project: Project) {
         for (let subscriber of Project._subscribers) {
             subscriber.update_project_changed(project);
