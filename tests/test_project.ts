@@ -1,5 +1,8 @@
 import {
-    Course, ExpectedStudentFile, InstructorFile,
+    Course,
+    ExpectedStudentFile,
+    HttpError,
+    InstructorFile,
     NewProjectData,
     Project,
     ProjectObserver,
@@ -8,7 +11,6 @@ import {
 
 import { do_editable_fields_test, expect_dates_equal, global_setup, make_superuser,
          reset_db, run_in_django_shell, sleep } from './utils';
-import { HttpError } from '../src/http_client';
 
 beforeAll(() => {
     global_setup();
