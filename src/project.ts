@@ -1,6 +1,6 @@
 import { SaveableAPIObject } from "./base";
 import { ExpectedStudentFile, ExpectedStudentFileData } from './expected_student_file';
-import { HttpClient } from "./http_client";
+import { HttpClient, HttpResponse } from "./http_client";
 import { InstructorFile, InstructorFileData } from './instructor_file';
 import { filter_keys, safe_assign, sort_by_name } from "./utils";
 
@@ -163,7 +163,7 @@ export class Project extends ProjectCoreData implements SaveableAPIObject {
         }
     }
 
-    delete() {
+    delete(): Promise<HttpResponse> {
         return HttpClient.get_instance().delete(`/projects/${this.pk}/`);
     }
 
