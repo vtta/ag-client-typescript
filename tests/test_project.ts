@@ -8,6 +8,7 @@ import {
 
 import { do_editable_fields_test, expect_dates_equal, global_setup, make_superuser,
          reset_db, run_in_django_shell, sleep } from './utils';
+import { HttpError } from '../src/http_client';
 
 beforeAll(() => {
     global_setup();
@@ -337,6 +338,22 @@ project.validate_and_update(name='projy')
 
         expect(observer.project).toEqual(project);
         expect(observer.changed_count).toEqual(1);
+    });
+
+    test('Delete project', async () => {
+        let project = await Project.create(course.pk, {name: 'project'});
+        await project.delete();
+
+        try {
+            await project.refresh();
+            fail('exception not thrown');
+        }
+        catch (e) {
+            if (!(e instanceof HttpError)) {
+                throw e;
+            }
+            expect(e.status).toEqual(404);
+        }
     });
 
     test('Copy project to same course', async () => {
