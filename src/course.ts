@@ -117,7 +117,7 @@ export class Course extends CourseData implements SaveableAPIObject {
         Course.notify_course_changed(this);
     }
 
-    delete() {
+    delete(): Promise<HttpResponse> {
         return HttpClient.get_instance().delete(`/courses/${this.pk}/`);
     }
 
