@@ -366,6 +366,7 @@ export interface MutationTestSuiteResultFeedback {
     timed_out_tests: string[] | null;
     num_bugs_exposed: number | null;
     bugs_exposed: string[] | null;
+    all_bug_names: string[] | null;
     total_points: string | number;
     total_points_possible: string | number;
 }

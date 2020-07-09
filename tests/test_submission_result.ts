@@ -312,6 +312,7 @@ describe('get_submission_result tests', () => {
                     timed_out_tests: ['test2'],
                     num_bugs_exposed: 2,
                     bugs_exposed: ['bug1', 'bug2'],
+                    all_bug_names: mutation_test_suite.buggy_impl_names,
                     total_points: '2.00',
                     total_points_possible: '3.00'
                 }
@@ -387,6 +388,7 @@ describe('get_submission_result tests', () => {
                     timed_out_tests: null,
                     num_bugs_exposed: null,
                     bugs_exposed: null,
+                    all_bug_names: null,
                     total_points: 0,
                     total_points_possible: 0,
                 }
