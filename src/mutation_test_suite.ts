@@ -257,7 +257,8 @@ export interface MutationTestSuiteFeedbackConfig {
 export enum BugsExposedFeedbackLevel {
     no_feedback = 'no_feedback',
     num_bugs_exposed = 'num_bugs_exposed',
-    exposed_bug_names = 'exposed_bug_names'
+    exposed_bug_names = 'exposed_bug_names',
+    all_bug_names = 'all_bug_names'
 }
 
 export class NewMutationTestSuiteData {
