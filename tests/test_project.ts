@@ -89,7 +89,12 @@ describe('Project ctor tests', () => {
             instructor_files: instructor_files,
             expected_student_files: expected_student_files,
 
-            has_handgrading_rubric: true
+            has_handgrading_rubric: true,
+
+            send_email_on_submission_received: true,
+            send_email_on_non_deferred_tests_finished: false,
+            use_honor_pledge: true,
+            honor_pledge_text: 'Honor',
         });
 
         expect(project.pk).toEqual(42);
@@ -126,6 +131,11 @@ describe('Project ctor tests', () => {
             [new ExpectedStudentFile(expected_student_files[0]), expected_student_files[1]]);
 
         expect(project.has_handgrading_rubric).toEqual(true);
+
+        expect(project.send_email_on_submission_received).toBe(true);
+        expect(project.send_email_on_non_deferred_tests_finished).toBe(false);
+        expect(project.use_honor_pledge).toBe(true);
+        expect(project.honor_pledge_text).toEqual('Honor');
     });
 
     test('Construct project without closing time or instructor files', () => {
@@ -154,6 +164,10 @@ describe('Project ctor tests', () => {
             hide_ultimate_submission_fdbk: true,
             expected_student_files: [],
             has_handgrading_rubric: false,
+            send_email_on_submission_received: true,
+            send_email_on_non_deferred_tests_finished: false,
+            use_honor_pledge: true,
+            honor_pledge_text: 'Honor',
         });
 
         expect(project.closing_time).toBeUndefined();

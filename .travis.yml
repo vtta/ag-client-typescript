@@ -4,7 +4,7 @@ services:
   - docker
 
 language: python
-python: 3.6
+python: 3.8
 
 before_install:
   - nvm install 8
@@ -29,6 +29,8 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
+  - pip install -r autograder-server/requirements.txt
+  - ./autograder-server/manage.py generate_secrets
   - docker-compose build
   - docker-compose up -d
   - docker ps -a
