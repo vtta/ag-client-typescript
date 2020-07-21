@@ -210,6 +210,12 @@ export class Project extends ProjectCoreData implements SaveableAPIObject {
 
         'ultimate_submission_policy',
         'hide_ultimate_submission_fdbk',
+
+        'send_email_on_submission_received',
+        'send_email_on_non_deferred_tests_finished',
+
+        'use_honor_pledge',
+        'honor_pledge_text',
     ];
 
     async num_queued_submissions(): Promise<number> {
