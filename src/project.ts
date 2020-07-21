@@ -36,6 +36,12 @@ class ProjectCoreData {
 
     has_handgrading_rubric: boolean;
 
+    send_email_on_submission_received: boolean;
+    send_email_on_non_deferred_tests_finished: boolean;
+
+    use_honor_pledge: boolean;
+    honor_pledge_text: string;
+
     constructor(args: ProjectCoreData) {
         this.pk = args.pk;
         this.name = args.name;
@@ -66,6 +72,12 @@ class ProjectCoreData {
         this.hide_ultimate_submission_fdbk = args.hide_ultimate_submission_fdbk;
 
         this.has_handgrading_rubric = args.has_handgrading_rubric;
+
+        this.send_email_on_submission_received = args.send_email_on_submission_received;
+        this.send_email_on_non_deferred_tests_finished
+            = args.send_email_on_non_deferred_tests_finished;
+        this.use_honor_pledge = args.use_honor_pledge;
+        this.honor_pledge_text = args.honor_pledge_text;
     }
 }
 
@@ -244,6 +256,12 @@ export class NewProjectData {
     ultimate_submission_policy?: UltimateSubmissionPolicy;
     hide_ultimate_submission_fdbk?: boolean;
 
+    send_email_on_submission_received?: boolean;
+    send_email_on_non_deferred_tests_finished?: boolean;
+
+    use_honor_pledge?: boolean;
+    honor_pledge_text?: string;
+
     constructor(args: NewProjectData) {
         this.name = args.name;
         this.visible_to_students = args.visible_to_students;
@@ -269,6 +287,13 @@ export class NewProjectData {
 
         this.ultimate_submission_policy = args.ultimate_submission_policy;
         this.hide_ultimate_submission_fdbk = args.hide_ultimate_submission_fdbk;
+
+        this.send_email_on_submission_received = args.send_email_on_submission_received;
+        this.send_email_on_non_deferred_tests_finished
+            = args.send_email_on_non_deferred_tests_finished;
+
+        this.use_honor_pledge = args.use_honor_pledge;
+        this.honor_pledge_text = args.honor_pledge_text;
     }
 }
 
