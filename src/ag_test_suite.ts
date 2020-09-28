@@ -17,6 +17,7 @@ export class AGTestSuiteCoreData {
 
     setup_suite_cmd: string;
     setup_suite_cmd_name: string;
+    reject_submission_if_setup_fails: boolean;
 
     sandbox_docker_image: SandboxDockerImageData;
 
@@ -38,6 +39,7 @@ export class AGTestSuiteCoreData {
 
         this.setup_suite_cmd = args.setup_suite_cmd;
         this.setup_suite_cmd_name = args.setup_suite_cmd_name;
+        this.reject_submission_if_setup_fails = args.reject_submission_if_setup_fails;
 
         this.sandbox_docker_image = args.sandbox_docker_image;
 
@@ -198,6 +200,7 @@ export class AGTestSuite extends AGTestSuiteCoreData implements SaveableAPIObjec
 
         'setup_suite_cmd',
         'setup_suite_cmd_name',
+        'reject_submission_if_setup_fails',
 
         'sandbox_docker_image',
 
@@ -232,6 +235,7 @@ export class NewAGTestSuiteData {
 
     setup_suite_cmd?: string;
     setup_suite_cmd_name?: string;
+    reject_submission_if_setup_fails?: boolean;
 
     sandbox_docker_image?: SandboxDockerImageData;
 
@@ -253,6 +257,7 @@ export class NewAGTestSuiteData {
 
         this.setup_suite_cmd =  args.setup_suite_cmd;
         this.setup_suite_cmd_name = args.setup_suite_cmd_name;
+        this.reject_submission_if_setup_fails = args.reject_submission_if_setup_fails;
 
         this.sandbox_docker_image = args.sandbox_docker_image;
 
