@@ -4,8 +4,8 @@ services:
   django:
     restart: unless-stopped
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./autograder-server
+      dockerfile: Dockerfile-django-dev
     container_name: typescript-cli-django
     ports:
       - "9000:9000"
