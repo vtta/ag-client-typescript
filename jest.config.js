@@ -17,6 +17,8 @@ module.exports = {
     // The port should be the same as the one that the Django Docker container exposes.
     "testURL": "http://localhost:9000",
 
+    cache: false,
+
     collectCoverage: true,
     collectCoverageFrom: ["<rootDir>/src/**/*.ts"],
     coverageThreshold: {
