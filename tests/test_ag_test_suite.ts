@@ -141,6 +141,7 @@ describe('AGTestSuite ctor tests', () => {
 
             setup_suite_cmd: 'echo "hello"',
             setup_suite_cmd_name: 'Setty',
+            reject_submission_if_setup_fails: true,
 
             sandbox_docker_image: sandbox_image,
 
@@ -167,6 +168,7 @@ describe('AGTestSuite ctor tests', () => {
 
         expect(ag_test_suite.setup_suite_cmd).toEqual('echo "hello"');
         expect(ag_test_suite.setup_suite_cmd_name).toEqual('Setty');
+        expect(ag_test_suite.reject_submission_if_setup_fails).toBe(true);
 
         expect(ag_test_suite.sandbox_docker_image).toEqual(sandbox_image);
 
@@ -298,6 +300,7 @@ print(image.pk)
                 read_only_instructor_files: false,
                 setup_suite_cmd: './run.exe',
                 setup_suite_cmd_name: 'Run',
+                reject_submission_if_setup_fails: false,
                 sandbox_docker_image: image,
                 allow_network_access: true,
                 deferred: true,
@@ -315,6 +318,7 @@ print(image.pk)
 
         expect(suite.setup_suite_cmd).toEqual('./run.exe');
         expect(suite.setup_suite_cmd_name).toEqual('Run');
+        expect(suite.reject_submission_if_setup_fails).toBe(false);
 
         expect(suite.sandbox_docker_image).toEqual(image);
 
@@ -347,11 +351,14 @@ print(image.pk)
 
     test('Save AG test suite', async () => {
         let suite = (await AGTestSuite.get_all_from_project(project.pk))[0];
+        expect(suite.reject_submission_if_setup_fails).toBe(false);
         suite.name = 'Renamed';
         suite.setup_suite_cmd = './compile.exe';
+        suite.reject_submission_if_setup_fails = true;
         await suite.save();
         expect(suite.name).toEqual('Renamed');
         expect(suite.setup_suite_cmd).toEqual('./compile.exe');
+        expect(suite.reject_submission_if_setup_fails).toBe(true);
 
         let reloaded = await AGTestSuite.get_by_pk(suite.pk);
         expect(reloaded.name).toEqual('Renamed');
