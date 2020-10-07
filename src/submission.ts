@@ -185,6 +185,10 @@ export enum GradingStatus {
     // started being graded.
     removed_from_queue = 'removed_from_queue',
 
+    // The submission was rejected after failing an AGTestSuite
+    // setup command where reject_submission_if_setup_fails was true.
+    rejected = 'rejected',
+
     // Something unexpected occurred during the grading process.
     error = 'error',
 }
