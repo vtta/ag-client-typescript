@@ -250,49 +250,77 @@ update_denormalized_ag_test_results(${submission_pk})
     run_in_django_shell(update_denormalized_submission_results);
 });
 
-test('get_all_minimal_ultimate_submission_results', async () => {
-    let page = await cli.get_all_minimal_ultimate_submission_results(project.pk);
-    expect(page.results.length).toEqual(1);
-    let result = page.results[0];
-    expect(result.username).toEqual(group.member_names[0]);
-    expect(result.group).toEqual(group);
+describe('Get all ultimate submission results tests', () => {
+    test('get_all_minimal_ultimate_submission_results', async () => {
+        let page = await cli.get_all_minimal_ultimate_submission_results(project.pk);
+        expect(page.results.length).toEqual(1);
+        let result = page.results[0];
+        expect(result.username).toEqual(group.member_names[0]);
+        expect(result.group).toEqual(group);
 
-    expect(result.ultimate_submission.results.total_points).toEqual('3.00');
-    expect(
-        result.ultimate_submission.results.total_points_possible
-    ).toEqual('10.00');
+        expect(result.ultimate_submission.results.total_points).toEqual('3.00');
+        expect(
+            result.ultimate_submission.results.total_points_possible
+        ).toEqual('10.00');
 
-    expect(result.ultimate_submission.results.ag_test_suite_results).toBeUndefined();
-    expect(result.ultimate_submission.results.mutation_test_suite_results).toBeUndefined();
+        expect(result.ultimate_submission.results.ag_test_suite_results).toBeUndefined();
+        expect(result.ultimate_submission.results.mutation_test_suite_results).toBeUndefined();
 
-    // @ts-expect-error
-    let array: AGTestSuiteResultFeedback[]
-        = result.ultimate_submission.results.ag_test_suite_results;
-    // @ts-expect-error
-    let array2: MutationTestSuiteResultFeedback[]
-        = result.ultimate_submission.results.mutation_test_suite_results;
-});
+        // @ts-expect-error
+        let array: AGTestSuiteResultFeedback[]
+            = result.ultimate_submission.results.ag_test_suite_results;
+        // @ts-expect-error
+        let array2: MutationTestSuiteResultFeedback[]
+            = result.ultimate_submission.results.mutation_test_suite_results;
+    });
 
-test('get_all_ultimate_submission_results', async () => {
-    let page = await cli.get_all_ultimate_submission_results(project.pk);
-    expect(page.results.length).toEqual(1);
-    let result = page.results[0];
-    expect(result.username).toEqual(group.member_names[0]);
-    expect(result.group).toEqual(group);
+    test('get_all_ultimate_submission_results', async () => {
+        let page = await cli.get_all_ultimate_submission_results(project.pk);
+        expect(page.results.length).toEqual(1);
+        let result = page.results[0];
+        expect(result.username).toEqual(group.member_names[0]);
+        expect(result.group).toEqual(group);
 
-    expect(result.ultimate_submission.results.total_points).toEqual('3.00');
-    expect(
-        result.ultimate_submission.results.total_points_possible
-    ).toEqual('10.00');
+        expect(result.ultimate_submission.results.total_points).toEqual('3.00');
+        expect(
+            result.ultimate_submission.results.total_points_possible
+        ).toEqual('10.00');
 
-    expect(result.ultimate_submission.results.ag_test_suite_results).not.toBeUndefined();
-    expect(result.ultimate_submission.results.mutation_test_suite_results).not.toBeUndefined();
+        expect(result.ultimate_submission.results.ag_test_suite_results).not.toBeUndefined();
+        expect(result.ultimate_submission.results.mutation_test_suite_results).not.toBeUndefined();
 
-    // Make sure type of arrays is correct
-    let array: AGTestSuiteResultFeedback[]
-        = result.ultimate_submission.results.ag_test_suite_results;
-    let array2: MutationTestSuiteResultFeedback[]
-        = result.ultimate_submission.results.mutation_test_suite_results;
+        // Make sure type of arrays is correct
+        let array: AGTestSuiteResultFeedback[]
+            = result.ultimate_submission.results.ag_test_suite_results;
+        let array2: MutationTestSuiteResultFeedback[]
+            = result.ultimate_submission.results.mutation_test_suite_results;
+    });
+
+    test('get_all_ultimate_submission_results include_staff false', async () => {
+        let page = await cli.get_all_ultimate_submission_results(
+            project.pk, {include_staff: false});
+        expect(page.results.length).toEqual(0);
+    });
+
+    test('get_all_minimal_ultimate_submission_results include_staff false', async () => {
+        let page = await cli.get_all_minimal_ultimate_submission_results(
+            project.pk, {include_staff: false});
+        expect(page.results.length).toEqual(0);
+    });
+
+    // This test is mostly to satisfy branch coverage
+    test('get_all_ultimate_submission_results page_size and page_num', async () => {
+        let page = await cli.get_all_ultimate_submission_results(
+            project.pk, {page_num: 1, page_size: 1});
+        expect(page.results.length).toEqual(1);
+    });
+
+    // This test is mostly to satisfy branch coverage
+    test('get_all_minimal_ultimate_submission_results page_size and page_num', async () => {
+        let page = await cli.get_all_minimal_ultimate_submission_results(
+            project.pk, {page_num: 1, page_size: 1});
+        expect(page.results.length).toEqual(1);
+    });
 });
 
 describe('get_submission_result tests', () => {
