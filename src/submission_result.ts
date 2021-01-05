@@ -2,6 +2,7 @@ import { AGTestCaseFeedbackConfig } from "./ag_test_case";
 import { AGTestCommandFeedbackConfig, ExpectedReturnCode } from "./ag_test_command";
 import { AGTestSuiteFeedbackConfig } from "./ag_test_suite";
 import { ID } from "./base";
+import { Group } from './group';
 import { HttpClient, ProgressEventListener } from "./http_client";
 import { MutationTestSuiteFeedbackConfig } from "./mutation_test_suite";
 
@@ -11,6 +12,64 @@ export enum FeedbackCategory {
     ultimate_submission = 'ultimate_submission',
     staff_viewer = 'staff_viewer',
     max = 'max',
+}
+
+export async function get_all_ultimate_submission_results(
+    project_pk: number,
+    {
+        include_staff = true,
+        page_num = 1,
+        page_size = 100,
+    }: {
+        include_staff?: boolean,
+        page_num?: number,
+        page_size?: number,
+    } = {}
+): Promise<UltimateSubmissionResultPage<false>> {
+    type ResponseType = UltimateSubmissionResultPage<false>;
+    let response = await HttpClient.get_instance().get<ResponseType>(
+        `projects/${project_pk}/all_ultimate_submission_results/`
+        + `?page=${page_num}&groups_per_page=${page_size}`
+        + `&full_results=true&include_staff=${include_staff}`
+    );
+    return response.data;
+}
+
+export async function get_all_minimal_ultimate_submission_results(
+    project_pk: number,
+    {
+        include_staff = true,
+        page_num = 1,
+        page_size = 100,
+    }: {
+        include_staff?: boolean,
+        page_num?: number,
+        page_size?: number,
+    } = {}
+): Promise<UltimateSubmissionResultPage<true>> {
+    type ResponseType = UltimateSubmissionResultPage<true>;
+    let response = await HttpClient.get_instance().get<ResponseType>(
+        `projects/${project_pk}/all_ultimate_submission_results/`
+        + `?page=${page_num}&groups_per_page=${page_size}`
+        + `&full_results=false&include_staff=${include_staff}`
+    );
+    return response.data;
+}
+
+export interface UltimateSubmissionResultPage<minimal extends boolean> {
+    count: number;
+    next: string | null;
+    previous: string | null;
+    results: UltimateSubmissionResult<minimal>[];
+}
+
+export interface UltimateSubmissionResult<minimal extends boolean> {
+    username: string;
+    group: Group;
+    ultimate_submission: {
+        results: minimal extends true
+            ? MinimalSubmissionResultFeedback : SubmissionResultFeedback
+    };
 }
 
 export async function get_submission_result(
@@ -297,13 +356,15 @@ export namespace ResultOutput {
     }
 }
 
-export interface SubmissionResultFeedback {
+interface MinimalSubmissionResultFeedback {
     pk: ID;
     total_points: string | number;
     total_points_possible: string | number;
-    ag_test_suite_results: AGTestSuiteResultFeedback[];
-    mutation_test_suite_results: MutationTestSuiteResultFeedback[];
+    ag_test_suite_results?: AGTestSuiteResultFeedback[];
+    mutation_test_suite_results?: MutationTestSuiteResultFeedback[];
 }
+
+export type SubmissionResultFeedback = Required<MinimalSubmissionResultFeedback>;
 
 export interface AGTestSuiteResultFeedback {
     pk: ID;

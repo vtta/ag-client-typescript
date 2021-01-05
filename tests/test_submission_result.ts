@@ -1,10 +1,13 @@
 import * as cli from '..';
 import { ID } from '../src/base';
+import { Group } from '../src/group';
+import { AGTestSuiteResultFeedback, MutationTestSuiteResultFeedback } from '../src/submission_result';
 
 import { global_setup, make_superuser, reset_db, run_in_django_shell } from "./utils";
 
 let course: cli.Course;
 let project: cli.Project;
+let group: Group;
 let submission_pk: ID;
 let ag_test_suite: cli.AGTestSuite;
 let ag_test_case: cli.AGTestCase;
@@ -125,12 +128,14 @@ beforeAll(async () => {
         }
     });
 
-    let group = await cli.Group.create_solo_group(project.pk);
+    group = await cli.Group.create_solo_group(project.pk);
 
     let make_submission = `
 from autograder.core.models import Group, Submission
 group = Group.objects.get(pk=${group.pk})
-submission = Submission.objects.validate_and_create(submitted_files=[], group=group)
+submission = Submission.objects.validate_and_create(
+    submitted_files=[], group=group, submitter=group.member_names[0]
+)
 submission.status = Submission.GradingStatus.finished_grading
 submission.save()
 
@@ -138,6 +143,7 @@ print(submission.pk)
     `;
     let result = run_in_django_shell(make_submission);
     submission_pk = parseInt(result.stdout, 10);
+    await group.refresh();
 
     let make_ag_test_suite_result = `
 from autograder.core.models import AGTestSuiteResult
@@ -244,6 +250,47 @@ update_denormalized_ag_test_results(${submission_pk})
     run_in_django_shell(update_denormalized_submission_results);
 });
 
+test('get_all_minimal_ultimate_submission_results', async () => {
+    let page = await cli.get_all_minimal_ultimate_submission_results(project.pk);
+    expect(page.results.length).toEqual(1);
+    let result = page.results[0];
+    expect(result.username).toEqual(group.member_names[0]);
+    expect(result.group).toEqual(group);
+
+    expect(result.ultimate_submission.results.total_points).toEqual('3.00');
+    expect(
+        result.ultimate_submission.results.total_points_possible
+    ).toEqual('10.00');
+
+    expect(result.ultimate_submission.results.ag_test_suite_results).toBeUndefined();
+    expect(result.ultimate_submission.results.mutation_test_suite_results).toBeUndefined();
+
+    // @ts-expect-error
+    let array: AGTestSuiteResultFeedback[] = result.ultimate_submission.results.ag_test_suite_results;
+    // @ts-expect-error
+    let array2: MutationTestSuiteResultFeedback[] = result.ultimate_submission.results.mutation_test_suite_results;
+});
+
+test('get_all_ultimate_submission_results', async () => {
+    let page = await cli.get_all_ultimate_submission_results(project.pk);
+    expect(page.results.length).toEqual(1);
+    let result = page.results[0];
+    expect(result.username).toEqual(group.member_names[0]);
+    expect(result.group).toEqual(group);
+
+    expect(result.ultimate_submission.results.total_points).toEqual('3.00');
+    expect(
+        result.ultimate_submission.results.total_points_possible
+    ).toEqual('10.00');
+
+    expect(result.ultimate_submission.results.ag_test_suite_results).not.toBeUndefined();
+    expect(result.ultimate_submission.results.mutation_test_suite_results).not.toBeUndefined();
+
+    // Make sure type of arrays is correct
+    let array: AGTestSuiteResultFeedback[] = result.ultimate_submission.results.ag_test_suite_results;
+    let array2: MutationTestSuiteResultFeedback[] = result.ultimate_submission.results.mutation_test_suite_results;
+});
+
 describe('get_submission_result tests', () => {
     test('get_submission_result max feedback', async () => {
         let result = await cli.get_submission_result(submission_pk, cli.FeedbackCategory.max);
@@ -329,8 +376,8 @@ describe('get_submission_result tests', () => {
         let result = await cli.get_submission_result(submission_pk, cli.FeedbackCategory.normal);
         let expected: cli.SubmissionResultFeedback = {
             pk: submission_pk,
-            total_points: 0,
-            total_points_possible: 0,
+            total_points: '0.00',
+            total_points_possible: '0.00',
             ag_test_suite_results: [{
                 ag_test_suite_name: ag_test_suite.name,
                 ag_test_suite_pk: ag_test_suite.pk,
@@ -393,8 +440,8 @@ describe('get_submission_result tests', () => {
                     num_bugs_exposed: null,
                     bugs_exposed: null,
                     all_bug_names: null,
-                    total_points: 0,
-                    total_points_possible: 0,
+                    total_points: '0.00',
+                    total_points_possible: '0.00',
                 }
             ],
         };
