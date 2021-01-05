@@ -29,7 +29,6 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
 
-  - pip install -r autograder-server/requirements.txt
   - docker-compose build
   - docker-compose up -d
   - docker ps -a

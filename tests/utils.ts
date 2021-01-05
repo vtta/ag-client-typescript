@@ -206,7 +206,7 @@ export function* zip<T1, T2>(iterable1: IterableType<T1>,
         let item1 = iterator1.next();
         let item2 = iterator2.next();
 
-        stop = item1.done || item2.done;
+        stop = (item1.done ?? false) || (item2.done ?? false);
         if (!stop) {
             yield [item1.value, item2.value];
         }
