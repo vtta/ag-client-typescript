@@ -266,9 +266,11 @@ test('get_all_minimal_ultimate_submission_results', async () => {
     expect(result.ultimate_submission.results.mutation_test_suite_results).toBeUndefined();
 
     // @ts-expect-error
-    let array: AGTestSuiteResultFeedback[] = result.ultimate_submission.results.ag_test_suite_results;
+    let array: AGTestSuiteResultFeedback[]
+        = result.ultimate_submission.results.ag_test_suite_results;
     // @ts-expect-error
-    let array2: MutationTestSuiteResultFeedback[] = result.ultimate_submission.results.mutation_test_suite_results;
+    let array2: MutationTestSuiteResultFeedback[]
+        = result.ultimate_submission.results.mutation_test_suite_results;
 });
 
 test('get_all_ultimate_submission_results', async () => {
@@ -287,8 +289,10 @@ test('get_all_ultimate_submission_results', async () => {
     expect(result.ultimate_submission.results.mutation_test_suite_results).not.toBeUndefined();
 
     // Make sure type of arrays is correct
-    let array: AGTestSuiteResultFeedback[] = result.ultimate_submission.results.ag_test_suite_results;
-    let array2: MutationTestSuiteResultFeedback[] = result.ultimate_submission.results.mutation_test_suite_results;
+    let array: AGTestSuiteResultFeedback[]
+        = result.ultimate_submission.results.ag_test_suite_results;
+    let array2: MutationTestSuiteResultFeedback[]
+        = result.ultimate_submission.results.mutation_test_suite_results;
 });
 
 describe('get_submission_result tests', () => {

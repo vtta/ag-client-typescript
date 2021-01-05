@@ -56,18 +56,18 @@ export async function get_all_minimal_ultimate_submission_results(
     return response.data;
 }
 
-export interface UltimateSubmissionResultPage<minimal extends boolean> {
+export interface UltimateSubmissionResultPage<Minimal extends boolean> {
     count: number;
     next: string | null;
     previous: string | null;
-    results: UltimateSubmissionResult<minimal>[];
+    results: UltimateSubmissionResult<Minimal>[];
 }
 
-export interface UltimateSubmissionResult<minimal extends boolean> {
+export interface UltimateSubmissionResult<Minimal extends boolean> {
     username: string;
     group: Group;
     ultimate_submission: {
-        results: minimal extends true
+        results: Minimal extends true
             ? MinimalSubmissionResultFeedback : SubmissionResultFeedback
     };
 }
