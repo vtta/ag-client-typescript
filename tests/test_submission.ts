@@ -198,12 +198,14 @@ describe('Submission detail endpoint tests', () => {
         let make_tarball = `
 import tarfile
 import tempfile
+from pathlib import Path
 
 from autograder.core.models import Submission
+import autograder.core.utils as core_ut
 
 s = Submission.objects.get(pk=${submission.pk})
 
-with s.get_file('file1', 'wb') as to_overwrite:
+with open(Path(core_ut.get_submission_dir(s)) / 'file1', 'wb') as to_overwrite:
     with tarfile.open(fileobj=to_overwrite, mode='w|gz') as tar:
         with tempfile.TemporaryFile() as f:
             f.write(b'I am file')
