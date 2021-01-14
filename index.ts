@@ -66,11 +66,11 @@ export {
 
 export {
     FeedbackCategory,
-    get_all_minimal_ultimate_submission_results,
-    get_all_ultimate_submission_results,
-    UltimateSubmissionResult,
-    UltimateSubmissionResultPage,
-    get_submission_result,
+    SubmissionResults,
+    FullUltimateSubmissionResult,
+    MinimalUltimateSubmissionResult,
+    FullUltimateSubmissionResultPage,
+    MinimalUltimateSubmissionResultPage,
     ResultOutput,
     SubmissionResultFeedback,
     AGTestSuiteResultFeedback,

@@ -14,71 +14,79 @@ export enum FeedbackCategory {
     max = 'max',
 }
 
-export async function get_all_ultimate_submission_results(
-    project_pk: number,
-    {
-        include_staff = true,
-        page_num = 1,
-        page_size = 100,
-    }: {
-        include_staff?: boolean,
-        page_num?: number,
-        page_size?: number,
-    } = {}
-): Promise<UltimateSubmissionResultPage<false>> {
-    type ResponseType = UltimateSubmissionResultPage<false>;
-    let response = await HttpClient.get_instance().get<ResponseType>(
-        `projects/${project_pk}/all_ultimate_submission_results/`
-        + `?page=${page_num}&groups_per_page=${page_size}`
-        + `&full_results=true&include_staff=${include_staff}`
-    );
-    return response.data;
+// tslint:disable-next-line: no-namespace
+export namespace SubmissionResults {
+    export async function get_all_ultimate_submission_results(
+        project_pk: number,
+        {
+            include_staff = true,
+            page_num = 1,
+            page_size = 100,
+        }: {
+            include_staff?: boolean,
+            page_num?: number,
+            page_size?: number,
+        } = {}
+    ): Promise<UltimateSubmissionResultPage<false>> {
+        type ResponseType = UltimateSubmissionResultPage<false>;
+        let response = await HttpClient.get_instance().get<ResponseType>(
+            `projects/${project_pk}/all_ultimate_submission_results/`
+            + `?page=${page_num}&groups_per_page=${page_size}`
+            + `&full_results=true&include_staff=${include_staff}`
+        );
+        return response.data;
+    }
+
+    export async function get_all_minimal_ultimate_submission_results(
+        project_pk: number,
+        {
+            include_staff = true,
+            page_num = 1,
+            page_size = 100,
+        }: {
+            include_staff?: boolean,
+            page_num?: number,
+            page_size?: number,
+        } = {}
+    ): Promise<UltimateSubmissionResultPage<true>> {
+        type ResponseType = UltimateSubmissionResultPage<true>;
+        let response = await HttpClient.get_instance().get<ResponseType>(
+            `projects/${project_pk}/all_ultimate_submission_results/`
+            + `?page=${page_num}&groups_per_page=${page_size}`
+            + `&full_results=false&include_staff=${include_staff}`
+        );
+        return response.data;
+    }
+
+    export async function get_submission_result(
+        submission_pk: ID,
+        feedback_category: FeedbackCategory
+    ): Promise<SubmissionResultFeedback> {
+        let response = await HttpClient.get_instance().get<SubmissionResultFeedback>(
+            `/submissions/${submission_pk}/results/?feedback_category=${feedback_category}`);
+        return response.data;
+    }
 }
 
-export async function get_all_minimal_ultimate_submission_results(
-    project_pk: number,
-    {
-        include_staff = true,
-        page_num = 1,
-        page_size = 100,
-    }: {
-        include_staff?: boolean,
-        page_num?: number,
-        page_size?: number,
-    } = {}
-): Promise<UltimateSubmissionResultPage<true>> {
-    type ResponseType = UltimateSubmissionResultPage<true>;
-    let response = await HttpClient.get_instance().get<ResponseType>(
-        `projects/${project_pk}/all_ultimate_submission_results/`
-        + `?page=${page_num}&groups_per_page=${page_size}`
-        + `&full_results=false&include_staff=${include_staff}`
-    );
-    return response.data;
-}
+export type FullUltimateSubmissionResultPage = UltimateSubmissionResultPage<false>;
+export type MinimalUltimateSubmissionResultPage = UltimateSubmissionResultPage<true>;
+export type FullUltimateSubmissionResult = UltimateSubmissionResult<false>;
+export type MinimalUltimateSubmissionResult = UltimateSubmissionResult<true>;
 
-export interface UltimateSubmissionResultPage<Minimal extends boolean> {
+interface UltimateSubmissionResultPage<Minimal extends boolean> {
     count: number;
     next: string | null;
     previous: string | null;
     results: UltimateSubmissionResult<Minimal>[];
 }
 
-export interface UltimateSubmissionResult<Minimal extends boolean> {
+interface UltimateSubmissionResult<Minimal extends boolean> {
     username: string;
     group: Group;
     ultimate_submission: {
         results: Minimal extends true
             ? MinimalSubmissionResultFeedback : SubmissionResultFeedback
     };
-}
-
-export async function get_submission_result(
-    submission_pk: ID,
-    feedback_category: FeedbackCategory
-): Promise<SubmissionResultFeedback> {
-    let response = await HttpClient.get_instance().get<SubmissionResultFeedback>(
-        `/submissions/${submission_pk}/results/?feedback_category=${feedback_category}`);
-    return response.data;
 }
 
 // tslint:disable-next-line: no-namespace

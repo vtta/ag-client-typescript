@@ -1,23 +1,20 @@
 import * as cli from '..';
-import { ID } from '../src/base';
-import { Group } from '../src/group';
-import { AGTestSuiteResultFeedback, MutationTestSuiteResultFeedback } from '../src/submission_result';
 
 import { global_setup, make_superuser, reset_db, run_in_django_shell } from "./utils";
 
 let course: cli.Course;
 let project: cli.Project;
-let group: Group;
-let submission_pk: ID;
+let group: cli.Group;
+let submission_pk: cli.ID;
 let ag_test_suite: cli.AGTestSuite;
 let ag_test_case: cli.AGTestCase;
 let ag_test_cmd: cli.AGTestCommand;
 let mutation_test_suite: cli.MutationTestSuite;
 
-let ag_test_suite_result_pk: ID;
-let ag_test_case_result_pk: ID;
-let ag_test_cmd_result_pk: ID;
-let mutation_test_suite_result_pk: ID;
+let ag_test_suite_result_pk: cli.ID;
+let ag_test_case_result_pk: cli.ID;
+let ag_test_cmd_result_pk: cli.ID;
+let mutation_test_suite_result_pk: cli.ID;
 
 // Note: Make sure all of these have unique lengths
 let ag_test_suite_setup_stdout = 'a'.repeat(5);
@@ -252,7 +249,8 @@ update_denormalized_ag_test_results(${submission_pk})
 
 describe('Get all ultimate submission results tests', () => {
     test('get_all_minimal_ultimate_submission_results', async () => {
-        let page = await cli.get_all_minimal_ultimate_submission_results(project.pk);
+        let page
+            = await cli.SubmissionResults.get_all_minimal_ultimate_submission_results(project.pk);
         expect(page.results.length).toEqual(1);
         let result = page.results[0];
         expect(result.username).toEqual(group.member_names[0]);
@@ -267,15 +265,15 @@ describe('Get all ultimate submission results tests', () => {
         expect(result.ultimate_submission.results.mutation_test_suite_results).toBeUndefined();
 
         // @ts-expect-error
-        let array: AGTestSuiteResultFeedback[]
+        let array: cli.AGTestSuiteResultFeedback[]
             = result.ultimate_submission.results.ag_test_suite_results;
         // @ts-expect-error
-        let array2: MutationTestSuiteResultFeedback[]
+        let array2: cli.MutationTestSuiteResultFeedback[]
             = result.ultimate_submission.results.mutation_test_suite_results;
     });
 
     test('get_all_ultimate_submission_results', async () => {
-        let page = await cli.get_all_ultimate_submission_results(project.pk);
+        let page = await cli.SubmissionResults.get_all_ultimate_submission_results(project.pk);
         expect(page.results.length).toEqual(1);
         let result = page.results[0];
         expect(result.username).toEqual(group.member_names[0]);
@@ -290,34 +288,34 @@ describe('Get all ultimate submission results tests', () => {
         expect(result.ultimate_submission.results.mutation_test_suite_results).not.toBeUndefined();
 
         // Make sure type of arrays is correct
-        let array: AGTestSuiteResultFeedback[]
+        let array: cli.AGTestSuiteResultFeedback[]
             = result.ultimate_submission.results.ag_test_suite_results;
-        let array2: MutationTestSuiteResultFeedback[]
+        let array2: cli.MutationTestSuiteResultFeedback[]
             = result.ultimate_submission.results.mutation_test_suite_results;
     });
 
     test('get_all_ultimate_submission_results include_staff false', async () => {
-        let page = await cli.get_all_ultimate_submission_results(
+        let page = await cli.SubmissionResults.get_all_ultimate_submission_results(
             project.pk, {include_staff: false});
         expect(page.results.length).toEqual(0);
     });
 
     test('get_all_minimal_ultimate_submission_results include_staff false', async () => {
-        let page = await cli.get_all_minimal_ultimate_submission_results(
+        let page = await cli.SubmissionResults.get_all_minimal_ultimate_submission_results(
             project.pk, {include_staff: false});
         expect(page.results.length).toEqual(0);
     });
 
     // This test is mostly to satisfy branch coverage
     test('get_all_ultimate_submission_results page_size and page_num', async () => {
-        let page = await cli.get_all_ultimate_submission_results(
+        let page = await cli.SubmissionResults.get_all_ultimate_submission_results(
             project.pk, {page_num: 1, page_size: 1});
         expect(page.results.length).toEqual(1);
     });
 
     // This test is mostly to satisfy branch coverage
     test('get_all_minimal_ultimate_submission_results page_size and page_num', async () => {
-        let page = await cli.get_all_minimal_ultimate_submission_results(
+        let page = await cli.SubmissionResults.get_all_minimal_ultimate_submission_results(
             project.pk, {page_num: 1, page_size: 1});
         expect(page.results.length).toEqual(1);
     });
@@ -325,7 +323,9 @@ describe('Get all ultimate submission results tests', () => {
 
 describe('get_submission_result tests', () => {
     test('get_submission_result max feedback', async () => {
-        let result = await cli.get_submission_result(submission_pk, cli.FeedbackCategory.max);
+        let result = await cli.SubmissionResults.get_submission_result(
+            submission_pk, cli.FeedbackCategory.max
+        );
         let expected: cli.SubmissionResultFeedback = {
             pk: submission_pk,
             total_points: '3.00',
@@ -405,7 +405,9 @@ describe('get_submission_result tests', () => {
     });
 
     test('get_submission_result min feedback', async () => {
-        let result = await cli.get_submission_result(submission_pk, cli.FeedbackCategory.normal);
+        let result = await cli.SubmissionResults.get_submission_result(
+            submission_pk, cli.FeedbackCategory.normal
+        );
         let expected: cli.SubmissionResultFeedback = {
             pk: submission_pk,
             total_points: '0.00',
