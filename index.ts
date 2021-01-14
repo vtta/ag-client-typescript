@@ -106,4 +106,4 @@ export {
     HandgradingResultPage,
 } from './src/handgrading_result';
 export { HandgradingRubric, HandgradingRubricData, HandgradingRubricObserver,
-         NewHandgradingRubricData, PointsStyle} from './src/handgrading_rubric';
+         NewHandgradingRubricData, PointsStyle } from './src/handgrading_rubric';
