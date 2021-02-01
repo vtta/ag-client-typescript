@@ -1,6 +1,6 @@
 import * as cli from '..';
 
-import { global_setup, make_superuser, reset_db, run_in_django_shell } from "./utils";
+import { assert_not_null, global_setup, make_superuser, reset_db, run_in_django_shell } from "./utils";
 
 let course: cli.Course;
 let project: cli.Project;
@@ -256,14 +256,15 @@ describe('Get all ultimate submission results tests', () => {
         expect(result.username).toEqual(group.member_names[0]);
         expect(result.group).toEqual(group);
 
-        expect(result.ultimate_submission.results.total_points).toEqual('3.00');
+        expect(result.ultimate_submission?.results.total_points).toEqual('3.00');
         expect(
-            result.ultimate_submission.results.total_points_possible
+            result.ultimate_submission?.results.total_points_possible
         ).toEqual('10.00');
 
-        expect(result.ultimate_submission.results.ag_test_suite_results).toBeUndefined();
-        expect(result.ultimate_submission.results.mutation_test_suite_results).toBeUndefined();
+        expect(result.ultimate_submission?.results.ag_test_suite_results).toBeUndefined();
+        expect(result.ultimate_submission?.results.mutation_test_suite_results).toBeUndefined();
 
+        assert_not_null(result.ultimate_submission);
         // @ts-expect-error
         let array: cli.AGTestSuiteResultFeedback[]
             = result.ultimate_submission.results.ag_test_suite_results;
@@ -279,14 +280,15 @@ describe('Get all ultimate submission results tests', () => {
         expect(result.username).toEqual(group.member_names[0]);
         expect(result.group).toEqual(group);
 
-        expect(result.ultimate_submission.results.total_points).toEqual('3.00');
+        expect(result.ultimate_submission?.results.total_points).toEqual('3.00');
         expect(
-            result.ultimate_submission.results.total_points_possible
+            result.ultimate_submission?.results.total_points_possible
         ).toEqual('10.00');
 
-        expect(result.ultimate_submission.results.ag_test_suite_results).not.toBeUndefined();
-        expect(result.ultimate_submission.results.mutation_test_suite_results).not.toBeUndefined();
+        expect(result.ultimate_submission?.results.ag_test_suite_results).not.toBeUndefined();
+        expect(result.ultimate_submission?.results.mutation_test_suite_results).not.toBeUndefined();
 
+        assert_not_null(result.ultimate_submission);
         // Make sure type of arrays is correct
         let array: cli.AGTestSuiteResultFeedback[]
             = result.ultimate_submission.results.ag_test_suite_results;

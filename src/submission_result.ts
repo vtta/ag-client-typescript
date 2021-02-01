@@ -86,7 +86,7 @@ interface UltimateSubmissionResult<Minimal extends boolean> {
     ultimate_submission: {
         results: Minimal extends true
             ? MinimalSubmissionResultFeedback : SubmissionResultFeedback
-    };
+    } | null;
 }
 
 // tslint:disable-next-line: no-namespace

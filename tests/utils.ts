@@ -212,3 +212,38 @@ export function* zip<T1, T2>(iterable1: IterableType<T1>,
         }
     }
 }
+
+// A type guard that throws NonNullAssertionError if the given object is null or undefined.
+// This can be used one of two ways:
+// - As a type guard in a conditional.
+// - Call this function on the expression that may be null, then use the non-null assertion
+//   operator (!) on subsequent uses of the expression. This has the disadvantage of
+//   more error-prone, but has the advantage of not artificially decreasing our branch coverage.
+// Note: In test case code, using the non-null-assertion operator without calling this
+// function is OK.
+export function assert_not_null<T>(obj: T | null | undefined, msg?: string): asserts obj is T {
+    // istanbul ignore next
+    if (msg === undefined) {
+        msg = 'Value was unexpectedly null or undefined';
+    }
+    // istanbul ignore next
+    if (obj === null) {
+        throw new NonNullAssertionError(msg);
+    }
+    // istanbul ignore next
+    if (obj === undefined) {
+        throw new NonNullAssertionError(msg);
+    }
+}
+
+export class NonNullAssertionError extends Error {
+    // See https://github.com/Microsoft/TypeScript/issues/13965
+    __proto__: Error; // tslint:disable-line
+
+    // istanbul ignore next
+    constructor(msg?: string) {
+        const actual_proto = new.target.prototype;
+        super(msg);
+        this.__proto__ = actual_proto;
+    }
+}
