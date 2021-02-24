@@ -1,11 +1,12 @@
 import * as child_process from 'child_process';
 import { writeFileSync } from 'fs';
 
+import { blob_to_string } from 'src/utils';
+
 import { BuildImageStatus, BuildSandboxDockerImageTask, Course, HttpError, SandboxDockerImage } from '..';
 
 import {
     blob_to_buffer,
-    blob_to_string,
     do_editable_fields_test,
     global_setup,
     make_superuser,

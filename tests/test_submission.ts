@@ -1,3 +1,5 @@
+import { blob_to_string } from "src/utils";
+
 import {
     Course,
     ExpectedStudentFile,
@@ -11,7 +13,6 @@ import {
 } from "..";
 
 import {
-    blob_to_string,
     check_tar_file,
     do_editable_fields_test,
     global_setup,

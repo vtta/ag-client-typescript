@@ -5,7 +5,7 @@ import { CriterionResult, CriterionResultCtorArgs } from './criterion_result';
 import { GroupData } from './group';
 import { HandgradingRubric, HandgradingRubricCtorArgs } from './handgrading_rubric';
 import { HttpClient, ProgressEventListener } from './http_client';
-import { safe_assign } from './utils';
+import { blob_to_string, safe_assign } from './utils';
 
 export class HandgradingResultCoreData {
     pk: number;
@@ -137,12 +137,12 @@ export class HandgradingResult extends HandgradingResultCoreData implements Refr
         group_pk: number, file: string,
         on_download_progress?: ProgressEventListener,
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/groups/${group_pk}/handgrading_result/file/?filename=${file}`,
             {on_download_progress: on_download_progress}
         );
 
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     async save_finished_grading(): Promise<void> {
