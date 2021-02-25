@@ -56,6 +56,8 @@ describe('Submission ctor tests', () => {
             missing_files: {'oops': 1, '*.cpp': 3},
 
             status: GradingStatus.being_graded,
+            grading_start_time: null,
+            non_deferred_grading_end_time: null,
 
             is_past_daily_limit: false,
             is_bonus_submission: true,
