@@ -1,3 +1,5 @@
+import { blob_to_string } from 'src/utils';
+
 import {
     Course,
     InstructorFile,
@@ -6,7 +8,6 @@ import {
 } from '..';
 
 import {
-    blob_to_string,
     check_tar_file,
     expect_dates_not_equal,
     global_setup,

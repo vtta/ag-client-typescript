@@ -139,23 +139,6 @@ export async function timeit_async(func: () => Promise<void>, label: string) {
     console.log(`${label}: ${(end - start) / 1000}`);
 }
 
-export function blob_to_string(blob: Blob): Promise<string> {
-    let reader = new FileReader();
-    return new Promise((resolve, reject) => {
-        reader.onload = () => {
-            resolve(<string> reader.result);
-        };
-
-        /* istanbul ignore next */
-        reader.onerror = () => {
-            reader.abort();
-            reject(new DOMException("Error converting blob to string."));
-        };
-
-        reader.readAsText(blob);
-    });
-}
-
 export function blob_to_buffer(blob: Blob): Promise<Buffer> {
     let reader = new FileReader();
     return new Promise((resolve, reject) => {

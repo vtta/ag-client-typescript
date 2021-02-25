@@ -23,3 +23,20 @@ export function safe_assign<ToType extends FromType, FromType>(to: ToType, from:
 export function sort_by_name<T extends {name: string}>(to_sort: T[]) {
     to_sort.sort((first: T, second: T) => first.name.localeCompare(second.name));
 }
+
+export function blob_to_string(blob: Blob): Promise<string> {
+    let reader = new FileReader();
+    return new Promise((resolve, reject) => {
+        reader.onload = () => {
+            resolve(<string> reader.result);
+        };
+
+        /* istanbul ignore next */
+        reader.onerror = () => {
+            reader.abort();
+            reject(new DOMException("Error converting blob to string."));
+        };
+
+        reader.readAsText(blob);
+    });
+}

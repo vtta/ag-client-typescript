@@ -27,6 +27,10 @@ export class HttpClient {
         this._axios_instance.defaults.headers = headers;
     }
 
+    // NOTE: Calling axios.get<string>(...) does NOT necessarily return
+    // a string. Use HttpClient.get_file instead, as it passes the proper
+    // arguments to axios so that it returns a blob. The blob can then be
+    // converted to a string with blob_to_string in utils.ts.
     async get<T = unknown>(
         url: string,
         options: {on_download_progress?: ProgressEventListener} = {}

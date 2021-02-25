@@ -5,6 +5,7 @@ import { ID } from "./base";
 import { Group } from './group';
 import { HttpClient, ProgressEventListener } from "./http_client";
 import { MutationTestSuiteFeedbackConfig } from "./mutation_test_suite";
+import { blob_to_string } from "./utils";
 
 export enum FeedbackCategory {
     normal = 'normal',
@@ -119,12 +120,12 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/ag_test_cmd_results/${ag_test_cmd_result_pk}/stdout/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_ag_test_cmd_result_stderr(
@@ -133,12 +134,12 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/ag_test_cmd_results/${ag_test_cmd_result_pk}/stderr/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_ag_test_cmd_result_stdout_diff(
@@ -197,12 +198,12 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/ag_test_suite_results/${ag_test_suite_result_pk}/stdout/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_ag_test_suite_result_setup_stderr(
@@ -211,12 +212,12 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/ag_test_suite_results/${ag_test_suite_result_pk}/stderr/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_output_size(
@@ -249,13 +250,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/setup_stdout/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_setup_stderr(
@@ -264,13 +265,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/setup_stderr/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_get_student_test_names_stdout(
@@ -279,13 +280,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/get_student_test_names_stdout/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_get_student_test_names_stderr(
@@ -294,13 +295,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/get_student_test_names_stderr/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_validity_check_stdout(
@@ -309,13 +310,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/validity_check_stdout/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_validity_check_stderr(
@@ -324,13 +325,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/validity_check_stderr/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_grade_buggy_impls_stdout(
@@ -339,13 +340,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/grade_buggy_impls_stdout/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 
     export async function get_mutation_test_suite_result_grade_buggy_impls_stderr(
@@ -354,13 +355,13 @@ export namespace ResultOutput {
         feedback_category: FeedbackCategory,
         on_download_progress?: ProgressEventListener
     ): Promise<string> {
-        let response = await HttpClient.get_instance().get<string>(
+        let response = await HttpClient.get_instance().get_file(
             `/submissions/${submission_pk}/mutation_test_suite_results/`
             + `${mutation_test_suite_result_pk}/grade_buggy_impls_stderr/`
             + `?feedback_category=${feedback_category}`,
             {on_download_progress: on_download_progress}
         );
-        return response.data;
+        return blob_to_string(response.data);
     }
 }
 

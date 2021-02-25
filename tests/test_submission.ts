@@ -1,3 +1,5 @@
+import { blob_to_string } from "src/utils";
+
 import {
     Course,
     ExpectedStudentFile,
@@ -11,7 +13,6 @@ import {
 } from "..";
 
 import {
-    blob_to_string,
     check_tar_file,
     do_editable_fields_test,
     global_setup,
@@ -55,6 +56,8 @@ describe('Submission ctor tests', () => {
             missing_files: {'oops': 1, '*.cpp': 3},
 
             status: GradingStatus.being_graded,
+            grading_start_time: null,
+            non_deferred_grading_end_time: null,
 
             is_past_daily_limit: false,
             is_bonus_submission: true,

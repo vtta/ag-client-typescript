@@ -16,6 +16,8 @@ export class SubmissionData {
     missing_files: {[key: string]: number};
 
     status: string;
+    grading_start_time: string | null;
+    non_deferred_grading_end_time: string | null;
 
     is_past_daily_limit: boolean;
     is_bonus_submission: boolean;
@@ -39,6 +41,8 @@ export class SubmissionData {
         this.missing_files = args.missing_files;
 
         this.status = args.status;
+        this.grading_start_time = args.grading_start_time;
+        this.non_deferred_grading_end_time = args.non_deferred_grading_end_time;
 
         this.is_past_daily_limit = args.is_past_daily_limit;
         this.is_bonus_submission = args.is_bonus_submission;
