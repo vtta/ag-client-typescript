@@ -24,7 +24,7 @@
     "typescript": "~3.9.3"
   },
   "dependencies": {
-    "axios": "^0.18.1"
+    "axios": "^0.21.1"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts"
