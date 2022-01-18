@@ -131,9 +131,9 @@ function get_axios_response(error: unknown): AxiosResponse {
 export class HttpResponse<T = unknown> {
     data: T;
     status: number;
-    headers: unknown;
+    headers: {[key: string]: string};
 
-    constructor(args: {status: number, data: T, headers: unknown}) {
+    constructor(args: {status: number, data: T, headers: {}}) {
         this.data = args.data;
         this.status = args.status;
         this.headers = args.headers;
